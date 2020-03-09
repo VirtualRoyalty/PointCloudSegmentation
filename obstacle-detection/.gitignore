@@ -1,6 +1,6 @@
 # Byte-compiled / optimized / DLL files
-dataset/
-dataset/sequences/
-obstacle-detection/dataset/
+dataset/*
+dataset/sequences/*
+obstacle-detection/dataset/*
 __pycache__/
 
