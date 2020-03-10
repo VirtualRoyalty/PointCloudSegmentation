@@ -129,10 +129,6 @@ EXPOSE 8888
 # ENTRYPOINT ["tini", "-g", "--"]
 # CMD ["start-notebook.sh"]
 
-# Copy local files as late as possible to avoid cache busting
-COPY start.sh start-notebook.sh start-singleuser.sh /usr/local/bin/
-COPY jupyter_notebook_config.py /etc/jupyter/
-
 # Fix permissions on /etc/jupyter as root
 USER root
 
@@ -142,5 +138,6 @@ RUN apt update && apt-get install libpcl-dev -y && \
     pip install python-pcl numpy pandas  pyntcloud  pythreejs ipywidgets matplotlib
 
 USER jovyan
+
 ENTRYPOINT ["tini", "-g", "--"]
 CMD ["start-notebook.sh"]
