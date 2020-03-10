@@ -125,9 +125,9 @@ RUN conda install --quiet --yes \
 
 EXPOSE 8888
 
-# Copy local files as late as possible to avoid cache busting
-COPY start.sh start-notebook.sh start-singleuser.sh /usr/local/bin/
-COPY jupyter_notebook_config.py /etc/jupyter/
+# Configure container startup
+# ENTRYPOINT ["tini", "-g", "--"]
+# CMD ["start-notebook.sh"]
 
 # Fix permissions on /etc/jupyter as root
 USER root
@@ -135,10 +135,9 @@ USER root
 RUN fix-permissions /etc/jupyter/
 
 RUN apt update && apt-get install libpcl-dev -y && \
-    pip install python-pcl numpy pandas pyntcloud  pythreejs ipywidgets
+    pip install python-pcl numpy pandas  pyntcloud  pythreejs ipywidgets matplotlib
 
 USER jovyan
 
-# Configure container startup
 ENTRYPOINT ["tini", "-g", "--"]
 CMD ["start-notebook.sh"]
