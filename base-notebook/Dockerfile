@@ -125,8 +125,6 @@ RUN conda install --quiet --yes \
 
 EXPOSE 8888
 
-
-
 # Copy local files as late as possible to avoid cache busting
 COPY start.sh start-notebook.sh start-singleuser.sh /usr/local/bin/
 COPY jupyter_notebook_config.py /etc/jupyter/
@@ -141,6 +139,5 @@ RUN apt update && apt-get install libpcl-dev -y && \
 
 USER jovyan
 
-# Configure container startup
 ENTRYPOINT ["tini", "-g", "--"]
 CMD ["start-notebook.sh"]
