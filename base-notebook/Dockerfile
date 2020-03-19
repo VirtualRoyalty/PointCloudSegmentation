@@ -137,7 +137,8 @@ USER root
 RUN fix-permissions /etc/jupyter/
 
 RUN apt update && apt-get install libpcl-dev -y && \
-    pip install python-pcl numpy pandas  pyntcloud  pythreejs ipywidgets matplotlib
+    pip install python-pcl numpy pandas  pyntcloud  pythreejs ipywidgets matplotlib pyyaml && \
+    conda install pytorch torchvision -c pytorch
 
 USER jovyan
 
