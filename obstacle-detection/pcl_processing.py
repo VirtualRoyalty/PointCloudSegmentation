@@ -105,7 +105,6 @@ def get_cluster_box_list(cluster_indices, cloud_obsts):
     cloud_cluster_list =[]
     box_coord_list =[]
     
-
     for j, indices in enumerate(cluster_indices):
         points = np.zeros((len(indices), 3), dtype=np.float32)
         for i, indice in enumerate(indices):
@@ -115,7 +114,36 @@ def get_cluster_box_list(cluster_indices, cloud_obsts):
             points[i][2] = cloud_obsts[indice][2]
         cloud_cluster = pcl.PointCloud()
         cloud_cluster.from_array(points)
-        cloud_cluster_list.append(cloud_cluster)
+        
+        # http://pointclouds.org/documentation/tutorials/remove_outliers.php
+        
+        #### radius remove-outliers
+
+        # outrem = cloud_cluster.make_RadiusOutlierRemoval()
+        # outrem.set_radius_search(0.8)
+        # outrem.set_MinNeighborsInRadius(2)
+        # cloud_filtered = outrem.filter()
+
+        
+        #### condition remove-outliers
+        # range_cond = cloud_cluster.make_ConditionAnd()
+
+        # range_cond.add_Comparison2('z', pcl.CythonCompareOp_Type.GT, 0.0)
+        # range_cond.add_Comparison2('z', pcl.CythonCompareOp_Type.LT, 0.8)
+
+        # build the filter
+        # condrem = cloud_cluster.make_ConditionalRemoval(range_cond)
+        # condrem.set_KeepOrganized(True)
+        
+        # cloud_filtered = condrem.filter()
+
+        #### other filter
+        cloud_filtered = cloud_cluster.make_statistical_outlier_filter()
+        cloud_filtered.set_mean_k(50)
+        cloud_filtered.set_std_dev_mul_thresh(1.0)
+        
+        
+        cloud_cluster_list.append(cloud_filtered)
         x_max, x_min = np.max(points[:, 0]), np.min(points[:, 0])
         y_max, y_min = np.max(points[:, 1]), np.min(points[:, 1])
         z_max, z_min = np.max(points[:, 2]), np.min(points[:, 2])
@@ -171,12 +199,9 @@ def draw_box(pyplot_axis, vertices, axes=[0, 1, 2], color='red'):
     ]
     for connection in connections:
         pyplot_axis.plot(*vertices[:, connection], c=color, lw=0.5)
-        
-        
-        
-        
-def draw_point_cloud(cloud, ax, title, axes_str , axes_limits, axes=[0, 1, 2]):
-        
+       
+def draw_point_cloud(cloud, ax, title, axes=[0, 1, 2], xlim3d=None, ylim3d=None, zlim3d=None):
+        axes_str = ['X', 'Y', 'Z']
         cloud = np.array(cloud) # Covert point cloud to numpy array
         no_points = np.shape(cloud)[0]
         point_size = 10**(3- int(np.log10(no_points))) # Adjust the point size based on the point cloud size
@@ -186,20 +211,20 @@ def draw_point_cloud(cloud, ax, title, axes_str , axes_limits, axes=[0, 1, 2]):
             ax.scatter(*np.transpose(cloud[:, axes]), s = point_size, c='b', alpha = 0.7)
         ax.set_xlabel('{} axis'.format(axes_str[axes[0]]))
         ax.set_ylabel('{} axis'.format(axes_str[axes[1]]))
-        if len(axes) > 2: # 3-D plot
-            ax.set_xlim3d(axes_limits[axes[0]])
-            ax.set_ylim3d(axes_limits[axes[1]])
-            ax.set_zlim3d(axes_limits[axes[2]])
-            ax.set_zlabel('{} axis'.format(axes_str[axes[2]]))
-        else: # 2-D plot
-            ax.set_xlim(*axes_limits[axes[0]])
-            ax.set_ylim(*axes_limits[axes[1]])
-#        # User specified limits
-#        if xlim3d!=None:
-#            ax.set_xlim3d(xlim3d)
-#        if ylim3d!=None:
-#            ax.set_ylim3d(ylim3d)
-#        if zlim3d!=None:
-#            ax.set_zlim3d(zlim3d)
-        ax.set_title(title)
+#         if len(axes) > 2: # 3-D plot
+#             ax.set_xlim3d(axes_limits[axes[0]])
+#             ax.set_ylim3d(axes_limits[axes[1]])
+#             ax.set_zlim3d(axes_limits[axes[2]])
+#             ax.set_zlabel('{} axis'.format(axes_str[axes[2]]))
+#         else: # 2-D plot
+#             ax.set_xlim(*axes_limits[axes[0]])
+#             ax.set_ylim(*axes_limits[axes[1]])
+        # User specified limits
+        if xlim3d!=None:
+            ax.set_xlim3d(xlim3d)
+        if ylim3d!=None:
+            ax.set_ylim3d(ylim3d)
+        if zlim3d!=None:
+            ax.set_zlim3d(zlim3d)
+        ax.set_title(title)   
 		
