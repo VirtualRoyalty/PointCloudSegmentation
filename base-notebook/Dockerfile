@@ -125,9 +125,9 @@ RUN conda install --quiet --yes \
 
 EXPOSE 8888
 
-# Configure container startup
-# ENTRYPOINT ["tini", "-g", "--"]
-# CMD ["start-notebook.sh"]
+# Copy local files as late as possible to avoid cache busting
+COPY start.sh start-notebook.sh start-singleuser.sh /usr/local/bin/
+COPY jupyter_notebook_config.py /etc/jupyter/
 
 # Fix permissions on /etc/jupyter as root
 USER root
