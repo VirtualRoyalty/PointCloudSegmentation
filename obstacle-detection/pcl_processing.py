@@ -92,7 +92,7 @@ def clustering(cloud, tol, min_size, max_size):
 
 
 
-def get_cluster_box_list(cluster_indices, cloud_obsts):
+def get_cluster_box_list(cluster_indices, cloud_obsts, radius_search=0.8, min_neighbors_in_radius=2):
     """
     Input parameters:
         cluster_indices: a list of list. Each element list contains the indices of the points that belongs to
@@ -119,10 +119,10 @@ def get_cluster_box_list(cluster_indices, cloud_obsts):
         
         #### radius remove-outliers
 
-        # outrem = cloud_cluster.make_RadiusOutlierRemoval()
-        # outrem.set_radius_search(0.8)
-        # outrem.set_MinNeighborsInRadius(2)
-        # cloud_filtered = outrem.filter()
+        outrem = cloud_cluster.make_RadiusOutlierRemoval()
+        outrem.set_radius_search(0.8)
+        outrem.set_MinNeighborsInRadius(2)
+        cloud_filtered = outrem.filter()
 
         
         #### condition remove-outliers
@@ -138,10 +138,10 @@ def get_cluster_box_list(cluster_indices, cloud_obsts):
         # cloud_filtered = condrem.filter()
 
         #### other filter
-        cloud_filtered = cloud_cluster.make_statistical_outlier_filter()
-        cloud_filtered.set_mean_k(50)
-        cloud_filtered.set_std_dev_mul_thresh(1.0)
-        
+        #cloud_filtered = cloud_cluster.make_statistical_outlier_filter()
+        #cloud_filtered.set_mean_k(50)
+        #cloud_filtered.set_std_dev_mul_thresh(1.0)
+        #cloud_filtered = cloud_cluster
         
         cloud_cluster_list.append(cloud_filtered)
         x_max, x_min = np.max(points[:, 0]), np.min(points[:, 0])
@@ -199,7 +199,7 @@ def draw_box(pyplot_axis, vertices, axes=[0, 1, 2], color='red'):
     ]
     for connection in connections:
         pyplot_axis.plot(*vertices[:, connection], c=color, lw=0.5)
-       
+
 def draw_point_cloud(cloud, ax, title, axes=[0, 1, 2], xlim3d=None, ylim3d=None, zlim3d=None):
         axes_str = ['X', 'Y', 'Z']
         cloud = np.array(cloud) # Covert point cloud to numpy array
