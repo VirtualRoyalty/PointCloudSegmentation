@@ -1,8 +1,24 @@
 # PointCloudSegmentation
 
 ---
-Project description
-
+**Project sctracture:**
+```
+├───docker-env/
+├───obstacle-detection/
+│   ├───dataset/
+│   │   └───sequences/
+│   │       └───00/
+│   │           ├───clusters/
+│   │           ├───labels/
+│   │           └───velodyne/
+│   ├───examples/
+│   │   
+│   ├───pipeline/
+│   │  
+│   └───scripts/
+│       
+└───visualization/
+```
 <br>
 
 ## How to dockerize this:
