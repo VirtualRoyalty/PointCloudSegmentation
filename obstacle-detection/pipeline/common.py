@@ -52,6 +52,24 @@ def obstacle_filter(pcloud, obstacle_lst, proc_labels=True, verbose=True):
     return pcloud
 
 
+def outlier_filter(cluster_data):
+    try:
+        tcluster = cluster_data.drop(['cluster_id'], axis=1)
+    except:
+        tcluster  = cluster_data
+
+    tcluster['norm'] = np.sqrt(np.square(tcluster).sum(axis=1))
+
+    _mean, _std = tcluster['norm'].mean(), tcluster['norm'].std()
+
+    tcluster['outlier'] = ((tcluster['norm'] <= _mean - 3 * _std) |
+                           (tcluster['norm'] >= _mean + 3 * _std))
+
+    tcluster = tcluster[~tcluster.outlier]
+
+    return tcluster
+
+
 def get_bounding_boxes(clusters):
     box_coord_list = []
     for i in range(len(clusters)):
