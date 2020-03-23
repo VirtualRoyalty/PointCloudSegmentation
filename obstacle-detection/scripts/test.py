@@ -1,9 +1,29 @@
 import re
 import time
+import json
 import numpy as np
 
 from datetime import datetime
 from tqdm import tqdm, tqdm_notebook
+
+from sklearn.model_selection import ParameterGrid
+
+
+def grid_search_optimization(scan, label, obstacle_lst, pipeline, params, verbose=True):
+    time_exec_lst = {}
+    for param in ParameterGrid(params):
+        start_time = datetime.now()
+        clusters, _, exec_time =  pipeline(scan, label, obstacle_lst,exec_time=True, verbose=False, **param)
+        end_time = sum(exec_time.values())
+        print('Total time {} ms. Created {} clusters'.format(end_time, len(clusters)))
+        if verbose:
+            print('*' * 40)
+            print(json.dumps(param, indent=3))
+            print(json.dumps(exec_time, indent=3))
+            print('*' * 40)
+            print()
+        time_exec_lst[json.dumps(param, indent=3)] = (end_time, len(clusters))
+    return time_exec_lst
 
 
 def get_scan_id(scan):
@@ -11,7 +31,7 @@ def get_scan_id(scan):
 
 
 def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
-                      write_path=None, detailed=False, **pipeline_params):              
+                      write_path=None, detailed=False, **pipeline_params):
     """
     Gettitng bounding boxes for reqired sequence of scans and labels
     Also ability to grep time execution statistic.
