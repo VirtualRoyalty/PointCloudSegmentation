@@ -29,7 +29,7 @@ def grid_search_optimization(scan, label, obstacle_lst, pipeline, params, verbos
     A dictionary of params range that is reqired to search
 
     verbose: bool, optional, defualt True
-    Wheter or not print info during execution    
+    Wheter or not print info during execution
 
     """
     time_exec_lst = {}
