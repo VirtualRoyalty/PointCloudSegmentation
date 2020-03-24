@@ -10,6 +10,28 @@ from sklearn.model_selection import ParameterGrid
 
 
 def grid_search_optimization(scan, label, obstacle_lst, pipeline, params, verbose=True):
+    """
+    Grid Search of hyperparametrs for optimization of executional time of pipeline
+
+    scan: numpy.array,
+    An N X 3 array of point cloud from LIDAR
+
+    label: numpy.array,
+    A list of segmentation labels respectively
+
+    obstacle_lst: list,
+    A list of obstacles id
+
+    pipeline: function,
+    An obstacle-detection pipeline function
+
+    params: dict,
+    A dictionary of params range that is reqired to search
+
+    verbose: bool, optional, defualt True
+    Wheter or not print info during execution.
+
+    """
     time_exec_lst = {}
     for param in ParameterGrid(params):
         start_time = datetime.now()
