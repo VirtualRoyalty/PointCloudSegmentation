@@ -51,7 +51,6 @@ def obstacle_filter(pcloud, obstacle_lst, proc_labels=True, verbose=True):
 
     return pcloud
 
-
 def outlier_filter(tcluster):
 
     # tcluster['norm'] = np.sqrt(np.square(tcluster).sum(axis=1))
