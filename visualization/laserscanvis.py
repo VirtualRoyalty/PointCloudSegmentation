@@ -6,7 +6,7 @@ from vispy.scene import visuals, SceneCanvas
 import numpy as np
 from matplotlib import pyplot as plt
 from laserscan import LaserScan, SemLaserScan
-
+bboxes = []
 
 class LaserScanVis:
   """Class that creates and handles a visualizer for a pointcloud"""
@@ -114,6 +114,7 @@ class LaserScanVis:
       self.inst_img_vis = visuals.Image(cmap='viridis')
       self.inst_img_view.add(self.inst_img_vis)
 
+
   def get_mpl_colormap(self, cmap_name):
     cmap = plt.get_cmap(cmap_name)
 
@@ -126,7 +127,6 @@ class LaserScanVis:
     return color_range.reshape(256, 3).astype(np.float32) / 255.0
 
   def update_scan(self):
-
     # first open data
     self.scan.open_scan(self.scan_names[self.offset])
     if self.semantics:
@@ -171,7 +171,7 @@ class LaserScanVis:
                              face_color=self.scan.inst_label_color[..., ::-1],
                              edge_color=self.scan.inst_label_color[..., ::-1],
                              size=1)
-    #new_view = self.sem_view
+
     # plot draw_clusters
     if self.bboxes_names and self.scan.bboxes:
 
@@ -179,17 +179,18 @@ class LaserScanVis:
         self.sem_vis.update()
 
         color =(0, 1, 1, 0.6)
-        edge_color = (0, 0, 1)
+        edge_color = (0, 0.05, 1)
+        global bboxes
         bboxes = [vispy.scene.visuals.Box(width=np.abs(bbox[1] - bbox[0]), height=np.abs(bbox[5] - bbox[4]),
                                           depth=np.abs(bbox[3] - bbox[2]), color=color, edge_color=edge_color, parent = self.sem_view.scene) for bbox in self.scan.bboxes]
-        for cluster, i in zip(bboxes, range(len(self.scan.bboxes))):
+        for cluster, i in zip(bboxes, range(len(self.scan.bboxes ))):
             bbox = self.scan.bboxes[i]
             cluster.transform = vispy.visuals.transforms.STTransform(translate = [bbox[0] + 0.5 * (np.abs(bbox[1] - bbox[0])),
                                                                                 bbox[2] + 0.5 * (np.abs(bbox[3] - bbox[2])),
                                                                                 bbox[4] + 0.5 * (np.abs(bbox[5] - bbox[4])) ],
                                                                                 scale = (1., 1., 1.,))
 
-        #self.sem_view.add(new_view)
+
         #visuals.XYZAxis(parent=new_view.scene)
 
     # now do all the range image stuff
@@ -219,9 +220,14 @@ class LaserScanVis:
     self.canvas.events.key_press.block()
     self.img_canvas.events.key_press.block()
     if event.key == 'N':
+      for bbox in bboxes:
+          bbox.parent = None
       self.offset += 1
       self.update_scan()
+
     elif event.key == 'B':
+      for bbox in bboxes:
+          bbox.parent = None
       self.offset -= 1
       self.update_scan()
     elif event.key == 'Q' or event.key == 'Escape':
