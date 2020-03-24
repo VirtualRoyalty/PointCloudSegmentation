@@ -92,8 +92,11 @@ def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
 
             if write_path:
                 # write cluster in format x_min, x_max, y_min, y_max, z_min, z_max
-                np.savetxt(write_path + str(scan_id) + '.bbox', clusters)
-
+                clusters_lst = []
+                for segment in clusters:
+                    for cluster in segment:
+                        clusters_lst.append(cluster)
+                np.savetxt(write_path + str(scan_id) + '.bbox', clusters_lst)
     except KeyboardInterrupt:
         print('User`s KeyboardInterruption...')
         return clusters_minmax_dct, exec_time_dct, stats
