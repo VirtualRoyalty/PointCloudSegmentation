@@ -29,22 +29,25 @@ def grid_search_optimization(scan, label, obstacle_lst, pipeline, params, verbos
     A dictionary of params range that is reqired to search
 
     verbose: bool, optional, defualt True
-    Wheter or not print info during execution.
+    Whether or not print info during execution.
 
     """
     time_exec_lst = {}
-    for param in ParameterGrid(params):
-        start_time = datetime.now()
-        clusters, _, exec_time =  pipeline(scan, label, obstacle_lst,exec_time=True, verbose=False, **param)
+    for param in tqdm_notebook(ParameterGrid(params), total=len(ParameterGrid(params)), desc='Scan processed'):
+        clusters, _, exec_time =  pipeline(scan, label, obstacle_lst, exec_time=True, verbose=False, **param)
         end_time = sum(exec_time.values())
-        print('Total time {} ms. Created {} clusters'.format(end_time, len(clusters)))
         if verbose:
+            print('Total time {} ms. Created {} clusters'.format(end_time, len(clusters)))
             print('*' * 40)
             print(json.dumps(param, indent=3))
             print(json.dumps(exec_time, indent=3))
             print('*' * 40)
             print()
-        time_exec_lst[json.dumps(param, indent=3)] = (end_time, len(clusters))
+        n_clusters = 0
+        for segment in clusters:
+            for cluster in segment:
+                n_clusters += 1
+        time_exec_lst[json.dumps(param, indent=3)] = (end_time, n_clusters)
     return time_exec_lst
 
 
