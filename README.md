@@ -1,4 +1,6 @@
 # PointCloudSegmentation
+---
+<img src="https://github.com/VirtualRoyalty/PointCloudSegmentation/blob/dev/obstacle-detection/examples/img/MainGifforGit.gif" width="1000">
 
 ---
 **Project sctracture:**
