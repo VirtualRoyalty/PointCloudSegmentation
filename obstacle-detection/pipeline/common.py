@@ -4,8 +4,26 @@ Our implementation of obstacle detection pipeline steps
 """
 import numpy as np
 import pandas as pd
+from datetime import datetime
 
 
+def roi_filter_rounded(pcloud, verbose=True, **params):
+    a = (- params['max_x'] - params['max_x']) / 2
+    b = (params['min_y'] - params['max_y']) / 2
+
+    if verbose:
+        print('Input pcloud size: {}'.format(len(pcloud)))
+    pcloud['equation'] = (pcloud['x'] ** 2) / (a ** 2) + (pcloud['y'] ** 2) / (b ** 2)
+
+    pcloud['camera'] = ((pcloud['z'] >  params['min_z']) & (pcloud['z'] <  params['max_z']) &
+                        (pcloud['x'] > params['min_x']) &
+                        (pcloud['equation'] <= 1.0))
+
+    pcloud = pcloud[pcloud['camera'] == True]
+
+    if verbose:
+        print('Output ROI pcloud size: {}'.format(len(pcloud)))
+    return pcloud
 
 def roi_filter(pcloud, verbose=True, **params):
     """
@@ -51,9 +69,11 @@ def obstacle_filter(pcloud, obstacle_lst, proc_labels=True, verbose=True):
 
     return pcloud
 
-def outlier_filter(tcluster):
+
+def outlier_filter(tcluster, verbose=True):
 
     # tcluster['norm'] = np.sqrt(np.square(tcluster).sum(axis=1))
+    start_time = datetime.now()
     try:
         _mean, _std = tcluster['norm'].mean(), tcluster['norm'].std()
         lower, higher = _mean - 3 * _std, _mean + 3 * _std
@@ -61,13 +81,15 @@ def outlier_filter(tcluster):
         tcluster['norm'] = np.sqrt(np.square(tcluster[['x', 'y', 'z']]).sum(axis=1))
         _mean, _std = tcluster['norm'].mean(), tcluster['norm'].std()
         lower, higher = _mean - 3 * _std, _mean + 3 * _std
+    end_time = (datetime.now() - start_time).total_seconds()
+    if verbose:
+        print('Computing lower-higher bounds {}'.format(end_time))
 
-    # tcluster['outlier'] = ((tcluster['norm'] < lower) |
-    #                        (tcluster['norm'] > higher))
-    tcluster['outlier'] = tcluster['norm'].apply(lambda x: True if x < lower or x > higher else False)
-
-    tcluster = tcluster[~tcluster.outlier]
-
+    start_time = datetime.now()
+    tcluster = tcluster[(tcluster['norm'] > lower) & (tcluster['norm'] < higher)]
+    end_time = (datetime.now() - start_time).total_seconds()
+    if verbose:
+        print('Applying  bounds {}'.format(end_time))
     return tcluster
 
 

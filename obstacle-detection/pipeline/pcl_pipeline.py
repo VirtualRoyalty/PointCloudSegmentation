@@ -119,10 +119,10 @@ def get_cluster_box_list(cluster_indices, cloud_obsts, radius_search=0.8, min_ne
 
         #### radius remove-outliers
 
-        # outrem = cloud_cluster.make_RadiusOutlierRemoval()
-        # outrem.set_radius_search(radius_search)
-        # outrem.set_MinNeighborsInRadius(min_neighbors_in_radius)
-        # cloud_filtered = outrem.filter()
+        outrem = cloud_cluster.make_RadiusOutlierRemoval()
+        outrem.set_radius_search(0.8)
+        outrem.set_MinNeighborsInRadius(2)
+        cloud_filtered = outrem.filter()
 
         #### condition remove-outliers
         # range_cond = cloud_cluster.make_ConditionAnd()
@@ -140,7 +140,7 @@ def get_cluster_box_list(cluster_indices, cloud_obsts, radius_search=0.8, min_ne
         #cloud_filtered = cloud_cluster.make_statistical_outlier_filter()
         #cloud_filtered.set_mean_k(50)
         #cloud_filtered.set_std_dev_mul_thresh(1.0)
-        cloud_filtered = cloud_cluster
+        #cloud_filtered = cloud_cluster
 
         cloud_cluster_list.append(cloud_filtered)
         x_max, x_min = np.max(points[:, 0]), np.min(points[:, 0])
