@@ -32,7 +32,7 @@ def grid_search_optimization(scan, label, obstacle_lst, pipeline, params, verbos
     Whether or not print info during execution.
 
     """
-    time_exec_lst = {}
+    time_exec_dct = {}
     for param in tqdm_notebook(ParameterGrid(params), total=len(ParameterGrid(params)), desc='Scan processed'):
         clusters, _, exec_time =  pipeline(scan, label, obstacle_lst, exec_time=True, verbose=False, **param)
         end_time = sum(exec_time.values())
@@ -47,8 +47,8 @@ def grid_search_optimization(scan, label, obstacle_lst, pipeline, params, verbos
         for segment in clusters:
             for cluster in segment:
                 n_clusters += 1
-        time_exec_lst[json.dumps(param, indent=3)] = (end_time, n_clusters)
-    return time_exec_lst
+        time_exec_dct[json.dumps(param, indent=3)] = (end_time, n_clusters)
+    return time_exec_dct
 
 
 def get_scan_id(scan):
@@ -112,16 +112,13 @@ def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
                 clusters, _ = pipeline(scan, label, obstacle_lst, **pipeline_params)
 
             end_time =  datetime.now() - start_time
-            exec_time_dct[str(scan_id)[-3:]] = end_time.microseconds / 1000
+            exec_time_dct[str(scan_id)[-3:]] = end_time.total_seconds()
             clusters_minmax_dct[str(scan_id)[-3:]] = clusters
 
             if write_path:
                 # write cluster in format x_min, x_max, y_min, y_max, z_min, z_max
-                clusters_lst = []
-                for segment in clusters:
-                    for cluster in segment:
-                        clusters_lst.append(cluster)
-                np.savetxt(write_path + str(scan_id) + '.bbox', clusters_lst)
+                assert isinstance(clusters, np.ndarray)
+                np.savetxt(write_path + str(scan_id) + '.bbox', clusters)
     except KeyboardInterrupt:
         print('User`s KeyboardInterruption...')
         return clusters_minmax_dct, exec_time_dct, stats

@@ -4,6 +4,7 @@ Our implementation of obstacle detection pipeline steps
 """
 import numpy as np
 import pandas as pd
+from datetime import datetime
 
 
 def roi_filter_rounded(pcloud, verbose=True, **params):
@@ -69,9 +70,10 @@ def obstacle_filter(pcloud, obstacle_lst, proc_labels=True, verbose=True):
     return pcloud
 
 
-def outlier_filter(tcluster):
+def outlier_filter(tcluster, verbose=True):
 
     # tcluster['norm'] = np.sqrt(np.square(tcluster).sum(axis=1))
+    start_time = datetime.now()
     try:
         _mean, _std = tcluster['norm'].mean(), tcluster['norm'].std()
         lower, higher = _mean - 3 * _std, _mean + 3 * _std
@@ -79,11 +81,15 @@ def outlier_filter(tcluster):
         tcluster['norm'] = np.sqrt(np.square(tcluster[['x', 'y', 'z']]).sum(axis=1))
         _mean, _std = tcluster['norm'].mean(), tcluster['norm'].std()
         lower, higher = _mean - 3 * _std, _mean + 3 * _std
+    end_time = (datetime.now() - start_time).total_seconds()
+    if verbose:
+        print('Computing lower-higher bounds {}'.format(end_time))
 
-    tcluster['outlier'] = tcluster['norm'].apply(lambda x: True if x < lower or x > higher else False)
-
-    tcluster = tcluster[~tcluster.outlier]
-
+    start_time = datetime.now()
+    tcluster = tcluster[(tcluster['norm'] > lower) & (tcluster['norm'] < higher)]
+    end_time = (datetime.now() - start_time).total_seconds()
+    if verbose:
+        print('Applying  bounds {}'.format(end_time))
     return tcluster
 
 
