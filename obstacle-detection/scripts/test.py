@@ -7,9 +7,11 @@ from datetime import datetime
 from tqdm import tqdm, tqdm_notebook
 
 from sklearn.model_selection import ParameterGrid
+from sklearn.metrics import silhouette_score
 
 
-def grid_search_optimization(scan, label, obstacle_lst, pipeline, params, verbose=True):
+def grid_search_optimization(scan, label, obstacle_lst, pipeline, params,
+                             score=False, verbose=True):
     """
     Grid Search of hyperparametrs for optimization of executional time of pipeline
 
@@ -33,22 +35,30 @@ def grid_search_optimization(scan, label, obstacle_lst, pipeline, params, verbos
 
     """
     time_exec_dct = {}
-    for param in tqdm_notebook(ParameterGrid(params), total=len(ParameterGrid(params)), desc='Scan processed'):
-        clusters, _, exec_time =  pipeline(scan, label, obstacle_lst, exec_time=True, verbose=False, **param)
-        end_time = sum(exec_time.values())
-        if verbose:
-            print('Total time {} ms. Created {} clusters'.format(end_time, len(clusters)))
-            print('*' * 40)
-            print(json.dumps(param, indent=3))
-            print(json.dumps(exec_time, indent=3))
-            print('*' * 40)
-            print()
-        n_clusters = 0
-        for segment in clusters:
-            for cluster in segment:
-                n_clusters += 1
-        time_exec_dct[json.dumps(param, indent=3)] = (end_time, n_clusters)
-    return time_exec_dct
+    try:
+        for param in tqdm_notebook(ParameterGrid(params), total=len(ParameterGrid(params)), desc='Scan processed'):
+            clusters, cls_data, exec_time =  pipeline(scan, label, obstacle_lst, exec_time=True,
+                                                      verbose=False, **param)
+            end_time = sum(exec_time.values())
+            if verbose:
+                print('Total time {} ms. Created {} clusters'.format(end_time, len(clusters)))
+                print('*' * 40)
+                print(json.dumps(param, indent=3))
+                print(json.dumps(exec_time, indent=3))
+                print('*' * 40)
+                print()
+            if score:
+                if len(cls_data) > 0 and cls_data['cluster_id'].nunique() > 1 :
+                    silh_score = silhouette_score(cls_data[['x', 'y', 'z']], cls_data['cluster_id'])
+                else:
+                    silh_score = 0
+                time_exec_dct[json.dumps(param, indent=3)] = (end_time, clusters.shape[0], silh_score)
+            else:
+                time_exec_dct[json.dumps(param, indent=3)] = (end_time, clusters.shape[0])
+        return time_exec_dct
+    except KeyboardInterrupt:
+        print('User`s KeyboardInterruption...')
+        return time_exec_dct
 
 
 def get_scan_id(scan):
@@ -56,7 +66,7 @@ def get_scan_id(scan):
 
 
 def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
-                      write_path=None, detailed=False, **pipeline_params):
+                      write_path=None, write_rotated=False, detailed=False, **pipeline_params):
     """
     Gettitng bounding boxes for reqired sequence of scans and labels
     Also ability to grep time execution statistic.
@@ -106,7 +116,7 @@ def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
             start_time = datetime.now()
             # start pipeline
             if detailed:
-                clusters, _, stat = pipeline(scan, label, obstacle_lst, exec_time=True, **pipeline_params)
+                clusters, cluster_data, stat = pipeline(scan, label, obstacle_lst, exec_time=True, **pipeline_params)
                 stats.append(stat)
             else:
                 clusters, _ = pipeline(scan, label, obstacle_lst, **pipeline_params)
@@ -116,6 +126,20 @@ def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
             clusters_minmax_dct[str(scan_id)[-3:]] = clusters
 
             if write_path:
+
+                if write_rotated:
+                    clusters_rotated = np.empty((0,18))
+                    for cluster_id in cluster_data['cluster_id'].unique():
+                        tcluster = cluster_data[cluster_data['cluster_id'] == cluster_id][['x', 'y', 'z']]
+                        min_poitns = [tcluster[tcluster.index == indx].values for indx in list(tcluster.idxmin())]
+                        max_points = [tcluster[tcluster.index == indx].values for indx in list(tcluster.idxmax())]
+                        vertices_lst = min_poitns + max_points
+                        varray = vertices_lst[0]
+                        for v in vertices_lst[1:]:
+                            varray = np.concatenate((varray, v), axis=1)
+                        clusters_rotated = np.concatenate((clusters_rotated, varray), axis=0)
+                    clusters = clusters_rotated
+
                 # write cluster in format x_min, x_max, y_min, y_max, z_min, z_max
                 assert isinstance(clusters, np.ndarray)
                 np.savetxt(write_path + str(scan_id) + '.bbox', clusters)
