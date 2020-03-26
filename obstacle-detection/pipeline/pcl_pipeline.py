@@ -104,7 +104,8 @@ def get_cluster_box_list(cluster_indices, cloud_obsts, radius_search=0.8, min_ne
     """
     cloud_cluster_list =[]
     box_coord_list =[]
-
+    box_min_max_list = np.zeros((len(cluster_indices), 6))
+    
     for j, indices in enumerate(cluster_indices):
         points = np.zeros((len(indices), 3), dtype=np.float32)
         for i, indice in enumerate(indices):
@@ -120,8 +121,8 @@ def get_cluster_box_list(cluster_indices, cloud_obsts, radius_search=0.8, min_ne
         #### radius remove-outliers
 
         outrem = cloud_cluster.make_RadiusOutlierRemoval()
-        outrem.set_radius_search(0.8)
-        outrem.set_MinNeighborsInRadius(2)
+        outrem.set_radius_search(radius_search)
+        outrem.set_MinNeighborsInRadius(min_neighbors_in_radius)
         cloud_filtered = outrem.filter()
 
         #### condition remove-outliers
@@ -157,7 +158,8 @@ def get_cluster_box_list(cluster_indices, cloud_obsts, radius_search=0.8, min_ne
         box[7, :] =[x_min, y_max, z_max]
         box = np.transpose(box)
         box_coord_list.append(box)
-    return cloud_cluster_list, box_coord_list
+        box_min_max_list[j] = get_min_max_box(box)
+    return box_min_max_list, box_coord_list
 
 
 def box_center(box):
@@ -176,3 +178,20 @@ def box_center(box):
     z_min, z_max = min(box[2]), max(box[2])
 
     return ((x_min + x_max)/2.0, (y_min + y_max)/2.0, (z_min + z_max)/2.0)
+
+def get_min_max_box(box):
+    """
+    Get x_min, x_max, y_min, y_max, z_min, z_max from boxes
+    Input: box, a 3-by-8 matrix, each coloum represents the xyz coordinate of a corner of the box
+           (e.g.
+           array([[42.62581635, 46.09998703, 46.09998703, 42.62581635, 42.62581635, 46.09998703, 46.09998703, 42.62581635],
+                  [2.64766479,  2.64766479,  4.64661026,  4.64661026,  2.64766479, 2.64766479,  4.64661026,  4.64661026],
+                  [0.10515476,  0.10515476,  0.10515476,  0.10515476,  1.98793995, 1.98793995,  1.98793995,  1.98793995]])
+           )
+    Output: min, max of the box in 3D [x_min, x_max, y_min, y_max, z_min, z_max]
+    """
+    x_min, x_max = min(box[0]), max(box[0])
+    y_min, y_max = min(box[1]), max(box[1])
+    z_min, z_max = min(box[2]), max(box[2])
+
+    return [x_min, x_max, y_min, y_max, z_min, z_max]
