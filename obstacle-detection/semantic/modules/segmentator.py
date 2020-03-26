@@ -5,6 +5,7 @@ import imp
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import backbones
 from semantic.postproc.CRF import CRF
 import __init__ as booger
 
@@ -19,11 +20,10 @@ class Segmentator(nn.Module):
     self.strict = False
 
     # get the model
-    bboneModule = imp.load_source("bboneModule",
-                                  booger.TRAIN_PATH + '/backbones/' +
-                                  self.ARCH["backbone"]["name"] + '.py')
-    self.backbone = bboneModule.Backbone(params=self.ARCH["backbone"])
-
+    #bboneModule = imp.load_source("bboneModule", '/backbones/darknet.py')
+    #self.backbone = bboneModule.Backbone(params=self.ARCH["backbone"])
+    TRAIN_PATH = ''
+    self.backbone = backbones.Backbone(params=self.ARCH["backbone"])
     # do a pass of the backbone to initialize the skip connections
     stub = torch.zeros((1,
                         self.backbone.get_input_depth(),
@@ -36,7 +36,7 @@ class Segmentator(nn.Module):
     _, stub_skips = self.backbone(stub)
 
     decoderModule = imp.load_source("decoderModule",
-                                    booger.TRAIN_PATH + '/tasks/semantic/decoders/' +
+                                    '/semantic/decoders/' +
                                     self.ARCH["decoder"]["name"] + '.py')
     self.decoder = decoderModule.Decoder(params=self.ARCH["decoder"],
                                          stub_skips=stub_skips,

@@ -47,7 +47,7 @@ def get_user(dataset, model):
     quit()
 
   # create user and infer dataset
-  user = User(ARCH, DATA, dataset, "", model)
+  user = User(ARCH, DATA, dataset, model)
   return user
 
 

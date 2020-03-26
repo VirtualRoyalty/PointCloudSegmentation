@@ -18,35 +18,35 @@ import os
 import numpy as np
 
 from semantic.modules.segmentator import *
+from semantic.dataset.kitti import *
 from semantic.postproc.KNN import KNN
 
 
 class User():
-  def __init__(self, ARCH, DATA, datadir, logdir, modeldir):
+  def __init__(self, ARCH, DATA, datadir, modeldir):
     # parameters
     self.ARCH = ARCH
     self.DATA = DATA
     self.datadir = datadir
-    self.logdir = logdir
     self.modeldir = modeldir
 
     # get the data
-    parserModule = imp.load_source("parserModule",
-                                   '/semantic/dataset/kitti/parser.py')
-    self.parser = parserModule.Parser(root=self.datadir,
-                                      train_sequences=self.DATA["split"]["train"],
-                                      valid_sequences=self.DATA["split"]["valid"],
-                                      test_sequences=self.DATA["split"]["test"],
-                                      labels=self.DATA["labels"],
-                                      color_map=self.DATA["color_map"],
-                                      learning_map=self.DATA["learning_map"],
-                                      learning_map_inv=self.DATA["learning_map_inv"],
-                                      sensor=self.ARCH["dataset"]["sensor"],
-                                      max_points=self.ARCH["dataset"]["max_points"],
-                                      batch_size=1,
-                                      workers=self.ARCH["train"]["workers"],
-                                      gt=True,
-                                      shuffle_train=False)
+    #parserModule = imp.load_source("parserModule",
+     #                              '/semantic/dataset/kitti/parser.py')
+    self.parser = Parser(root=self.datadir,
+                          train_sequences=self.DATA["split"]["train"],
+                          valid_sequences=self.DATA["split"]["valid"],
+                          test_sequences=self.DATA["split"]["test"],
+                          labels=self.DATA["labels"],
+                          color_map=self.DATA["color_map"],
+                          learning_map=self.DATA["learning_map"],
+                          learning_map_inv=self.DATA["learning_map_inv"],
+                          sensor=self.ARCH["dataset"]["sensor"],
+                          max_points=self.ARCH["dataset"]["max_points"],
+                          batch_size=1,
+                          workers=self.ARCH["train"]["workers"],
+                          gt=True,
+                          shuffle_train=False)
 
     # concatenate the encoder and the head
     with torch.no_grad():
@@ -124,7 +124,7 @@ class User():
         # save scan
         # get the first scan in batch and project scan
         pred_np = unproj_argmax.cpu().numpy()
-        pred_np = pred_np.reshape((-1)).astype(np.int32)
+        #pred_np = pred_np.reshape((-1)).astype(np.int32)
         return pred_np
         # map to original label
         #pred_np = to_orig_fn(pred_np)
