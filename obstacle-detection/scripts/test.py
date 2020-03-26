@@ -130,6 +130,8 @@ def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
                 if write_rotated:
                     clusters_rotated = np.empty((0,18))
                     for cluster_id in cluster_data['cluster_id'].unique():
+                        if cluster_id == -1:
+                            continue
                         tcluster = cluster_data[cluster_data['cluster_id'] == cluster_id][['x', 'y', 'z']]
                         min_poitns = [tcluster[tcluster.index == indx].values for indx in list(tcluster.idxmin())]
                         max_points = [tcluster[tcluster.index == indx].values for indx in list(tcluster.idxmax())]

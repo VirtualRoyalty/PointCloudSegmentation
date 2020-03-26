@@ -5,6 +5,8 @@ Our implementation of obstacle detection pipeline steps
 import numpy as np
 import pandas as pd
 from datetime import datetime
+from numpy.linalg import eigh
+from sklearn.preprocessing import normalize
 
 
 def roi_filter_rounded(pcloud, verbose=True, **params):
@@ -143,3 +145,14 @@ def get_optimal_bboxes(clusters, cluster_data):
         box = np.transpose(box)
         box_coord_list.append(box)
     return box_coord_list
+
+
+def get_rotated_data(cluster):
+    cluster_id = cluster['cluster_id'].values
+    mcov = cluster[['x', 'y', 'z']].cov().values
+    _, eigen_vectors = eigh(mcov)
+    eigen_vec_normalized = normalize(eigen_vectors, axis=0)
+    rotated_cluster = eigen_vectors.dot(cluster[['x','y','z']].values.T).T
+    rotated_cluster = pd.DataFrame(rotated_cluster, columns = ['x', 'y', 'z'])
+    rotated_cluster['cluster_id'] = cluster_id
+    return rotated_cluster
