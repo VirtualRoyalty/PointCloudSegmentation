@@ -16,19 +16,19 @@ import copy
 import os
 import numpy as np
 from torch.utils.data import Dataset
-from common.laserscan import LaserScan, SemLaserScan
+from model.common.laserscan import LaserScan, SemLaserScan
 
 
-from tasks.semantic.modules.segmentator import *
-from tasks.semantic.postproc.KNN import KNN
+from model.tasks.semantic.modules.segmentator import *
+from model.tasks.semantic.postproc.KNN import KNN
 
 
 class Inference():
-    def __init__(self, ARCH, DATA, datadir, modeldir):
+    def __init__(self, ARCH, DATA, modeldir):
         # parameters
         self.ARCH = ARCH
         self.DATA = DATA
-        self.datadir = datadir
+        self.datadir = ""
         self.modeldir = modeldir
 
         # get the data
@@ -129,8 +129,6 @@ class Inference():
 
             proj_x = proj_x.unsqueeze(0)
             proj_y = proj_y.unsqueeze(0)
-            print("proj_x shape = ", proj_x.shape)
-            print("proj_y shape = ", proj_y.shape)
             p_x = proj_x[0, :unproj_n_points]
             p_y = proj_y[0, :unproj_n_points]
 
@@ -144,8 +142,6 @@ class Inference():
             # compute output
             proj = proj.unsqueeze(0)
             proj_mask = proj_mask.unsqueeze(0)
-            print(proj.shape)
-            print(proj_mask.shape)
             proj_output = self.model(proj, proj_mask)
             proj_argmax = proj_output[0].argmax(dim=0)
 
