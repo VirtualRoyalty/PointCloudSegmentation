@@ -164,6 +164,7 @@ class Backbone(nn.Module):
     os = 1
 
     # first layer
+
     x, skips, os = self.run_layer(x, self.conv1, skips, os)
     x, skips, os = self.run_layer(x, self.bn1, skips, os)
     x, skips, os = self.run_layer(x, self.relu1, skips, os)
