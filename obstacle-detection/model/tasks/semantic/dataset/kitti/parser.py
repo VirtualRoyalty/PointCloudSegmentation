@@ -209,25 +209,6 @@ class Parser():
     # number of classes that matters is the one for xentropy
     self.nclasses = len(self.learning_map_inv)
 
-    if self.test_sequences:
-      self.test_dataset = SemanticKitti(root=self.root,
-                                        sequences=self.test_sequences,
-                                        labels=self.labels,
-                                        color_map=self.color_map,
-                                        learning_map=self.learning_map,
-                                        learning_map_inv=self.learning_map_inv,
-                                        sensor=self.sensor,
-                                        max_points=max_points,
-                                        gt=False)
-
-      self.testloader = torch.utils.data.DataLoader(self.test_dataset,
-                                                    batch_size=self.batch_size,
-                                                    shuffle=False,
-                                                    num_workers=self.workers,
-                                                    pin_memory=True,
-                                                    drop_last=True)
-      #assert len(self.testloader) > 0
-      self.testiter = iter(self.testloader)
 
 
   def get_test_batch(self):

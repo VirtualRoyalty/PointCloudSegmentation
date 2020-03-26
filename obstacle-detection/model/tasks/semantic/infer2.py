@@ -10,7 +10,7 @@ import os
 import shutil
 import __init__ as booger
 
-from tasks.semantic.modules.user import *
+from model.tasks.semantic.modules.user import *
 
 
 def get_user(dataset, model):
@@ -24,7 +24,7 @@ def get_user(dataset, model):
   # open arch config file
   try:
     print("Opening arch config file from %s" % model)
-    ARCH = yaml.safe_load(open(model + "/arch_cfg.yaml", 'r'))
+    ARCH = yaml.safe_load(open("model/" + model + "/arch_cfg.yaml", 'r'))
   except Exception as e:
     print(e)
     print("Error opening arch yaml file.")
@@ -33,7 +33,7 @@ def get_user(dataset, model):
   # open data config file
   try:
     print("Opening data config file from %s" % model)
-    DATA = yaml.safe_load(open(model + "/data_cfg.yaml", 'r'))
+    DATA = yaml.safe_load(open("model/" + model + "/data_cfg.yaml", 'r'))
   except Exception as e:
     print(e)
     print("Error opening data yaml file.")
