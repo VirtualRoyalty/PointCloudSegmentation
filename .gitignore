@@ -1,7 +1,0 @@
-# Byte-compiled / optimized / DLL files
-dataset/*
-dataset/sequences/
-obstacle-detection/dataset/
-obstacle-detection/.ipynb_checkpoints/*
-__pycache__/
-
