@@ -10,7 +10,7 @@ To visualize the predictions (in this example sequence 00):
 $ ./visualize.py -d /path/to/dataset/ -p /path/to/predictions/ -s 00
 ```
 
-If you want to visualize oriented bounding boxes use flag -b or --bboxes (in this example sequence 00):
+If you want to visualize axis aligned bounding boxes use flag -b or --bboxes (in this example sequence 00):
 
 ```sh
 $ ./visualize.py -d /path/to/dataset/ -p /path/to/predictions/ -s 00 -b
