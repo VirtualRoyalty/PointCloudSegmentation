@@ -55,24 +55,25 @@ class LaserScan:
   def __len__(self):
     return self.size()
 
-  def open_scan(self, filename):
+  def open_scan(self, scan):
     """ Open raw scan and fill in attributes
     """
     # reset just in case there was an open structure
     self.reset()
 
     # check filename is string
-    if not isinstance(filename, str):
-      raise TypeError("Filename should be string type, "
-                      "but was {type}".format(type=str(type(filename))))
-
-    # check extension is a laserscan
-    if not any(filename.endswith(ext) for ext in self.EXTENSIONS_SCAN):
-      raise RuntimeError("Filename extension is not valid scan file.")
+    # if not isinstance(filename, str):
+    #   raise TypeError("Filename should be string type, "
+    #                   "but was {type}".format(type=str(type(filename))))
+    #
+    # # check extension is a laserscan
+    # if not any(filename.endswith(ext) for ext in self.EXTENSIONS_SCAN):
+    #   raise RuntimeError("Filename extension is not valid scan file.")
 
     # if all goes well, open pointcloud
-    scan = np.fromfile(filename, dtype=np.float32)
-    scan = scan.reshape((-1, 4))
+    # scan = np.fromfile(scan, dtype=np.float32)
+    # scan = scan.reshape((-1, 4))
+
 
     # put in attribute
     points = scan[:, 0:3]    # get xyz

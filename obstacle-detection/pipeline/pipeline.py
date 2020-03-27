@@ -12,6 +12,7 @@ common = imp.reload(common)
 
 def pipeline(scan, label, obstacle_lst, verbose=False, OBBoxes=False, exec_time=False,  **params):
 
+
     """ ROI filtering """
     ##################################################################################################
     start_time = datetime.now()
@@ -54,7 +55,7 @@ def pipeline(scan, label, obstacle_lst, verbose=False, OBBoxes=False, exec_time=
         cluster_data = pd.DataFrame.from_dict({'x': [], 'y': [], 'z': [],'cluster_id': []})
         clusters = []
         for _id in pcloud['cluster_id'].unique():
-            if _id == -1 or len(pcloud[pcloud['cluster_id'] == _id]) < 10:
+            if _id == -1 or len(pcloud[pcloud['cluster_id'] == _id]) < 100 or len(pcloud[pcloud['cluster_id'] == _id]) > 2500:
                 continue
             tcluster = common.outlier_filter(pcloud[pcloud['cluster_id'] == _id], verbose=False)
             cluster_data = cluster_data.append(tcluster)
@@ -63,14 +64,14 @@ def pipeline(scan, label, obstacle_lst, verbose=False, OBBoxes=False, exec_time=
                 clusters.append([x.tolist() for x in obb.points])
         if not OBBoxes:
             clusters = cluster_data.groupby(['cluster_id']).agg({ 'x': ['min', 'max'],
-                                                            'y': ['min', 'max'],
-                                                            'z': ['min', 'max'] }).values
+                                                                  'y': ['min', 'max'],
+                                                                  'z': ['min', 'max'] }).values
 
         bb_time = (datetime.now() - start_time).total_seconds()
         ###############################################################################################
     else:
         clusters, cluster_data = np.empty((0, 0)), np.empty((0, 0))
-        voxel_time, cluster_time, min_max_time = 0, 0, 0
+        voxel_time, cluster_time, bb_time = 0, 0, 0
 
     if verbose:
         print('Execution time:')
