@@ -5,6 +5,8 @@ Our implementation of obstacle detection pipeline steps
 import numpy as np
 import pandas as pd
 from datetime import datetime
+from numpy.linalg import eigh
+from sklearn.preprocessing import normalize
 
 
 def roi_filter_rounded(pcloud, verbose=True, **params):
@@ -35,8 +37,8 @@ def roi_filter(pcloud, verbose=True, **params):
     if verbose:
         print('Input pcloud size: {}'.format(len(pcloud)))
     pcloud['camera'] = ((pcloud['x'] > params['min_x']) & (pcloud['x'] < params['max_x']) &
-                       (pcloud['y'] >  params['min_y']) & (pcloud['y'] < params['max_y']) &
-                       (pcloud['z'] >  params['min_z']) & (pcloud['z'] <  params['max_z']))
+                        (pcloud['y'] >  params['min_y']) & (pcloud['y'] < params['max_y']) &
+                        (pcloud['z'] >  params['min_z']) & (pcloud['z'] <  params['max_z']))
     pcloud = pcloud[pcloud['camera'] == True]
     if verbose:
         print('Output ROI pcloud size: {}'.format(len(pcloud)))
@@ -61,8 +63,9 @@ def obstacle_filter(pcloud, obstacle_lst, proc_labels=True, verbose=True):
     if proc_labels:
         pcloud.seg_id = pcloud.seg_id.astype('uint32')
         pcloud.seg_id = pcloud.seg_id.apply(lambda x: x & 0xFFFF)
-
-    pcloud = pcloud[pcloud['seg_id'].isin(list(obstacle_lst.keys()))]
+        pcloud = pcloud[pcloud['seg_id'].isin(list(obstacle_lst.keys()))]
+    else:
+        pcloud = pcloud[pcloud['seg_id'].isin(obstacle_lst)]
     if verbose:
         print('Filter required segments')
         print('Point size before: {} and after filtering: {}'.format(origin_point_size, len(pcloud)))
@@ -143,3 +146,43 @@ def get_optimal_bboxes(clusters, cluster_data):
         box = np.transpose(box)
         box_coord_list.append(box)
     return box_coord_list
+
+
+def get_rotated_data(cluster):
+
+    cluster_id = cluster['cluster_id'].values
+    rotation = np.cov(cluster[['x', 'y', 'z']].values, y=None, rowvar=0, bias=1)
+
+    _, eigen_vectors = eigh(rotation)
+    eigen_vec_normalized = normalize(eigen_vectors, axis=0)
+    rotated_cluster = eigen_vectors.dot(cluster[['x','y','z']].values.T).T
+
+    obb_min = np.min(rotated_cluster, axis=0)
+    obb_max = np.max(rotated_cluster, axis=0)
+
+
+    rotated_cluster = pd.DataFrame(rotated_cluster, columns = ['x', 'y', 'z'])
+    rotated_cluster['cluster_id'] = cluster_id
+    return rotated_cluster,  [
+                                    # rightmost, topmost, farthest
+                                    transform((obb_max[0], obb_max[1], obb_min[2]), rotation),
+                                    # leftmost, topmost, farthest
+                                    transform((obb_min[0], obb_max[1], obb_min[2]), rotation),
+                                    # leftmost, topmost, closest
+                                    transform((obb_min[0], obb_max[1], obb_max[2]), rotation),
+                                    # rightmost, topmost, closest
+                                    transform(obb_max, rotation),
+
+                                    # leftmost, bottommost, farthest
+                                    transform(obb_min, rotation),
+                                    # rightmost, bottommost, farthest
+                                    transform((obb_max[0], obb_min[1], obb_min[2]), rotation),
+                                    # rightmost, bottommost, closest
+                                    transform((obb_max[0], obb_min[1], obb_max[2]), rotation),
+                                    # leftmost, bottommost, closest
+                                    transform((obb_min[0], obb_min[1], obb_max[2]), rotation),
+                                ]
+
+
+def transform(point, rotation):
+    return np.dot(np.array(point), rotation).tolist()

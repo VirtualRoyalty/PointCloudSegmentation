@@ -66,7 +66,7 @@ def get_scan_id(scan):
 
 
 def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
-                      write_path=None, write_rotated=False, detailed=False, **pipeline_params):
+                      write_path=None, OBB=False, detailed=False, **pipeline_params):
     """
     Gettitng bounding boxes for reqired sequence of scans and labels
     Also ability to grep time execution statistic.
@@ -127,19 +127,15 @@ def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
 
             if write_path:
 
-                if write_rotated:
-                    clusters_rotated = np.empty((0,18))
-                    for cluster_id in cluster_data['cluster_id'].unique():
-                        tcluster = cluster_data[cluster_data['cluster_id'] == cluster_id][['x', 'y', 'z']]
-                        min_poitns = [tcluster[tcluster.index == indx].values for indx in list(tcluster.idxmin())]
-                        max_points = [tcluster[tcluster.index == indx].values for indx in list(tcluster.idxmax())]
-                        vertices_lst = min_poitns + max_points
-                        varray = vertices_lst[0]
-                        for v in vertices_lst[1:]:
-                            varray = np.concatenate((varray, v), axis=1)
-                        clusters_rotated = np.concatenate((clusters_rotated, varray), axis=0)
-                    clusters = clusters_rotated
-
+                if OBB:
+                    np_clusters = np.empty((0, 24))
+                    for cluster in clusters:
+                        _obb = []
+                        for v in cluster:
+                            _obb = _obb + v
+                        _obb = np.asarray(_obb).reshape(1, 24)
+                        np_clusters = np.concatenate((np_clusters, _obb), axis=0)
+                    clusters = np_clusters
                 # write cluster in format x_min, x_max, y_min, y_max, z_min, z_max
                 assert isinstance(clusters, np.ndarray)
                 np.savetxt(write_path + str(scan_id) + '.bbox', clusters)
