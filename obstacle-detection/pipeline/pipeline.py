@@ -1,9 +1,16 @@
+import numpy as np
+import pandas as pd
+import importlib as imp
+
+from datetime import datetime
 from sklearn.cluster import DBSCAN
-from pipeline import common
 from pyobb.obb import OBB
+from pipeline import common
+common = imp.reload(common)
 
 
-def pipeline(scan, label, obstacle_lst, verbose=False, exec_time=False, **params):
+
+def pipeline(scan, label, obstacle_lst, verbose=False, OBBoxes=False, exec_time=False,  **params):
 
     """ ROI filtering """
     ##################################################################################################
@@ -20,7 +27,7 @@ def pipeline(scan, label, obstacle_lst, verbose=False, exec_time=False, **params
     """ Obstacles filtering """
     ###################################################################################################
     start_time = datetime.now()
-    pcloud = common.obstacle_filter(pcloud, obstacle_lst, proc_labels=True, verbose=False)
+    pcloud = common.obstacle_filter(pcloud, obstacle_lst, proc_labels=params['proc_labels'], verbose=False)
     obstacle_time = (datetime.now() - start_time).total_seconds()
     ###################################################################################################
 
@@ -51,9 +58,15 @@ def pipeline(scan, label, obstacle_lst, verbose=False, exec_time=False, **params
                 continue
             tcluster = common.outlier_filter(pcloud[pcloud['cluster_id'] == _id], verbose=False)
             cluster_data = cluster_data.append(tcluster)
-            obb = OBB.build_from_points(tcluster[['x', 'y', 'z']].values)
-            clusters.append([x.tolist() for x in obb.points])
-        obb_time = (datetime.now() - start_time).total_seconds()
+            if OBBoxes:
+                obb = OBB.build_from_points(tcluster[['x', 'y', 'z']].values)
+                clusters.append([x.tolist() for x in obb.points])
+        if not OBBoxes:
+            clusters = cluster_data.groupby(['cluster_id']).agg({ 'x': ['min', 'max'],
+                                                            'y': ['min', 'max'],
+                                                            'z': ['min', 'max'] }).values
+
+        bb_time = (datetime.now() - start_time).total_seconds()
         ###############################################################################################
     else:
         clusters, cluster_data = np.empty((0, 0)), np.empty((0, 0))
@@ -65,13 +78,13 @@ def pipeline(scan, label, obstacle_lst, verbose=False, exec_time=False, **params
         print('\n - Filtering obstacles: {:.5f}s'.format(obstacle_time))
         print('\n - Voxel grid: {:.5f}s'.format(voxel_time))
         print('\n - Clustering: {:.5f}s'.format(cluster_time))
-        print('\n - Min-max cluster points: {:.5f}s \n'.format(obb_time))
+        print('\n - Min-max cluster points: {:.5f}s \n'.format(bb_time))
 
     if exec_time:
         return clusters, cluster_data, {'roi_time': roi_time,
                                         'filter_obstacle_time': obstacle_time,
                                         'voxel_grid_time': voxel_time,
                                         'clustering_time': cluster_time,
-                                        'outlier_filter_bbox_time': obb_time}
+                                        'outlier_filter_bbox_time': bb_time}
     else:
         return clusters, cluster_data

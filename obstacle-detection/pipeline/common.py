@@ -63,8 +63,9 @@ def obstacle_filter(pcloud, obstacle_lst, proc_labels=True, verbose=True):
     if proc_labels:
         pcloud.seg_id = pcloud.seg_id.astype('uint32')
         pcloud.seg_id = pcloud.seg_id.apply(lambda x: x & 0xFFFF)
-
-    pcloud = pcloud[pcloud['seg_id'].isin(list(obstacle_lst.keys()))]
+        pcloud = pcloud[pcloud['seg_id'].isin(list(obstacle_lst.keys()))]
+    else:
+        pcloud = pcloud[pcloud['seg_id'].isin(obstacle_lst)]
     if verbose:
         print('Filter required segments')
         print('Point size before: {} and after filtering: {}'.format(origin_point_size, len(pcloud)))
