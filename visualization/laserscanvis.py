@@ -120,10 +120,6 @@ class LaserScanVis:
     min_y, max_y = y_roi
     min_z, max_z = z_roi
 
-    dist_x_2 = (np.abs(max_x - min_x) * 0.5) ** 2
-    dist_y_2 = (np.abs(max_y - min_y) * 0.5) ** 2
-    print(np.sqrt(dist_y_2))
-
     for pcloud, i in zip(self.scan.points, range(len(self.scan.sem_label_color))):
         if ((pcloud[0] > 0) & (pcloud[0] < max_x) &
             (pcloud[1] > min_y) & (pcloud[1] < max_y) &
