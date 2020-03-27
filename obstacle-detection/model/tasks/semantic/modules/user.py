@@ -16,8 +16,8 @@ import copy
 import os
 import numpy as np
 from torch.utils.data import Dataset
+import importlib as implib
 from model.common.laserscan import LaserScan, SemLaserScan
-
 
 from model.tasks.semantic.modules.segmentator import *
 from model.tasks.semantic.postproc.KNN import KNN
@@ -151,8 +151,8 @@ class Inference():
             if torch.cuda.is_available():
                 torch.cuda.synchronize()
 
-            print("Infered scan ", scan_file,
-                  "in", time.time() - end, "sec")
+            # print("Infered scan ", scan_file,
+            #       "in", time.time() - end, "sec")
             end = time.time()
 
             # save scan

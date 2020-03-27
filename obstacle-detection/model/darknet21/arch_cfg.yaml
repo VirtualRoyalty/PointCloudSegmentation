@@ -85,7 +85,7 @@ dataset:
     fov_up: 3
     fov_down: -25
     img_prop:
-      width: 2048
+      width: 1048
       height: 64
     img_means: #range,x,y,z,signal
       - 12.12
