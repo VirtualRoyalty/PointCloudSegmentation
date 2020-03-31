@@ -60,8 +60,8 @@ def pipeline(scan, label, obstacle_lst, verbose=False, OBBoxes=False, exec_time=
             tcluster = common.outlier_filter(pcloud[pcloud['cluster_id'] == _id], verbose=False)
             cluster_data = cluster_data.append(tcluster)
             if OBBoxes:
-                obb = OBB.build_from_points(tcluster[['x', 'y', 'z']].values)
-                clusters.append([x.tolist() for x in obb.points])
+                obb = common.get_OBB(tcluster[['x', 'y', 'z']])
+                clusters.append(obb)
         if not OBBoxes:
             clusters = cluster_data.groupby(['cluster_id']).agg({ 'x': ['min', 'max'],
                                                                   'y': ['min', 'max'],
