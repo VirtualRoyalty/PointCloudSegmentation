@@ -268,17 +268,52 @@ class SemLaserScan(LaserScan):
     if self.project:
       self.do_label_projection()
 
-  def open_bbox(self, filename):
-     f = open(filename, "r")
-     fl = f.readlines()
-     bboxes = []
-     for str in fl:
-         clusters = str.split(' ')
-         cluster = []
-         for i in clusters:
-             cluster.append(float(i))
-         bboxes.append(cluster)
-     self.bboxes = bboxes
+  def get_bbox_info(self,bbox):
+     info = []
+     width = np.linalg.norm(bbox[0] - bbox[1])
+     depth = np.linalg.norm(bbox[0] - bbox[2])
+     height = np.linalg.norm(bbox[0] - bbox[4])
+     center = np.mean(bbox, axis=0)
+     vec1_x = bbox[0][0] - bbox[1][0]
+     vec1_y = bbox[0][1] - bbox[1][1]
+
+     vec2_x = 5
+     vec2_y = 0
+     cos_angle = (vec1_x * vec2_x + vec1_y * vec2_y) / ((np.sqrt(vec1_x ** 2 + vec1_y ** 2)) * (np.sqrt(vec2_x ** 2 + vec2_y ** 2)) )
+
+     if ((cos_angle >= -1) & (cos_angle <= 1)):
+       angle = np.degrees(np.arccos(cos_angle))
+     else:
+       angle = 0
+     info.append(width)
+     info.append(depth)
+     info.append(height)
+     info.append(center)
+     info.append(angle)
+     return info
+
+  def open_bbox(self, filename, use_bbox_measurements):
+    f = open(filename, "r")
+    fl = f.readlines()
+    bboxes = []
+    if not use_bbox_measurements:
+        for str in fl:
+            coord = str.split(' ')
+            cluster = []
+            for i in range(0, len(coord), 3):
+                cluster.append(np.array((float(coord[i]), float(coord[i + 1]), float(coord[i + 2]))))
+            bboxes.append(self.get_bbox_info(cluster))
+    else:
+        for str in fl:
+            coord = str.split(' ')
+            cluster = []
+            cluster.append(float(coord[0]))
+            cluster.append(float(coord[1]))
+            cluster.append(float(coord[2]))
+            cluster.append(np.array((float(coord[3]), float(coord[4]), float(coord[5]))))
+            cluster.append(float(coord[6]))
+            bboxes.append(cluster)
+    self.bboxes = bboxes
 
   def colorize(self):
     """ Colorize pointcloud with the color of each semantic label
