@@ -42,12 +42,21 @@ if __name__ == '__main__':
       ' (see readme)'
       'Defaults to %(default)s',
   )
+
   parser.add_argument(
       '--bboxes', '-b',
       dest='draw_clusters',
       default=False,
       action='store_true',
-      help='Bounding boxes to visualize. Defaults to %(default)s',
+      help='Use 8 vertex coordinates of oriented bounding box to visualize cluster. Defaults to %(default)s',
+  )
+
+  parser.add_argument(
+      '--use_bbox_measurements', '-m',
+      dest='use_bbox_measurements',
+      default=False,
+      action='store_true',
+      help='Use width, depth, height, center coordinate and angle of rotation of oriented bounding box to visualize cluster . Defaults to %(default)s',
   )
 
   parser.add_argument(
@@ -93,6 +102,7 @@ if __name__ == '__main__':
   print("Sequence", FLAGS.sequence)
   print("Predictions", FLAGS.predictions)
   print("Bounding boxes", FLAGS.draw_clusters)
+  print("use_bbox_measurements", FLAGS.use_bbox_measurements)
   print("use_roi_filter", FLAGS.use_roi_filter)
   print("ignore_semantics", FLAGS.ignore_semantics)
   print("ignore_safety", FLAGS.ignore_safety)
@@ -185,6 +195,7 @@ if __name__ == '__main__':
                      offset=FLAGS.offset,
                      semantics=semantics,
                      bboxes_names=bboxes_names,
+                     use_bbox_measurements=FLAGS.use_bbox_measurements,
                      roi_filter=roi_filter,
                      instances=False)
 
