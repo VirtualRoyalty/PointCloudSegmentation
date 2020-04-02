@@ -2,12 +2,14 @@ import re
 import time
 import json
 import numpy as np
+import pandas as pd
 
 from datetime import datetime
 from tqdm import tqdm, tqdm_notebook
 
 from sklearn.model_selection import ParameterGrid
 from sklearn.metrics import silhouette_score
+from pipeline import common
 
 
 def grid_search_optimization(scan, label, obstacle_lst, pipeline, params,
@@ -66,7 +68,8 @@ def get_scan_id(scan):
 
 
 def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
-                      write_path=None, write_rotated=False, detailed=False, **pipeline_params):
+                      write_path=None, OBB=False, detailed=False,
+                      seg_model=None, **pipeline_params):
     """
     Gettitng bounding boxes for reqired sequence of scans and labels
     Also ability to grep time execution statistic.
@@ -107,16 +110,28 @@ def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
 
             # read scan
             scan = np.fromfile(scan, dtype=np.float32)
-            scan = scan.reshape((-1, 4))[:, :3]
-
-            # read label
-            label = np.fromfile(label, dtype=np.uint32)
-            label = label.reshape((-1))
+            scan = scan.reshape((-1, 4))
 
             start_time = datetime.now()
+            if seg_model:
+                seg_time = datetime.now()
+                scan = common.roi_filter(pd.DataFrame(scan, columns=['x', 'y', 'z', 'remission']),
+                                        min_x=pipeline_params['roi_x_min'], max_x=pipeline_params['roi_x_max'],
+                                        min_y=pipeline_params['roi_y_min'], max_y=pipeline_params['roi_y_max'],
+                                        min_z=pipeline_params['roi_z_min'], max_z=pipeline_params['roi_z_max'],
+                                        verbose=False)[['x', 'y', 'z', 'remission']].values
+                label = seg_model.infer(scan)
+                seg_time = (datetime.now() - seg_time).total_seconds()
+            else:
+                # read label
+                label = np.fromfile(label, dtype=np.uint32)
+                label = label.reshape((-1))
+
             # start pipeline
             if detailed:
-                clusters, cluster_data, stat = pipeline(scan, label, obstacle_lst, exec_time=True, **pipeline_params)
+                clusters, cluster_data, stat = pipeline(scan[:, :3], label, obstacle_lst, exec_time=True, **pipeline_params)
+                if seg_model:
+                    stat['segmentation_time'] = seg_time
                 stats.append(stat)
             else:
                 clusters, _ = pipeline(scan, label, obstacle_lst, **pipeline_params)
@@ -127,18 +142,15 @@ def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
 
             if write_path:
 
-                if write_rotated:
-                    clusters_rotated = np.empty((0,18))
-                    for cluster_id in cluster_data['cluster_id'].unique():
-                        tcluster = cluster_data[cluster_data['cluster_id'] == cluster_id][['x', 'y', 'z']]
-                        min_poitns = [tcluster[tcluster.index == indx].values for indx in list(tcluster.idxmin())]
-                        max_points = [tcluster[tcluster.index == indx].values for indx in list(tcluster.idxmax())]
-                        vertices_lst = min_poitns + max_points
-                        varray = vertices_lst[0]
-                        for v in vertices_lst[1:]:
-                            varray = np.concatenate((varray, v), axis=1)
-                        clusters_rotated = np.concatenate((clusters_rotated, varray), axis=0)
-                    clusters = clusters_rotated
+                if OBB:
+                    np_clusters = np.empty((0, 24))
+                    for cluster in clusters:
+                        _obb = []
+                        for v in cluster:
+                            _obb = _obb + v.tolist()
+                        _obb = np.asarray(_obb).reshape(1, 24)
+                        np_clusters = np.concatenate((np_clusters, _obb), axis=0)
+                    clusters = np_clusters
 
                 # write cluster in format x_min, x_max, y_min, y_max, z_min, z_max
                 assert isinstance(clusters, np.ndarray)

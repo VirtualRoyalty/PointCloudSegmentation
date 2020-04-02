@@ -47,7 +47,23 @@ if __name__ == '__main__':
       dest='draw_clusters',
       default=False,
       action='store_true',
-      help='Bounding boxes to visualize. Defaults to %(default)s',
+      help='Use 8 vertex coordinates of oriented bounding box to visualize cluster. Defaults to %(default)s',
+  )
+
+  parser.add_argument(
+      '--use_bbox_measurements', '-m',
+      dest='use_bbox_measurements',
+      default=False,
+      action='store_true',
+      help='Use width, depth, height, center coordinate and angle of rotation of oriented bounding box to visualize cluster . Defaults to %(default)s',
+  )
+
+  parser.add_argument(
+      '--roi_filter', '-r',
+      dest='use_roi_filter',
+      default=False,
+      action='store_true',
+      help='Use roi filter to visualize only 3d points used for clustering . Defaults to %(default)s',
   )
 
   parser.add_argument(
@@ -85,6 +101,8 @@ if __name__ == '__main__':
   print("Sequence", FLAGS.sequence)
   print("Predictions", FLAGS.predictions)
   print("Bounding boxes", FLAGS.draw_clusters)
+  print("use_bbox_measurements", FLAGS.use_bbox_measurements)
+  print("use_roi_filter", FLAGS.use_roi_filter)
   print("ignore_semantics", FLAGS.ignore_semantics)
   print("ignore_safety", FLAGS.ignore_safety)
   print("offset", FLAGS.offset)
@@ -157,6 +175,7 @@ if __name__ == '__main__':
   # create a scan
   if FLAGS.ignore_semantics:
     scan = LaserScan(project=True)  # project all opened scans to spheric proj
+    bboxes_names = None
   else:
     color_dict = CFG["color_map"]
     scan = SemLaserScan(color_dict, project=True)
@@ -164,16 +183,19 @@ if __name__ == '__main__':
   # create a visualizer
   semantics = not FLAGS.ignore_semantics
   draw_clusters = FLAGS.draw_clusters
+  roi_filter = FLAGS.use_roi_filter
   if not draw_clusters:
       bboxes_names = None
   if not semantics:
-    label_names = None
+      label_names = None
   vis = LaserScanVis(scan=scan,
                      scan_names=scan_names,
                      label_names=label_names,
                      offset=FLAGS.offset,
                      semantics=semantics,
                      bboxes_names=bboxes_names,
+                     use_bbox_measurements=FLAGS.use_bbox_measurements,
+                     roi_filter=roi_filter,
                      instances=False)
 
   # print instructions
