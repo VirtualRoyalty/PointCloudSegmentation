@@ -10,8 +10,10 @@ common = imp.reload(common)
 
 
 
-def pipeline(scan, label, obstacle_lst, verbose=False, OBBoxes=False, exec_time=False,  **params):
+from pipeline import common
+common = imp.reload(common)
 
+def pipeline(scan, label, obstacle_lst, verbose=False, OBBoxes=False, exec_time=False, **params):
 
     """ ROI filtering """
     ##################################################################################################
@@ -28,7 +30,7 @@ def pipeline(scan, label, obstacle_lst, verbose=False, OBBoxes=False, exec_time=
     """ Obstacles filtering """
     ###################################################################################################
     start_time = datetime.now()
-    pcloud = common.obstacle_filter(pcloud, obstacle_lst, proc_labels=params['proc_labels'], verbose=False)
+    pcloud = common.obstacle_filter(pcloud, obstacle_lst, proc_labels=True, verbose=False)
     obstacle_time = (datetime.now() - start_time).total_seconds()
     ###################################################################################################
 
@@ -54,10 +56,11 @@ def pipeline(scan, label, obstacle_lst, verbose=False, OBBoxes=False, exec_time=
         pcloud['norm'] = np.sqrt(np.square(pcloud[['x', 'y', 'z']]).sum(axis=1))
         cluster_data = pd.DataFrame.from_dict({'x': [], 'y': [], 'z': [],'cluster_id': []})
         clusters = []
-        for _id in pcloud['cluster_id'].unique():
-            if _id == -1 or len(pcloud[pcloud['cluster_id'] == _id]) < 100 or len(pcloud[pcloud['cluster_id'] == _id]) > 2500:
+        for _id in sorted(pcloud['cluster_id'].unique()):
+            if _id == -1 or not 50 < len(pcloud[pcloud['cluster_id'] == _id]) < 5000:
                 continue
-            tcluster = common.outlier_filter(pcloud[pcloud['cluster_id'] == _id], verbose=False)
+            tcluster = pcloud[pcloud['cluster_id'] == _id]
+            tcluster = common.outlier_filter(tcluster, verbose=False)
             cluster_data = cluster_data.append(tcluster)
             if OBBoxes:
                 obb = common.get_OBB(tcluster[['x', 'y', 'z']])
@@ -66,7 +69,6 @@ def pipeline(scan, label, obstacle_lst, verbose=False, OBBoxes=False, exec_time=
             clusters = cluster_data.groupby(['cluster_id']).agg({ 'x': ['min', 'max'],
                                                                   'y': ['min', 'max'],
                                                                   'z': ['min', 'max'] }).values
-
         bb_time = (datetime.now() - start_time).total_seconds()
         ###############################################################################################
     else:
