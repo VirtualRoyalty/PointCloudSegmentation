@@ -141,7 +141,11 @@ def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
             clusters_minmax_dct[str(scan_id)[-3:]] = clusters
 
             if write_path:
-
+                if len(clusters) == 0:
+                    np.savetxt(write_path + str(scan_id) + '.bbox', np.empty((0, 0)))
+                    if OBB:
+                        np.savetxt(write_path + str(scan_id) + '.segs', np.empty((0, 0)))
+                    continue
                 # Oriented Bounding Boxes
                 if OBB:
                     np_clusters = np.empty((0, 24))
