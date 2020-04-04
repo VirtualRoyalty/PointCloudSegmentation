@@ -68,7 +68,7 @@ def get_scan_id(scan):
 
 
 def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
-                      write_path=None, OBB=False, detailed=False,
+                      write_path=None, OBB=False, write_seg_id=False, detailed=False,
                       seg_model=None, **pipeline_params):
     """
     Gettitng bounding boxes for reqired sequence of scans and labels
@@ -142,6 +142,7 @@ def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
 
             if write_path:
 
+                # Oriented Bounding Boxes
                 if OBB:
                     np_clusters = np.empty((0, 24))
                     for cluster in clusters:
@@ -151,9 +152,19 @@ def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
                         _obb = np.asarray(_obb).reshape(1, 24)
                         np_clusters = np.concatenate((np_clusters, _obb), axis=0)
                     clusters = np_clusters
-                    
-                # write cluster in format x_min, x_max, y_min, y_max, z_min, z_max
+
+                # Seg id for additional info e.g. for visualization
+                if write_seg_id:
+                    seg_lst = []
+                    for cl_id in sorted(cluster_data['cluster_id'].unique()):
+                        seg = cluster_data[cluster_data['cluster_id'] == cl_id].agg({'seg_id': 'mode'}).values
+                        seg_lst.append(seg)
+                    seg_arr = np.array(seg_lst, dtype='int64').reshape(1, len(seg_lst))
+                    np.savetxt(write_path + str(scan_id) + '.segs', seg_arr)
+                # sanity check
                 assert isinstance(clusters, np.ndarray)
+                # if OBB=False write bounding boxes in format x_min, x_max, y_min, y_max, z_min, z_max
+                # else write oriented bounding boxes in format 8 vertixes x1, y1, z1 ... x8, y8, z8
                 np.savetxt(write_path + str(scan_id) + '.bbox', clusters)
     except KeyboardInterrupt:
         print('User`s KeyboardInterruption...')
