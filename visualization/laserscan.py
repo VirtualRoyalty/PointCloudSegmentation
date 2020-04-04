@@ -328,14 +328,16 @@ class SemLaserScan(LaserScan):
   def open_bbox_labels(self, filename):
     f = open(filename, "r")
     str = f.readline()
-    labels = str.split(' ')
-    bbox_labels = []
     self.bbox_labels = []
-    for i in range(len(labels)):
-        bbox_labels.append(int(float(labels[i])))
-        self.bbox_labels.append(self.sem_labels_lut[bbox_labels[i]])
-    self.bbox_label_color = self.sem_color_lut[bbox_labels]
-    self.bbox_label_color = self.bbox_label_color.reshape((-1, 3))
+    self.bbox_label_color = []
+    if len(str) != 0:
+        labels = str.split(' ')
+        bbox_labels = []
+        for i in range(len(labels)):
+            bbox_labels.append(int(float(labels[i])))
+            self.bbox_labels.append(self.sem_labels_lut[bbox_labels[i]])
+        self.bbox_label_color = self.sem_color_lut[bbox_labels]
+        self.bbox_label_color = self.bbox_label_color.reshape((-1, 3))
 
   def colorize(self):
     """ Colorize pointcloud with the color of each semantic label
