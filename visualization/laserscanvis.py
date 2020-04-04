@@ -239,7 +239,9 @@ class LaserScanVis:
                bbox = self.scan.bboxes[i]
                center = bbox[3]
                #labels.append(vispy.scene.visuals.Text(text = self.scan.bbox_labels[i], parent = self.sem_view.scene,  color = self.scan.bbox_label_color[i], bold=True))
-               labels.append(vispy.scene.visuals.Text(text = self.scan.bbox_labels[i], parent = self.sem_view.scene,  color = "red", bold=True))
+               labels.append(vispy.scene.visuals.Text(text = self.scan.bbox_labels[i],
+                                                      parent = self.sem_view.scene,
+                                                      color = "red", bold=True))
                labels[i].pos = center[0], center[1], center[2] + 1
                labels[i].font_size = 600
 
