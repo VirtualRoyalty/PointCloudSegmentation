@@ -152,7 +152,6 @@ def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
                     for cluster in clusters:
                         _obb = []
                         for v in cluster:
-                            print(v, cluster, _obb)
                             _obb = _obb + v.tolist()
                         _obb = np.asarray(_obb).reshape(1, 24)
                         np_clusters = np.concatenate((np_clusters, _obb), axis=0)
