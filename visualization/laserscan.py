@@ -172,7 +172,7 @@ class SemLaserScan(LaserScan):
   """Class that contains LaserScan with x,y,z,r,sem_label,sem_color_label,inst_label,inst_color_label"""
   EXTENSIONS_LABEL = ['.label']
 
-  def __init__(self,  sem_color_dict=None, project=False, H=64, W=1024, fov_up=3.0, fov_down=-25.0, max_classes=300):
+  def __init__(self,  sem_color_dict=None, sem_labels_dict=None, project=False, H=64, W=1024, fov_up=3.0, fov_down=-25.0, max_classes=300):
     super(SemLaserScan, self).__init__(project, H, W, fov_up, fov_down)
     self.reset()
 
@@ -194,6 +194,16 @@ class SemLaserScan(LaserScan):
                                              size=(max_sem_key, 3))
       # force zero to a gray-ish color
       self.sem_color_lut[0] = np.full((3), 0.1)
+
+    #make semantic labels
+    if sem_labels_dict:
+        max_sem_key = 0
+        for key, data in sem_labels_dict.items():
+          if key + 1 > max_sem_key:
+            max_sem_key = key + 1
+        self.sem_labels_lut = ["" for x in range(max_sem_key)]
+        for key, value in sem_labels_dict.items():
+            self.sem_labels_lut[key] = value
 
     # make instance colors
     max_inst_id = 100000
@@ -268,17 +278,66 @@ class SemLaserScan(LaserScan):
     if self.project:
       self.do_label_projection()
 
-  def open_bbox(self, filename):
-     f = open(filename, "r")
-     fl = f.readlines()
-     bboxes = []
-     for str in fl:
-         clusters = str.split(' ')
-         cluster = []
-         for i in clusters:
-             cluster.append(float(i))
-         bboxes.append(cluster)
-     self.bboxes = bboxes
+  def get_bbox_info(self,bbox):
+     info = []
+     width = np.linalg.norm(bbox[0] - bbox[1])
+     depth = np.linalg.norm(bbox[0] - bbox[2])
+     height = np.linalg.norm(bbox[0] - bbox[4])
+     center = np.mean(bbox, axis=0)
+     vec1_x = bbox[0][0] - bbox[1][0]
+     vec1_y = bbox[0][1] - bbox[1][1]
+
+     vec2_x = 5
+     vec2_y = 0
+     cos_angle = (vec1_x * vec2_x + vec1_y * vec2_y) / ((np.sqrt(vec1_x ** 2 + vec1_y ** 2)) * (np.sqrt(vec2_x ** 2 + vec2_y ** 2)) )
+
+     if ((cos_angle >= -1) & (cos_angle <= 1)):
+       angle = np.degrees(np.arccos(cos_angle))
+     else:
+       angle = 0
+     info.append(width)
+     info.append(depth)
+     info.append(height)
+     info.append(center)
+     info.append(angle)
+     return info
+
+  def open_bbox(self, filename, use_bbox_measurements):
+    f = open(filename, "r")
+    fl = f.readlines()
+    bboxes = []
+    if not use_bbox_measurements:
+        for str in fl:
+            coord = str.split(' ')
+            cluster = []
+            for i in range(0, len(coord), 3):
+                cluster.append(np.array((float(coord[i]), float(coord[i + 1]), float(coord[i + 2]))))
+            bboxes.append(self.get_bbox_info(cluster))
+    else:
+        for str in fl:
+            coord = str.split(' ')
+            cluster = []
+            cluster.append(float(coord[0]))
+            cluster.append(float(coord[1]))
+            cluster.append(float(coord[2]))
+            cluster.append(np.array((float(coord[3]), float(coord[4]), float(coord[5]))))
+            cluster.append(float(coord[6]))
+            bboxes.append(cluster)
+    self.bboxes = bboxes
+
+  def open_bbox_labels(self, filename):
+    f = open(filename, "r")
+    str = f.readline()
+    self.bbox_labels = []
+    self.bbox_label_color = []
+    if len(str) != 0:
+        labels = str.split(' ')
+        bbox_labels = []
+        for i in range(len(labels)):
+            bbox_labels.append(int(float(labels[i])))
+            self.bbox_labels.append(self.sem_labels_lut[bbox_labels[i]])
+        self.bbox_label_color = self.sem_color_lut[bbox_labels]
+        self.bbox_label_color = self.bbox_label_color.reshape((-1, 3))
 
   def colorize(self):
     """ Colorize pointcloud with the color of each semantic label

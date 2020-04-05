@@ -1,6 +1,6 @@
 # PointCloudSegmentation
 ---
-<img src="https://github.com/VirtualRoyalty/PointCloudSegmentation/blob/dev/obstacle-detection/examples/img/MainGifforGit.gif" width="1000">
+<img src="https://github.com/VirtualRoyalty/PointCloudSegmentation/blob/master/obstacle-detection/examples/img/MainGifwithLabels.gif" width="1000">
 
 ---
 **Project sctracture:**
@@ -13,6 +13,8 @@
 │   │           ├───clusters/
 │   │           ├───labels/
 │   │           └───velodyne/
+|   ├───model/
+|   |
 │   ├───examples/
 │   │   
 │   ├───pipeline/
@@ -36,6 +38,19 @@
              *httр://127.0.0.1:8888?token=0cccd15e74216ed2dbe681738ed0f9c78bf65515e94f27a8*<br><br>
 - To access jupyter you need to go for **Docker IP**:8888?token=xxxx... <br>( e.g.  httр://192.168.99.100:8888/?token=0cccd15e74216ed2dbe681738ed0f9c78bf65515e94f27a8)<br><br>
 - To enter a docker container run `$ docker exec -it *CONTAINER ID* bash` (find out ID by running `$ docker ps`)
+
+## Pre-trained Models
+
+### [SemanticKITTI](http://semantic-kitti.org)
+
+- [squeezeseg](http://www.ipb.uni-bonn.de/html/projects/bonnetal/lidar/semantic/models/squeezeseg.tar.gz)
+- [squeezeseg + crf](http://www.ipb.uni-bonn.de/html/projects/bonnetal/lidar/semantic/models/squeezeseg-crf.tar.gz)
+- [squeezesegV2](http://www.ipb.uni-bonn.de/html/projects/bonnetal/lidar/semantic/models/squeezesegV2.tar.gz)
+- [squeezesegV2 + crf](http://www.ipb.uni-bonn.de/html/projects/bonnetal/lidar/semantic/models/squeezesegV2-crf.tar.gz)
+- [darknet21](http://www.ipb.uni-bonn.de/html/projects/bonnetal/lidar/semantic/models/darknet21.tar.gz)
+- [darknet53](http://www.ipb.uni-bonn.de/html/projects/bonnetal/lidar/semantic/models/darknet53.tar.gz)
+- [darknet53-1024](http://www.ipb.uni-bonn.de/html/projects/bonnetal/lidar/semantic/models/darknet53-1024.tar.gz)
+- [darknet53-512](http://www.ipb.uni-bonn.de/html/projects/bonnetal/lidar/semantic/models/darknet53-512.tar.gz)
 
 ## References and useful links:
 ---
