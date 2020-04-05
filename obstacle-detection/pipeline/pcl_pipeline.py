@@ -1,178 +1,81 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Sep 25 20:52:45 2019
-@author: kyleguan
-"""
-
+from pipeline import common
+from datetime import datetime
+from importlib import reload  
+from pipeline import pcl_utils
+import time
+import pandas as pd
 import numpy as np
 import pcl
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-import os
+
+pcl_utils = reload(pcl_utils)
+
+def pipeline_optimized_pcl(scan, label, obstacle_lst, verbose=False, exec_time=False, **params):
+    # get segment id
+    start_time = datetime.now()
+    pcloud = pd.DataFrame(np.concatenate((scan,label.reshape(len(label), 1)), axis=1), 
+                          columns=['x', 'y', 'z', 'seg_id'])
+    
+    pcloud = common.roi_filter(pcloud,  min_x=params['roi_x_min'], max_x=params['roi_x_max'], 
+                                                min_y=params['roi_y_min'], max_y=params['roi_y_max'],
+                                                min_z=params['roi_z_min'], max_z=params['roi_z_max'], 
+                                                verbose=False)
+    
+    pcloud = common.obstacle_filter(pcloud, obstacle_lst, proc_labels=True, verbose=False)
+    pcloud = pcloud.drop(['seg_id'], axis=1)
+    pcloud = pcloud.drop(['camera'], axis=1)
+    obstacle_time = datetime.now() - start_time
+    
+    if (len(pcloud.index) > 0):
+        # get voxel grid
+        start_time = datetime.now()
+        pcloud_pcl = pcl.PointCloud()
+        pcloud_pcl.from_array(pcloud.to_numpy(dtype=np.float32))
+
+        voxelgrid_id = pcl_utils.voxel_filter(pcloud_pcl, [params['x_voxels'],
+                                                              params['y_voxels'],
+                                                              params['z_voxels']])
+        #voxelgrid_id = pcloud_pcl  
+        voxel_time = datetime.now() - start_time
+
+        # ROI filter
+        start_time = datetime.now()
+        pcloud_roi = pcl_utils.roi_filter(voxelgrid_id, [params['roi_x_min'], params['roi_x_max']], 
+                                        [params['roi_y_min'], params['roi_y_max']], 
+                                        [params['roi_z_min'], params['roi_z_max']],)
+        roi_time = datetime.now() - start_time
 
 
-def voxel_filter(cloud, leaf_sizes):
-    """
-    Input parameters:
-    cloud: input point cloud to be filtered
-    leaf_sizes: a list of leaf_size for X, Y, Z
-    Output:
-    cloud_voxel_filtered: voxel-filtered cloud
-    """
-    sor = cloud.make_voxel_grid_filter()
-    size_x, size_y, size_z = leaf_sizes
-    sor.set_leaf_size(size_x, size_y, size_z)
-    cloud_voxel_filtered = sor.filter()
+        # get cluster
+        start_time = datetime.now()
+        cloud_obsts = pcloud_roi.extract([], negative = True)
+        cluster_indices = pcl_utils.clustering(cloud_obsts, params['tol_distance'], params['min_cluster_size'], 150000)        
+        clustering_time = datetime.now() - start_time
 
-    return cloud_voxel_filtered
-
-
-def roi_filter(cloud, x_roi, y_roi, z_roi):
-    """
-    Input Parameters:
-        cloud: input point cloud
-        x_roi: ROI range in X
-        y_roi: ROI range in Y
-        z_roi: ROI range in Z
-
-    Output:
-        ROI region filtered point cloud
-    """
-    clipper = cloud.make_cropbox()
-    cloud_roi_filtered= pcl.PointCloud()
-    xc_min, xc_max = x_roi
-    yc_min, yc_max = y_roi
-    zc_min, zc_max = z_roi
-    clipper.set_MinMax(xc_min, yc_min, zc_min, 0, xc_max, yc_max, zc_max, 0)
-    cloud_roi_filtered =clipper.filter()
-    return cloud_roi_filtered
-
-
-
-def plane_segmentation(cloud, dist_thold, max_iter):
-    """
-    Input parameters:
-        cloud: Input cloud
-        dist_thold: distance threshold
-        max_iter: maximal number of iteration
-    Output:
-        indices: list of indices of the PCL points that belongs to the plane
-        coefficient: the coefficients of the plane-fitting (e.g., [a, b, c, d] for ax + by +cz + d =0)
-    """
-    seg = cloud.make_segmenter_normals(ksearch=50)# For simplicity,hard coded
-    seg.set_optimize_coefficients(True)
-    seg.set_model_type(pcl.SACMODEL_NORMAL_PLANE)
-    seg.set_method_type(pcl.SAC_RANSAC)
-    seg.set_distance_threshold(dist_thold)
-    seg.set_max_iterations(max_iter)
-    indices, coefficients = seg.segment()
-    return indices, coefficients
-
-
-def clustering(cloud, tol, min_size, max_size):
-    """
-    Input parameters:
-        cloud: Input cloud
-        tol: tolerance
-        min_size: minimal number of points to form a cluster
-        max_size: maximal number of points that a cluster allows
-    Output:
-        cluster_indices: a list of list. Each element list contains the indices of the points that belongs to
-                         the same cluster
-    """
-    tree = cloud.make_kdtree()
-    ec = cloud.make_EuclideanClusterExtraction()
-    ec.set_ClusterTolerance(tol)
-    ec.set_MinClusterSize(min_size)
-    ec.set_MaxClusterSize(max_size)
-    ec.set_SearchMethod(tree)
-    cluster_indices = ec.Extract()
-    return cluster_indices
-
-
-
-def get_cluster_box_list(cluster_indices, cloud_obsts, radius_search=0.8, min_neighbors_in_radius=2):
-    """
-    Input parameters:
-        cluster_indices: a list of list. Each element list contains the indices of the points that belongs to
-                         the same cluster
-        colud_obsts: PCL for the obstacles
-    Output:
-        cloud_cluster_list: a list for the PCL clusters: each element is a point cloud of a cluster
-        box_coord_list: a list of corrdinates for bounding boxes
-    """
-    cloud_cluster_list =[]
-    box_coord_list =[]
-
-    for j, indices in enumerate(cluster_indices):
-        points = np.zeros((len(indices), 3), dtype=np.float32)
-        for i, indice in enumerate(indices):
-
-            points[i][0] = cloud_obsts[indice][0]
-            points[i][1] = cloud_obsts[indice][1]
-            points[i][2] = cloud_obsts[indice][2]
-        cloud_cluster = pcl.PointCloud()
-        cloud_cluster.from_array(points)
-
-        # http://pointclouds.org/documentation/tutorials/remove_outliers.php
-
-        #### radius remove-outliers
-
-        outrem = cloud_cluster.make_RadiusOutlierRemoval()
-        outrem.set_radius_search(0.8)
-        outrem.set_MinNeighborsInRadius(2)
-        cloud_filtered = outrem.filter()
-
-        #### condition remove-outliers
-        # range_cond = cloud_cluster.make_ConditionAnd()
-
-        # range_cond.add_Comparison2('z', pcl.CythonCompareOp_Type.GT, 0.0)
-        # range_cond.add_Comparison2('z', pcl.CythonCompareOp_Type.LT, 0.8)
-
-        # build the filter
-        # condrem = cloud_cluster.make_ConditionalRemoval(range_cond)
-        # condrem.set_KeepOrganized(True)
-
-        # cloud_filtered = condrem.filter()
-
-        #### other filter
-        #cloud_filtered = cloud_cluster.make_statistical_outlier_filter()
-        #cloud_filtered.set_mean_k(50)
-        #cloud_filtered.set_std_dev_mul_thresh(1.0)
-        #cloud_filtered = cloud_cluster
-
-        cloud_cluster_list.append(cloud_filtered)
-        x_max, x_min = np.max(points[:, 0]), np.min(points[:, 0])
-        y_max, y_min = np.max(points[:, 1]), np.min(points[:, 1])
-        z_max, z_min = np.max(points[:, 2]), np.min(points[:, 2])
-        box = np.zeros([8, 3])
-        box[0, :] =[x_min, y_min, z_min]
-        box[1, :] =[x_max, y_min, z_min]
-        box[2, :] =[x_max, y_max, z_min]
-        box[3, :] =[x_min, y_max, z_min]
-        box[4, :] =[x_min, y_min, z_max]
-        box[5, :] =[x_max, y_min, z_max]
-        box[6, :] =[x_max, y_max, z_max]
-        box[7, :] =[x_min, y_max, z_max]
-        box = np.transpose(box)
-        box_coord_list.append(box)
-    return cloud_cluster_list, box_coord_list
-
-
-def box_center(box):
-    """
-    Calculate the centroid of a 3D bounding box
-    Input: box, a 3-by-8 matrix, each coloum represents the xyz coordinate of a corner of the box
-           (e.g.
-           array([[42.62581635, 46.09998703, 46.09998703, 42.62581635, 42.62581635, 46.09998703, 46.09998703, 42.62581635],
-                  [2.64766479,  2.64766479,  4.64661026,  4.64661026,  2.64766479, 2.64766479,  4.64661026,  4.64661026],
-                  [0.10515476,  0.10515476,  0.10515476,  0.10515476,  1.98793995, 1.98793995,  1.98793995,  1.98793995]])
-           )
-    Output: the centroid of the box in 3D [x_cent, y_cent, z_cent]
-    """
-    x_min, x_max = min(box[0]), max(box[0])
-    y_min, y_max = min(box[1]), max(box[1])
-    z_min, z_max = min(box[2]), max(box[2])
-
-    return ((x_min + x_max)/2.0, (y_min + y_max)/2.0, (z_min + z_max)/2.0)
+        # get bboxes
+        start_time = datetime.now()
+        box_min_max_list, box_coord_list = pcl_utils.get_cluster_box_list(
+                                                    cluster_indices, cloud_obsts, 
+                                                    radius_search=params['radius_search'], 
+                                                    min_neighbors_in_radius=params['min_neighbors_in_radius'])
+        bbox_time = datetime.now() - start_time
+    else:
+        box_min_max_list, box_coord_list = np.empty((0, 0)), np.empty((0, 0))
+        roi_time, obstacle_time, voxel_time, clustering_time, bbox_time = 0, 0, 0, 0, 0
+    
+    if verbose:
+        print('Execution time:')
+        print('\n - ROI filtering: {:.5f} s'.format(roi_time.total_seconds()))
+        print('\n - Filtering obstacles: {:.5f} s'.format(obstacle_time.total_seconds()))
+        print('\n - Voxel grid: {:.5f} s'.format(voxel_time.total_seconds()))
+        print('\n - Clustering: {:.5f} s'.format(clustering_time.total_seconds()))
+        print('\n - Min-max cluster points: {:.5f} s \n'.format(bbox_time.total_seconds()))
+        
+    if exec_time:
+        return box_min_max_list, box_coord_list, {'roi_time': roi_time.total_seconds(),
+                                        'filter_obstacle_time': obstacle_time.total_seconds(),
+                                        'voxel_grid_time': voxel_time.total_seconds(),
+                                        'clustering_time': clustering_time.total_seconds(),
+                                        'outlier_filter_bbox_time': bbox_time.total_seconds(),
+}
+    else:
+        return box_min_max_list, box_coord_list

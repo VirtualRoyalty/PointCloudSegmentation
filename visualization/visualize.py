@@ -42,7 +42,6 @@ if __name__ == '__main__':
       ' (see readme)'
       'Defaults to %(default)s',
   )
-
   parser.add_argument(
       '--bboxes', '-b',
       dest='draw_clusters',

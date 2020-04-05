@@ -32,10 +32,8 @@ def roi_filter_rounded(pcloud, verbose=True, **params):
 
 def roi_filter(pcloud, verbose=True, **params):
     """
-
     Region Of Interest function, which filter required area
     that relative to LIDAR scanner (point (0, 0, 0) is a center)
-
     """
     if verbose:
         print('Input pcloud size: {}'.format(len(pcloud)))
@@ -50,11 +48,9 @@ def roi_filter(pcloud, verbose=True, **params):
 
 def obstacle_filter(pcloud, obstacle_lst, proc_labels=True, verbose=True):
     """
-
     Obstacle filtering function
     pcloud: pandas.DataFrame,
     Point cloud DataFrame that have columns=['x', 'y', 'z', 'seg_id']
-
     obstacle_lst: list,
     A list of segments id you want to be remain after filtering
     """
