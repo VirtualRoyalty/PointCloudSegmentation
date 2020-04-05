@@ -7,12 +7,12 @@ import numpy as np
 from matplotlib import pyplot as plt
 from laserscan import LaserScan, SemLaserScan
 bboxes = []
-
+labels = []
 class LaserScanVis:
   """Class that creates and handles a visualizer for a pointcloud"""
 
   def __init__(self, scan, scan_names, label_names, offset=0,
-               semantics=True, bboxes_names=None, use_bbox_measurements=False, roi_filter=False, instances=False):
+               semantics=True, bboxes_names=None, use_bbox_measurements=False, bboxes_labels_names=None, roi_filter=False, instances=False):
     self.scan = scan
     self.scan_names = scan_names
     self.label_names = label_names
@@ -20,6 +20,7 @@ class LaserScanVis:
     self.semantics = semantics
     self.bboxes_names = bboxes_names
     self.use_bbox_measurements = use_bbox_measurements
+    self.bboxes_labels_names = bboxes_labels_names
     self.roi_filter = roi_filter
     self.instances = instances
     # sanity check
@@ -60,6 +61,7 @@ class LaserScanVis:
       self.grid.add_widget(self.sem_view, 0, 1)
       self.sem_vis = visuals.Markers()
       self.sem_view.camera = 'turntable'
+
       self.sem_view.add(self.sem_vis)
       visuals.XYZAxis(parent=self.sem_view.scene)
       self.sem_view.camera.link(self.scan_view.camera)
@@ -116,8 +118,6 @@ class LaserScanVis:
       self.inst_img_vis = visuals.Image(cmap='viridis')
       self.inst_img_view.add(self.inst_img_vis)
 
-<<<<<<< HEAD
-=======
   def roi_filter_(self, pointcloud, colors, x_roi, y_roi, z_roi):
     min_x, max_x = x_roi
     min_y, max_y = y_roi
@@ -135,7 +135,6 @@ class LaserScanVis:
 
 
 
->>>>>>> 8ae18b115bf11265bce68c7940d469515280ef9b
 
   def get_mpl_colormap(self, cmap_name):
     cmap = plt.get_cmap(cmap_name)
@@ -155,11 +154,9 @@ class LaserScanVis:
       self.scan.open_label(self.label_names[self.offset])
       self.scan.colorize()
     if self.bboxes_names:
-<<<<<<< HEAD
-      self.scan.open_bbox(self.bboxes_names[self.offset])
-=======
       self.scan.open_bbox(self.bboxes_names[self.offset], self.use_bbox_measurements)
->>>>>>> 8ae18b115bf11265bce68c7940d469515280ef9b
+    if self.bboxes_labels_names:
+      self.scan.open_bbox_labels(self.bboxes_labels_names[self.offset])
     # then change names
     title = "scan " + str(self.offset) + " of " + str(len(self.scan_names))
     self.canvas.title = title
@@ -186,16 +183,6 @@ class LaserScanVis:
 
     # plot semantics
     if self.semantics:
-<<<<<<< HEAD
-      self.sem_view.add(self.sem_vis)
-      self.sem_vis.set_data(self.scan.points,
-                            face_color=self.scan.sem_label_color[..., ::-1],
-                            edge_color=self.scan.sem_label_color[..., ::-1],
-                            size=1)
-    # plot instances
-    if self.instances:
-      self.inst_vis.set_data(self.scan.points,
-=======
       colors = []
       pointcloud = []
       if self.roi_filter:
@@ -213,7 +200,6 @@ class LaserScanVis:
     # plot instances
     if self.instances:
         self.inst_vis.set_data(self.scan.points,
->>>>>>> 8ae18b115bf11265bce68c7940d469515280ef9b
                              face_color=self.scan.inst_label_color[..., ::-1],
                              edge_color=self.scan.inst_label_color[..., ::-1],
                              size=1)
@@ -226,21 +212,10 @@ class LaserScanVis:
 
         color =(0, 1, 1, 0.6)
         edge_color = (0, 0.05, 1)
-        global bboxes
-<<<<<<< HEAD
-        bboxes = [vispy.scene.visuals.Box(width=np.abs(bbox[1] - bbox[0]), height=np.abs(bbox[5] - bbox[4]),
-                                          depth=np.abs(bbox[3] - bbox[2]), color=color, edge_color=edge_color, parent = self.sem_view.scene) for bbox in self.scan.bboxes]
-        for cluster, i in zip(bboxes, range(len(self.scan.bboxes ))):
-            bbox = self.scan.bboxes[i]
-            cluster.transform = vispy.visuals.transforms.STTransform(translate = [bbox[0] + 0.5 * (np.abs(bbox[1] - bbox[0])),
-                                                                                bbox[2] + 0.5 * (np.abs(bbox[3] - bbox[2])),
-                                                                                bbox[4] + 0.5 * (np.abs(bbox[5] - bbox[4])) ],
-                                                                                scale = (1., 1., 1.,))
-
-
-        #visuals.XYZAxis(parent=new_view.scene)
-=======
+        global bboxes, labels
         bboxes = []
+        labels = []
+
 
         for bbox in self.scan.bboxes:
             width = bbox[0]
@@ -259,7 +234,16 @@ class LaserScanVis:
             cluster.transform.rotate(-angle, (0, 0, 1))
             cluster.transform.translate(center)
 
->>>>>>> 8ae18b115bf11265bce68c7940d469515280ef9b
+        if self.bboxes_labels_names:
+           for i in range(len(self.scan.bbox_labels)):
+               bbox = self.scan.bboxes[i]
+               center = bbox[3]
+               #labels.append(vispy.scene.visuals.Text(text = self.scan.bbox_labels[i], parent = self.sem_view.scene,  color = self.scan.bbox_label_color[i], bold=True))
+               labels.append(vispy.scene.visuals.Text(text = self.scan.bbox_labels[i],
+                                                      parent = self.sem_view.scene,
+                                                      color = "red", bold=True))
+               labels[i].pos = center[0], center[1], center[2] + 1
+               labels[i].font_size = 600
 
     # now do all the range image stuff
     # plot range image
@@ -290,12 +274,16 @@ class LaserScanVis:
     if event.key == 'N':
       for bbox in bboxes:
           bbox.parent = None
+      for label in labels:
+          label.parent = None
       self.offset += 1
       self.update_scan()
 
     elif event.key == 'B':
       for bbox in bboxes:
           bbox.parent = None
+      for label in labels:
+          label.parent = None
       self.offset -= 1
       self.update_scan()
     elif event.key == 'Q' or event.key == 'Escape':

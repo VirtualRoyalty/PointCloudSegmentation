@@ -172,7 +172,7 @@ class SemLaserScan(LaserScan):
   """Class that contains LaserScan with x,y,z,r,sem_label,sem_color_label,inst_label,inst_color_label"""
   EXTENSIONS_LABEL = ['.label']
 
-  def __init__(self,  sem_color_dict=None, project=False, H=64, W=1024, fov_up=3.0, fov_down=-25.0, max_classes=300):
+  def __init__(self,  sem_color_dict=None, sem_labels_dict=None, project=False, H=64, W=1024, fov_up=3.0, fov_down=-25.0, max_classes=300):
     super(SemLaserScan, self).__init__(project, H, W, fov_up, fov_down)
     self.reset()
 
@@ -194,6 +194,16 @@ class SemLaserScan(LaserScan):
                                              size=(max_sem_key, 3))
       # force zero to a gray-ish color
       self.sem_color_lut[0] = np.full((3), 0.1)
+
+    #make semantic labels
+    if sem_labels_dict:
+        max_sem_key = 0
+        for key, data in sem_labels_dict.items():
+          if key + 1 > max_sem_key:
+            max_sem_key = key + 1
+        self.sem_labels_lut = ["" for x in range(max_sem_key)]
+        for key, value in sem_labels_dict.items():
+            self.sem_labels_lut[key] = value
 
     # make instance colors
     max_inst_id = 100000
@@ -314,6 +324,20 @@ class SemLaserScan(LaserScan):
             cluster.append(float(coord[6]))
             bboxes.append(cluster)
     self.bboxes = bboxes
+
+  def open_bbox_labels(self, filename):
+    f = open(filename, "r")
+    str = f.readline()
+    self.bbox_labels = []
+    self.bbox_label_color = []
+    if len(str) != 0:
+        labels = str.split(' ')
+        bbox_labels = []
+        for i in range(len(labels)):
+            bbox_labels.append(int(float(labels[i])))
+            self.bbox_labels.append(self.sem_labels_lut[bbox_labels[i]])
+        self.bbox_label_color = self.sem_color_lut[bbox_labels]
+        self.bbox_label_color = self.bbox_label_color.reshape((-1, 3))
 
   def colorize(self):
     """ Colorize pointcloud with the color of each semantic label

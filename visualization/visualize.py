@@ -59,6 +59,14 @@ if __name__ == '__main__':
   )
 
   parser.add_argument(
+      '--use_bbox_labels', '-l',
+      dest='use_bbox_labels',
+      default=False,
+      action='store_true',
+      help='Use label for each cluster . Defaults to %(default)s',
+  )
+
+  parser.add_argument(
       '--roi_filter', '-r',
       dest='use_roi_filter',
       default=False,
@@ -102,6 +110,7 @@ if __name__ == '__main__':
   print("Predictions", FLAGS.predictions)
   print("Bounding boxes", FLAGS.draw_clusters)
   print("use_bbox_measurements", FLAGS.use_bbox_measurements)
+  print("use_bbox_labels", FLAGS.use_bbox_labels)
   print("use_roi_filter", FLAGS.use_roi_filter)
   print("ignore_semantics", FLAGS.ignore_semantics)
   print("ignore_safety", FLAGS.ignore_safety)
@@ -166,26 +175,37 @@ if __name__ == '__main__':
           quit()
         # populate the pointclouds
       bboxes_names = [os.path.join(dp, f) for dp, dn, fn in os.walk(
-          os.path.expanduser(bboxes_paths)) for f in fn]
+          os.path.expanduser(bboxes_paths)) for f in fn if f.endswith(".bbox")]
       bboxes_names.sort()
+      if FLAGS.use_bbox_labels:
+          bboxes_labels_names = [os.path.join(dp, f) for dp, dn, fn in os.walk(
+              os.path.expanduser(bboxes_paths)) for f in fn if f.endswith(".segs")]
+          bboxes_labels_names.sort()
 
      # check that there are same amount of bboxes and scans
       if not FLAGS.ignore_safety:
          assert(len(bboxes_names) == len(scan_names))
+         if FLAGS.use_bbox_labels:
+             assert(len(bboxes_names) == len(bboxes_labels_names))
   # create a scan
   if FLAGS.ignore_semantics:
     scan = LaserScan(project=True)  # project all opened scans to spheric proj
     bboxes_names = None
+    bboxes_labels_names = None
   else:
     color_dict = CFG["color_map"]
-    scan = SemLaserScan(color_dict, project=True)
+    labels_dict = CFG["labels"]
+    scan = SemLaserScan(color_dict, labels_dict, project=True)
 
   # create a visualizer
   semantics = not FLAGS.ignore_semantics
   draw_clusters = FLAGS.draw_clusters
+  bbox_labels = FLAGS.use_bbox_labels
   roi_filter = FLAGS.use_roi_filter
   if not draw_clusters:
       bboxes_names = None
+  if not bbox_labels:
+      bboxes_labels_names = None
   if not semantics:
       label_names = None
   vis = LaserScanVis(scan=scan,
@@ -195,6 +215,7 @@ if __name__ == '__main__':
                      semantics=semantics,
                      bboxes_names=bboxes_names,
                      use_bbox_measurements=FLAGS.use_bbox_measurements,
+                     bboxes_labels_names = bboxes_labels_names,
                      roi_filter=roi_filter,
                      instances=False)
 
