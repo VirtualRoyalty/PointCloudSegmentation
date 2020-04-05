@@ -3,7 +3,7 @@
 <img src="https://github.com/VirtualRoyalty/PointCloudSegmentation/blob/master/obstacle-detection/examples/img/MainGifwithLabels.gif" width="1000">
 
 ---
-**Project sctracture:**
+**Project structure:**
 ```
 ├───docker-env/
 ├───obstacle-detection/
