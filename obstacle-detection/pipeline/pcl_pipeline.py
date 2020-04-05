@@ -26,13 +26,11 @@ def pipeline_optimized_pcl(scan, label, obstacle_lst, verbose=False, exec_time=F
     obstacle_time = datetime.now() - start_time
     
     if (len(pcloud.index) > 0):
+        # get voxel grid
         start_time = datetime.now()
         pcloud_pcl = pcl.PointCloud()
         pcloud_pcl.from_array(pcloud.to_numpy(dtype=np.float32))
-        convert_time = datetime.now() - start_time
 
-        # get voxel grid
-        start_time = datetime.now()
         voxelgrid_id = pcl_utils.voxel_filter(pcloud_pcl, [params['x_voxels'],
                                                               params['y_voxels'],
                                                               params['z_voxels']])
@@ -78,6 +76,6 @@ def pipeline_optimized_pcl(scan, label, obstacle_lst, verbose=False, exec_time=F
                                         'voxel_grid_time': voxel_time.total_seconds(),
                                         'clustering_time': clustering_time.total_seconds(),
                                         'outlier_filter_bbox_time': bbox_time.total_seconds(),
-                                        'convert_time' : convert_time.total_seconds()}
+}
     else:
         return box_min_max_list, box_coord_list
