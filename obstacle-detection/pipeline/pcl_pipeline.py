@@ -24,13 +24,14 @@ def pipeline_optimized_pcl(scan, label, obstacle_lst, verbose=False, exec_time=F
     pcloud = pcloud.drop(['seg_id'], axis=1)
     pcloud = pcloud.drop(['camera'], axis=1)
     obstacle_time = datetime.now() - start_time
-    
     if (len(pcloud.index) > 0):
-        # get voxel grid
         start_time = datetime.now()
         pcloud_pcl = pcl.PointCloud()
         pcloud_pcl.from_array(pcloud.to_numpy(dtype=np.float32))
+        convert_time = datetime.now() - start_time
 
+        # get voxel grid
+        start_time = datetime.now()
         voxelgrid_id = pcl_utils.voxel_filter(pcloud_pcl, [params['x_voxels'],
                                                               params['y_voxels'],
                                                               params['z_voxels']])
@@ -47,19 +48,19 @@ def pipeline_optimized_pcl(scan, label, obstacle_lst, verbose=False, exec_time=F
 
         # get cluster
         start_time = datetime.now()
-        cloud_obsts = pcloud_roi.extract([], negative = True)
-        cluster_indices = pcl_utils.clustering(cloud_obsts, params['tol_distance'], params['min_cluster_size'], 150000)        
+        cluster_data = pcloud_roi.extract([], negative = True)
+        cluster_indices = pcl_utils.clustering(cluster_data, params['tol_distance'], params['min_cluster_size'], 150000)        
         clustering_time = datetime.now() - start_time
 
         # get bboxes
         start_time = datetime.now()
-        box_min_max_list, box_coord_list = pcl_utils.get_cluster_box_list(
-                                                    cluster_indices, cloud_obsts, 
+        box_min_max_list, _ = pcl_utils.get_cluster_box_list(
+                                                    cluster_indices, cluster_data, 
                                                     radius_search=params['radius_search'], 
                                                     min_neighbors_in_radius=params['min_neighbors_in_radius'])
         bbox_time = datetime.now() - start_time
     else:
-        box_min_max_list, box_coord_list = np.empty((0, 0)), np.empty((0, 0))
+        box_min_max_list, cluster_data = np.empty((0, 0)), np.empty((0, 0))
         roi_time, obstacle_time, voxel_time, clustering_time, bbox_time = 0, 0, 0, 0, 0
     
     if verbose:
@@ -71,11 +72,11 @@ def pipeline_optimized_pcl(scan, label, obstacle_lst, verbose=False, exec_time=F
         print('\n - Min-max cluster points: {:.5f} s \n'.format(bbox_time.total_seconds()))
         
     if exec_time:
-        return box_min_max_list, box_coord_list, {'roi_time': roi_time.total_seconds(),
+        return box_min_max_list, cluster_data, {'roi_time': roi_time.total_seconds(),
                                         'filter_obstacle_time': obstacle_time.total_seconds(),
                                         'voxel_grid_time': voxel_time.total_seconds(),
                                         'clustering_time': clustering_time.total_seconds(),
                                         'outlier_filter_bbox_time': bbox_time.total_seconds(),
-}
+                                        'convert_time' : convert_time.total_seconds()}
     else:
-        return box_min_max_list, box_coord_list
+        return box_min_max_list, cluster_data
