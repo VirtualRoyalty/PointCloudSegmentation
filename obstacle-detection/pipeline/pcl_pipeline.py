@@ -18,8 +18,8 @@ def pipeline_optimized_pcl(scan,
                            **params):
     # get segment id
     start_time = datetime.now()
-    pcloud = pd.DataFrame(np.concatenate((scan, label.reshape(len(label), 1)),
-                                         axis=1),
+    pcloud = pd.DataFrame(np.concatenate(
+        (scan, label.reshape(len(label), 1)), axis=1),
                           columns=['x', 'y', 'z', 'seg_id'])
 
     pcloud = common.roi_filter(pcloud,
@@ -46,9 +46,9 @@ def pipeline_optimized_pcl(scan,
 
         # get voxel grid
         start_time = datetime.now()
-        voxelgrid_id = pcl_utils.voxel_filter(
-            pcloud_pcl,
-            [params['x_voxels'], params['y_voxels'], params['z_voxels']])
+        voxelgrid_id = pcl_utils.voxel_filter(pcloud_pcl, [
+            params['x_voxels'], params['y_voxels'], params['z_voxels']
+        ])
         #voxelgrid_id = pcloud_pcl
         voxel_time = datetime.now() - start_time
 
@@ -65,10 +65,9 @@ def pipeline_optimized_pcl(scan,
         # get cluster
         start_time = datetime.now()
         cluster_data = pcloud_roi.extract([], negative=True)
-        cluster_indices = pcl_utils.clustering(cluster_data,
-                                               params['tol_distance'],
-                                               params['min_cluster_size'],
-                                               150000)
+        cluster_indices = pcl_utils.clustering(
+            cluster_data, params['tol_distance'],
+            params['min_cluster_size'], 150000)
         clustering_time = datetime.now() - start_time
 
         # get bboxes
@@ -80,16 +79,20 @@ def pipeline_optimized_pcl(scan,
             min_neighbors_in_radius=params['min_neighbors_in_radius'])
         bbox_time = datetime.now() - start_time
     else:
-        box_min_max_list, cluster_data = np.empty((0, 0)), np.empty((0, 0))
+        box_min_max_list, cluster_data = np.empty((0, 0)), np.empty(
+            (0, 0))
         roi_time, obstacle_time, voxel_time, clustering_time, bbox_time = 0, 0, 0, 0, 0
 
     if verbose:
         print('Execution time:')
-        print('\n-ROI filtering: {:.5f}s'.format(roi_time.total_seconds()))
+        print('\n-ROI filtering: {:.5f}s'.format(
+            roi_time.total_seconds()))
         print('\n-Filtering obstacles: {:.5f}s'.format(
             obstacle_time.total_seconds()))
-        print('\n-Voxel grid: {:.5f}s'.format(voxel_time.total_seconds()))
-        print('\n-Clustering: {:.5f}s'.format(clustering_time.total_seconds()))
+        print('\n-Voxel grid: {:.5f}s'.format(
+            voxel_time.total_seconds()))
+        print('\n-Clustering: {:.5f}s'.format(
+            clustering_time.total_seconds()))
         print('\n-Min-max cluster points: {:.5f} s \n'.format(
             bbox_time.total_seconds()))
 

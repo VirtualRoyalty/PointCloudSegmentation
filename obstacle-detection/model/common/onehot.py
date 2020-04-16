@@ -136,7 +136,8 @@ if __name__ == "__main__":
         tensor.unsqueeze(0)
     ])  # [0,1,2]]
     tensor = torch.cat([tensor.unsqueeze(0),
-                        tensor.unsqueeze(0)])  # 2 of the same 2d tensor
+                        tensor.unsqueeze(0)
+                        ])  # 2 of the same 2d tensor
     print("in:", tensor)
     module = oneHot(device, nclasses, spatial_dim=2)
     print("out:", module(tensor))

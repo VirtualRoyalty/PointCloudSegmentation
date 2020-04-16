@@ -74,10 +74,10 @@ class Decoder(nn.Module):
         print("Decoder strides: ", self.strides)
 
         # decoder
-        self.dec5 = self._make_dec_layer(BasicBlock,
-                                         [self.backbone_feature_depth, 512],
-                                         bn_d=self.bn_d,
-                                         stride=self.strides[0])
+        self.dec5 = self._make_dec_layer(
+            BasicBlock, [self.backbone_feature_depth, 512],
+            bn_d=self.bn_d,
+            stride=self.strides[0])
         self.dec4 = self._make_dec_layer(BasicBlock, [512, 256],
                                          bn_d=self.bn_d,
                                          stride=self.strides[1])
@@ -92,7 +92,9 @@ class Decoder(nn.Module):
                                          stride=self.strides[4])
 
         # layer list to execute with skips
-        self.layers = [self.dec5, self.dec4, self.dec3, self.dec2, self.dec1]
+        self.layers = [
+            self.dec5, self.dec4, self.dec3, self.dec2, self.dec1
+        ]
 
         # for a bit of fun
         self.dropout = nn.Dropout2d(self.drop_prob)
@@ -117,7 +119,8 @@ class Decoder(nn.Module):
                                      planes[1],
                                      kernel_size=3,
                                      padding=1)))
-        layers.append(("bn", nn.BatchNorm2d(planes[1], momentum=bn_d)))
+        layers.append(("bn", nn.BatchNorm2d(planes[1],
+                                            momentum=bn_d)))
         layers.append(("relu", nn.LeakyReLU(0.1)))
 
         #  blocks

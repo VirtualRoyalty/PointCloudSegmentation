@@ -44,7 +44,8 @@ def roi_filter(cloud, x_roi, y_roi, z_roi):
     xc_min, xc_max = x_roi
     yc_min, yc_max = y_roi
     zc_min, zc_max = z_roi
-    clipper.set_MinMax(xc_min, yc_min, zc_min, 0, xc_max, yc_max, zc_max, 0)
+    clipper.set_MinMax(xc_min, yc_min, zc_min, 0, xc_max, yc_max,
+                       zc_max, 0)
     cloud_roi_filtered = clipper.filter()
     return cloud_roi_filtered
 
@@ -59,7 +60,8 @@ def plane_segmentation(cloud, dist_thold, max_iter):
         indices: list of indices of the PCL points that belongs to the plane
         coefficient: the coefficients of the plane-fitting (e.g., [a, b, c, d] for ax + by +cz + d =0)
     """
-    seg = cloud.make_segmenter_normals(ksearch=50)  # For simplicity,hard coded
+    seg = cloud.make_segmenter_normals(
+        ksearch=50)  # For simplicity,hard coded
     seg.set_optimize_coefficients(True)
     seg.set_model_type(pcl.SACMODEL_NORMAL_PLANE)
     seg.set_method_type(pcl.SAC_RANSAC)

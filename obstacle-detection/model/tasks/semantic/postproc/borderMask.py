@@ -118,7 +118,8 @@ class borderMask(nn.Module):
         self.background_class = background_class
         if self.background_class is not None:
             self.include_idx = list(range(self.nclasses))
-            self.exclude_idx = self.include_idx.pop(self.background_class)
+            self.exclude_idx = self.include_idx.pop(
+                self.background_class)
 
         # check connectivity
         # For obtaining the border mask we will be eroding the input image, for this
@@ -128,7 +129,8 @@ class borderMask(nn.Module):
             "not supported" % self.kern_conn)
 
         # make the onehot inferer
-        self.onehot = oneHot(self.device, self.nclasses,
+        self.onehot = oneHot(self.device,
+                             self.nclasses,
                              spatial_dim=2)  # range labels
 
     def forward(self, range_label):
@@ -168,14 +170,15 @@ class borderMask(nn.Module):
         # Create an empty erode kernel and send it to 'device'
         erode_kernel = torch.zeros((C, 1, 3, 3), device=self.device)
         if self.kern_conn == 4:
-            erode_kernel[:] = torch.tensor([[0, 1, 0], [1, 1, 1], [0, 1, 0]],
-                                           device=self.device)
+            erode_kernel[:] = torch.tensor(
+                [[0, 1, 0], [1, 1, 1], [0, 1, 0]], device=self.device)
         else:
-            erode_kernel[:] = torch.tensor([[1, 1, 1], [1, 1, 1], [1, 1, 1]],
-                                           device=self.device)
+            erode_kernel[:] = torch.tensor(
+                [[1, 1, 1], [1, 1, 1], [1, 1, 1]], device=self.device)
 
         # to check connectivity
-        kernel_sum = erode_kernel[0][0].sum()  # should be kern_conn + 1
+        kernel_sum = erode_kernel[0][0].sum(
+        )  # should be kern_conn + 1
 
         # erode the input image border_size times
         erode_input = input_tensor
@@ -196,7 +199,8 @@ class borderMask(nn.Module):
         # We need to obtain the background mask and add it to the eroded bodies to
         # obtain a consisent output once we calculate the border mask
         if self.background_class is not None:
-            background_mask = (eroded_output[:, self.exclude_idx] == 1)
+            background_mask = (eroded_output[:,
+                                             self.exclude_idx] == 1)
 
         # The eroded_bodies mask will consist in all the pixels were the convolution
         # returned 1 for all the channels, therefore we need to sum up all the
@@ -281,7 +285,8 @@ if __name__ == "__main__":
         device = torch.device('cpu')
 
     # define the border mask
-    bm = borderMask(300, device, FLAGS.border, FLAGS.conn, FLAGS.exclude_class)
+    bm = borderMask(300, device, FLAGS.border, FLAGS.conn,
+                    FLAGS.exclude_class)
 
     # imports for inference part
     import cv2
@@ -295,7 +300,8 @@ if __name__ == "__main__":
 
     # get the things I need
     proj_range = torch.from_numpy(scan.proj_range).to(device)
-    proj_sem_label = torch.from_numpy(scan.proj_sem_label).long().to(device)
+    proj_sem_label = torch.from_numpy(
+        scan.proj_sem_label).long().to(device)
     proj_sem_color = torch.from_numpy(scan.proj_sem_color).to(device)
 
     # run the border mask
@@ -308,7 +314,8 @@ if __name__ == "__main__":
     border_mask = border_mask.cpu().numpy().squeeze()
 
     # norm
-    proj_range = (proj_range / proj_range.max() * 255).astype(np.uint8)
+    proj_range = (proj_range / proj_range.max() * 255).astype(
+        np.uint8)
     border_mask = (border_mask * 255).astype(np.uint8)
 
     # show

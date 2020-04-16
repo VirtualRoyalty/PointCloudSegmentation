@@ -27,7 +27,8 @@ if __name__ == '__main__':
         type=str,
         default=os.path.expanduser("~") + '/logs/' +
         datetime.datetime.now().strftime("%Y-%-m-%d-%H:%M") + '/',
-        help='Directory to put the predictions. Default: ~/logs/date+time')
+        help=
+        'Directory to put the predictions. Default: ~/logs/date+time')
     parser.add_argument('--model',
                         '-m',
                         type=str,
@@ -46,14 +47,15 @@ if __name__ == '__main__':
     print(
         "Commit hash (training version): ",
         str(
-            subprocess.check_output(['git', 'rev-parse', '--short',
-                                     'HEAD']).strip()))
+            subprocess.check_output(
+                ['git', 'rev-parse', '--short', 'HEAD']).strip()))
     print("----------\n")
 
     # open arch config file
     try:
         print("Opening arch config file from %s" % FLAGS.model)
-        ARCH = yaml.safe_load(open(FLAGS.model + "/arch_cfg.yaml", 'r'))
+        ARCH = yaml.safe_load(
+            open(FLAGS.model + "/arch_cfg.yaml", 'r'))
     except Exception as e:
         print(e)
         print("Error opening arch yaml file.")
@@ -62,7 +64,8 @@ if __name__ == '__main__':
     # open data config file
     try:
         print("Opening data config file from %s" % FLAGS.model)
-        DATA = yaml.safe_load(open(FLAGS.model + "/data_cfg.yaml", 'r'))
+        DATA = yaml.safe_load(
+            open(FLAGS.model + "/data_cfg.yaml", 'r'))
     except Exception as e:
         print(e)
         print("Error opening data yaml file.")
@@ -79,19 +82,22 @@ if __name__ == '__main__':
             print("train", seq)
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
             os.makedirs(
-                os.path.join(FLAGS.log, "sequences", seq, "predictions"))
+                os.path.join(FLAGS.log, "sequences", seq,
+                             "predictions"))
         for seq in DATA["split"]["valid"]:
             seq = '{0:02d}'.format(int(seq))
             print("valid", seq)
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
             os.makedirs(
-                os.path.join(FLAGS.log, "sequences", seq, "predictions"))
+                os.path.join(FLAGS.log, "sequences", seq,
+                             "predictions"))
         for seq in DATA["split"]["test"]:
             seq = '{0:02d}'.format(int(seq))
             print("test", seq)
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
             os.makedirs(
-                os.path.join(FLAGS.log, "sequences", seq, "predictions"))
+                os.path.join(FLAGS.log, "sequences", seq,
+                             "predictions"))
     except Exception as e:
         print(e)
         print("Error creating log directory. Check permissions!")
@@ -104,7 +110,8 @@ if __name__ == '__main__':
 
     # does model folder exist?
     if os.path.isdir(FLAGS.model):
-        print("model folder exists! Using model from %s" % (FLAGS.model))
+        print("model folder exists! Using model from %s" %
+              (FLAGS.model))
     else:
         print("model folder doesnt exist! Can't infer...")
         quit()

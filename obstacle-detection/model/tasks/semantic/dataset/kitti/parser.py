@@ -59,7 +59,8 @@ class SemanticKitti(Dataset):
             print("Sequences folder exists! Using sequences from %s" %
                   self.root)
         else:
-            raise ValueError("Sequences folder doesn't exist! Exiting...")
+            raise ValueError(
+                "Sequences folder doesn't exist! Exiting...")
         # make sure labels is a dict
         assert (isinstance(self.labels, dict))
         # make sure color_map is a dict
@@ -84,9 +85,9 @@ class SemanticKitti(Dataset):
             scan_path = os.path.join(self.root, seq, "velodyne")
             # get files
             scan_files = [
-                os.path.join(dp, f)
-                for dp, dn, fn in os.walk(os.path.expanduser(scan_path))
-                for f in fn if is_scan(f)
+                os.path.join(dp, f) for dp, dn, fn in os.walk(
+                    os.path.expanduser(scan_path)) for f in fn
+                if is_scan(f)
             ]
 
             # check all scans have labels
@@ -112,14 +113,20 @@ class SemanticKitti(Dataset):
         scan.open_scan(scan_file)
         # make a tensor of the uncompressed data (with the max num points)
         unproj_n_points = scan.points.shape[0]
-        unproj_xyz = torch.full((self.max_points, 3), -1.0, dtype=torch.float)
+        unproj_xyz = torch.full((self.max_points, 3),
+                                -1.0,
+                                dtype=torch.float)
         unproj_xyz[:unproj_n_points] = torch.from_numpy(scan.points)
-        unproj_range = torch.full([self.max_points], -1.0, dtype=torch.float)
-        unproj_range[:unproj_n_points] = torch.from_numpy(scan.unproj_range)
+        unproj_range = torch.full([self.max_points],
+                                  -1.0,
+                                  dtype=torch.float)
+        unproj_range[:unproj_n_points] = torch.from_numpy(
+            scan.unproj_range)
         unproj_remissions = torch.full([self.max_points],
                                        -1.0,
                                        dtype=torch.float)
-        unproj_remissions[:unproj_n_points] = torch.from_numpy(scan.remissions)
+        unproj_remissions[:unproj_n_points] = torch.from_numpy(
+            scan.remissions)
         unproj_labels = []
 
         # get points and labels

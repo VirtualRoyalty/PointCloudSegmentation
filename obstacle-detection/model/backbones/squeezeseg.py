@@ -11,7 +11,9 @@ class Fire(nn.Module):
         super(Fire, self).__init__()
         self.inplanes = inplanes
         self.activation = nn.ReLU(inplace=True)
-        self.squeeze = nn.Conv2d(inplanes, squeeze_planes, kernel_size=1)
+        self.squeeze = nn.Conv2d(inplanes,
+                                 squeeze_planes,
+                                 kernel_size=1)
         self.expand1x1 = nn.Conv2d(squeeze_planes,
                                    expand1x1_planes,
                                    kernel_size=1)
@@ -96,15 +98,18 @@ class Backbone(nn.Module):
                                 stride=1,
                                 padding=0)
         self.fire23 = nn.Sequential(
-            nn.MaxPool2d(kernel_size=3, stride=[1,
-                                                self.strides[1]], padding=1),
-            Fire(64, 16, 64, 64), Fire(128, 16, 64, 64))
+            nn.MaxPool2d(kernel_size=3,
+                         stride=[1, self.strides[1]],
+                         padding=1), Fire(64, 16, 64, 64),
+            Fire(128, 16, 64, 64))
         self.fire45 = nn.Sequential(
-            nn.MaxPool2d(kernel_size=3, stride=[1, self.strides[2]],
+            nn.MaxPool2d(kernel_size=3,
+                         stride=[1, self.strides[2]],
                          padding=1), Fire(128, 32, 128, 128),
             Fire(256, 32, 128, 128))
         self.fire6789 = nn.Sequential(
-            nn.MaxPool2d(kernel_size=3, stride=[1, self.strides[3]],
+            nn.MaxPool2d(kernel_size=3,
+                         stride=[1, self.strides[3]],
                          padding=1), Fire(256, 48, 192, 192),
             Fire(384, 48, 192, 192), Fire(384, 64, 256, 256),
             Fire(512, 64, 256, 256))

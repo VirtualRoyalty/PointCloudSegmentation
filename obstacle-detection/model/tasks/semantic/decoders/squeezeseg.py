@@ -12,7 +12,9 @@ class FireUp(nn.Module):
         self.inplanes = inplanes
         self.stride = stride
         self.activation = nn.ReLU(inplace=True)
-        self.squeeze = nn.Conv2d(inplanes, squeeze_planes, kernel_size=1)
+        self.squeeze = nn.Conv2d(inplanes,
+                                 squeeze_planes,
+                                 kernel_size=1)
         if self.stride == 2:
             self.upconv = nn.ConvTranspose2d(squeeze_planes,
                                              squeeze_planes,
@@ -75,13 +77,26 @@ class Decoder(nn.Module):
                                 128,
                                 128,
                                 stride=self.strides[0])
-        self.firedec11 = FireUp(256, 32, 64, 64, stride=self.strides[1])
-        self.firedec12 = FireUp(128, 16, 32, 32, stride=self.strides[2])
-        self.firedec13 = FireUp(64, 16, 32, 32, stride=self.strides[3])
+        self.firedec11 = FireUp(256,
+                                32,
+                                64,
+                                64,
+                                stride=self.strides[1])
+        self.firedec12 = FireUp(128,
+                                16,
+                                32,
+                                32,
+                                stride=self.strides[2])
+        self.firedec13 = FireUp(64,
+                                16,
+                                32,
+                                32,
+                                stride=self.strides[3])
 
         # layer list to execute with skips
         self.layers = [
-            self.firedec10, self.firedec11, self.firedec12, self.firedec13
+            self.firedec10, self.firedec11, self.firedec12,
+            self.firedec13
         ]
 
         # for a bit of fun

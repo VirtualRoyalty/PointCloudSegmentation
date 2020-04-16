@@ -148,7 +148,12 @@ class Backbone(nn.Module):
         self.last_channels = 1024
 
     # make layer useful function
-    def _make_enc_layer(self, block, planes, blocks, stride, bn_d=0.1):
+    def _make_enc_layer(self,
+                        block,
+                        planes,
+                        blocks,
+                        stride,
+                        bn_d=0.1):
         layers = []
 
         #  downsample
@@ -160,14 +165,16 @@ class Backbone(nn.Module):
                                  dilation=1,
                                  padding=1,
                                  bias=False)))
-        layers.append(("bn", nn.BatchNorm2d(planes[1], momentum=bn_d)))
+        layers.append(("bn", nn.BatchNorm2d(planes[1],
+                                            momentum=bn_d)))
         layers.append(("relu", nn.LeakyReLU(0.1)))
 
         #  blocks
         inplanes = planes[1]
         for i in range(0, blocks):
             layers.append(
-                ("residual_{}".format(i), block(inplanes, planes, bn_d)))
+                ("residual_{}".format(i), block(inplanes, planes,
+                                                bn_d)))
 
         return nn.Sequential(OrderedDict(layers))
 

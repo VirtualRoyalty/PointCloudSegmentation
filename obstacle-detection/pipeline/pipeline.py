@@ -21,8 +21,8 @@ def pipeline(scan,
     """ ROI filtering """
     ##########################################################################
     start_time = datetime.now()
-    pcloud = pd.DataFrame(np.concatenate((scan, label.reshape(len(label), 1)),
-                                         axis=1),
+    pcloud = pd.DataFrame(np.concatenate(
+        (scan, label.reshape(len(label), 1)), axis=1),
                           columns=['x', 'y', 'z', 'seg_id'])
     pcloud = common.roi_filter(pcloud,
                                min_x=params['roi_x_min'],
@@ -98,10 +98,12 @@ def pipeline(scan,
     if verbose:
         print('Execution time:')
         print('\n - ROI filtering: {:.5f}s'.format(roi_time))
-        print('\n - Filtering obstacles: {:.5f}s'.format(obstacle_time))
+        print(
+            '\n - Filtering obstacles: {:.5f}s'.format(obstacle_time))
         print('\n - Voxel grid: {:.5f}s'.format(voxel_time))
         print('\n - Clustering: {:.5f}s'.format(cluster_time))
-        print('\n - Min-max cluster points: {:.5f}s \n'.format(bb_time))
+        print(
+            '\n - Min-max cluster points: {:.5f}s \n'.format(bb_time))
 
     if exec_time:
         return clusters, cluster_data, {

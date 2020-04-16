@@ -29,7 +29,8 @@ if __name__ == '__main__':
         '-p',
         type=str,
         required=None,
-        help='Prediction dir. Same organization as dataset, but predictions in'
+        help=
+        'Prediction dir. Same organization as dataset, but predictions in'
         'each sequences "prediction" directory. No Default. If no option is set'
         ' we look for the labels in the same directory as dataset')
     parser.add_argument(
@@ -122,12 +123,14 @@ if __name__ == '__main__':
         if ign:
             x_cl = int(cl)
             ignore.append(x_cl)
-            print("Ignoring xentropy class ", x_cl, " in IoU evaluation")
+            print("Ignoring xentropy class ", x_cl,
+                  " in IoU evaluation")
 
     # create evaluator
     device = torch.device(
         "cuda") if torch.cuda.is_available() else torch.device('cpu')
-    evaluator = biouEval(nr_classes, device, ignore, FLAGS.border, FLAGS.conn)
+    evaluator = biouEval(nr_classes, device, ignore, FLAGS.border,
+                         FLAGS.conn)
     evaluator.reset()
 
     # get test set
@@ -137,8 +140,8 @@ if __name__ == '__main__':
     scan_names = []
     for sequence in test_sequences:
         sequence = '{0:02d}'.format(int(sequence))
-        scan_paths = os.path.join(FLAGS.dataset, "sequences", str(sequence),
-                                  "velodyne")
+        scan_paths = os.path.join(FLAGS.dataset, "sequences",
+                                  str(sequence), "velodyne")
         # populate the scan names
         seq_scan_names = sorted([
             os.path.join(dp, f)
@@ -152,8 +155,8 @@ if __name__ == '__main__':
     label_names = []
     for sequence in test_sequences:
         sequence = '{0:02d}'.format(int(sequence))
-        label_paths = os.path.join(FLAGS.dataset, "sequences", str(sequence),
-                                   "labels")
+        label_paths = os.path.join(FLAGS.dataset, "sequences",
+                                   str(sequence), "labels")
         # populate the label names
         seq_label_names = sorted([
             os.path.join(dp, f)
@@ -167,8 +170,8 @@ if __name__ == '__main__':
     pred_names = []
     for sequence in test_sequences:
         sequence = '{0:02d}'.format(int(sequence))
-        pred_paths = os.path.join(FLAGS.predictions, "sequences", sequence,
-                                  "predictions")
+        pred_paths = os.path.join(FLAGS.predictions, "sequences",
+                                  sequence, "predictions")
         # populate the label names
         seq_pred_names = sorted([
             os.path.join(dp, f)
@@ -186,14 +189,16 @@ if __name__ == '__main__':
 
     print("Evaluating sequences: ")
     # open each file, get the tensor, and make the iou comparison
-    for scan_file, label_file, pred_file in zip(scan_names, label_names,
+    for scan_file, label_file, pred_file in zip(scan_names,
+                                                label_names,
                                                 pred_names):
         print("evaluating label ", label_file, "with", pred_file)
         # open label
         label = SemLaserScan(project=True)
         label.open_scan(scan_file)
         label.open_label(label_file)
-        u_label_sem = remap_lut[label.sem_label]  # remap to xentropy format
+        u_label_sem = remap_lut[
+            label.sem_label]  # remap to xentropy format
         # remap to xentropy format
         p_label_sem = remap_lut[label.proj_sem_label]
         u_scan_px = label.proj_x
@@ -203,11 +208,12 @@ if __name__ == '__main__':
         pred = SemLaserScan(project=True)
         pred.open_scan(scan_file)
         pred.open_label(pred_file)
-        u_pred_sem = remap_lut[pred.sem_label]  # remap to xentropy format
+        u_pred_sem = remap_lut[
+            pred.sem_label]  # remap to xentropy format
 
         # add single scan to evaluation
-        evaluator.addBorderBatch1d(p_label_sem, u_pred_sem, u_label_sem,
-                                   u_scan_px, u_scan_py)
+        evaluator.addBorderBatch1d(p_label_sem, u_pred_sem,
+                                   u_label_sem, u_scan_px, u_scan_py)
 
     # when I am done, print the evaluation
     m_accuracy = evaluator.getacc()
@@ -220,8 +226,11 @@ if __name__ == '__main__':
     # print also classwise
     for i, jacc in enumerate(class_jaccard):
         if i not in ignore:
-            print('bIoU class {i:} [{class_str:}] = {jacc:.3f}'.format(
-                i=i, class_str=class_strings[class_inv_remap[i]], jacc=jacc))
+            print(
+                'bIoU class {i:} [{class_str:}] = {jacc:.3f}'.format(
+                    i=i,
+                    class_str=class_strings[class_inv_remap[i]],
+                    jacc=jacc))
 
     # print for spreadsheet
     print("*" * 80)

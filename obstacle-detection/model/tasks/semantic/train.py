@@ -44,7 +44,8 @@ if __name__ == '__main__':
         type=str,
         default=os.path.expanduser("~") + '/logs/' +
         datetime.datetime.now().strftime("%Y-%-m-%d-%H:%M") + '/',
-        help='Directory to put the log data. Default: ~/logs/date+time')
+        help='Directory to put the log data. Default: ~/logs/date+time'
+    )
     parser.add_argument(
         '--pretrained',
         '-p',
@@ -68,8 +69,8 @@ if __name__ == '__main__':
     print(
         "Commit hash (training version): ",
         str(
-            subprocess.check_output(['git', 'rev-parse', '--short',
-                                     'HEAD']).strip()))
+            subprocess.check_output(
+                ['git', 'rev-parse', '--short', 'HEAD']).strip()))
     print("----------\n")
 
     # open arch config file
@@ -106,14 +107,17 @@ if __name__ == '__main__':
             print("model folder exists! Using model from %s" %
                   (FLAGS.pretrained))
         else:
-            print("model folder doesnt exist! Start with random weights...")
+            print(
+                "model folder doesnt exist! Start with random weights..."
+            )
     else:
         print("No pretrained directory found.")
 
     # copy all files to log folder (to remember what we did, and make inference
     # easier). Also, standardize name to be able to open it later
     try:
-        print("Copying files to %s for further reference." % FLAGS.log)
+        print("Copying files to %s for further reference." %
+              FLAGS.log)
         copyfile(FLAGS.arch_cfg, FLAGS.log + "/arch_cfg.yaml")
         copyfile(FLAGS.data_cfg, FLAGS.log + "/data_cfg.yaml")
     except Exception as e:
@@ -122,5 +126,6 @@ if __name__ == '__main__':
         quit()
 
     # create trainer and start the training
-    trainer = Trainer(ARCH, DATA, FLAGS.dataset, FLAGS.log, FLAGS.pretrained)
+    trainer = Trainer(ARCH, DATA, FLAGS.dataset, FLAGS.log,
+                      FLAGS.pretrained)
     trainer.train()

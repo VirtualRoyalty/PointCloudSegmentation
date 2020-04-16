@@ -52,7 +52,10 @@ def roi_filter(pcloud, verbose=True, **params):
     return pcloud
 
 
-def obstacle_filter(pcloud, obstacle_lst, proc_labels=True, verbose=True):
+def obstacle_filter(pcloud,
+                    obstacle_lst,
+                    proc_labels=True,
+                    verbose=True):
     """
     Obstacle filtering function
     pcloud: pandas.DataFrame,
@@ -68,7 +71,8 @@ def obstacle_filter(pcloud, obstacle_lst, proc_labels=True, verbose=True):
     if proc_labels:
         pcloud.seg_id = pcloud.seg_id.astype('uint32')
         pcloud.seg_id = pcloud.seg_id.apply(lambda x: x & 0xFFFF)
-        pcloud = pcloud[pcloud['seg_id'].isin(list(obstacle_lst.keys()))]
+        pcloud = pcloud[pcloud['seg_id'].isin(
+            list(obstacle_lst.keys()))]
     else:
         pcloud = pcloud[pcloud['seg_id'].isin(obstacle_lst)]
     if verbose:
@@ -108,7 +112,8 @@ def outlier_filter(tcluster, verbose=True):
 def get_bounding_boxes(clusters):
     box_coord_list = []
     for i in range(len(clusters)):
-        x_min, x_max, y_min, y_max, z_min, z_max = list(clusters.iloc[i])
+        x_min, x_max, y_min, y_max, z_min, z_max = list(
+            clusters.iloc[i])
         box = np.zeros([8, 3])
         box[0, :] = [x_min, y_min, z_min]
         box[1, :] = [x_max, y_min, z_min]
@@ -139,7 +144,8 @@ def get_OBB(cluster):
     z_array = np.array([z_min] * 4 + [z_max] * 4)
 
     # double xy bbox z_array
-    xy_minimum_bb = np.concatenate((xy_minimum_bb, xy_minimum_bb), axis=0)
+    xy_minimum_bb = np.concatenate((xy_minimum_bb, xy_minimum_bb),
+                                   axis=0)
 
     # concatenate xy with z values and get array of 8x3 shape
     obb = np.hstack((xy_minimum_bb, z_array.reshape(8, 1)))

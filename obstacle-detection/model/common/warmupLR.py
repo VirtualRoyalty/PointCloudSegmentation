@@ -39,7 +39,8 @@ class warmupLR(toptim._LRScheduler):
 
     def get_lr(self):
         return [
-            self.lr * (self.decay**self.last_epoch) for lr in self.base_lrs
+            self.lr * (self.decay**self.last_epoch)
+            for lr in self.base_lrs
         ]
 
     def step(self, epoch=None):

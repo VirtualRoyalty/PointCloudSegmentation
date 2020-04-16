@@ -29,7 +29,8 @@ if __name__ == '__main__':
         '-p',
         type=str,
         required=None,
-        help='Prediction dir. Same organization as dataset, but predictions in'
+        help=
+        'Prediction dir. Same organization as dataset, but predictions in'
         'each sequences "prediction" directory. No Default. If no option is set'
         ' we look for the labels in the same directory as dataset')
     parser.add_argument(
@@ -56,7 +57,8 @@ if __name__ == '__main__':
         type=int,
         required=False,
         default=None,
-        help='Limit to the first "--limit" points of each scan. Useful for'
+        help=
+        'Limit to the first "--limit" points of each scan. Useful for'
         ' evaluating single scan from aggregated pointcloud.'
         ' Defaults to %(default)s',
     )
@@ -116,7 +118,8 @@ if __name__ == '__main__':
         if ign:
             x_cl = int(cl)
             ignore.append(x_cl)
-            print("Ignoring xentropy class ", x_cl, " in IoU evaluation")
+            print("Ignoring xentropy class ", x_cl,
+                  " in IoU evaluation")
 
     # create evaluator
     device = torch.device("cpu")
@@ -130,8 +133,8 @@ if __name__ == '__main__':
     scan_names = []
     for sequence in test_sequences:
         sequence = '{0:02d}'.format(int(sequence))
-        scan_paths = os.path.join(FLAGS.dataset, "sequences", str(sequence),
-                                  "velodyne")
+        scan_paths = os.path.join(FLAGS.dataset, "sequences",
+                                  str(sequence), "velodyne")
         # populate the scan names
         seq_scan_names = sorted([
             os.path.join(dp, f)
@@ -145,8 +148,8 @@ if __name__ == '__main__':
     label_names = []
     for sequence in test_sequences:
         sequence = '{0:02d}'.format(int(sequence))
-        label_paths = os.path.join(FLAGS.dataset, "sequences", str(sequence),
-                                   "labels")
+        label_paths = os.path.join(FLAGS.dataset, "sequences",
+                                   str(sequence), "labels")
         # populate the label names
         seq_label_names = sorted([
             os.path.join(dp, f)
@@ -160,8 +163,8 @@ if __name__ == '__main__':
     pred_names = []
     for sequence in test_sequences:
         sequence = '{0:02d}'.format(int(sequence))
-        pred_paths = os.path.join(FLAGS.predictions, "sequences", sequence,
-                                  "predictions")
+        pred_paths = os.path.join(FLAGS.predictions, "sequences",
+                                  sequence, "predictions")
         # populate the label names
         seq_pred_names = sorted([
             os.path.join(dp, f)
@@ -179,14 +182,16 @@ if __name__ == '__main__':
 
     print("Evaluating sequences: ")
     # open each file, get the tensor, and make the iou comparison
-    for scan_file, label_file, pred_file in zip(scan_names, label_names,
+    for scan_file, label_file, pred_file in zip(scan_names,
+                                                label_names,
                                                 pred_names):
         print("evaluating label ", label_file, "with", pred_file)
         # open label
         label = SemLaserScan(project=False)
         label.open_scan(scan_file)
         label.open_label(label_file)
-        u_label_sem = remap_lut[label.sem_label]  # remap to xentropy format
+        u_label_sem = remap_lut[
+            label.sem_label]  # remap to xentropy format
         if FLAGS.limit is not None:
             u_label_sem = u_label_sem[:FLAGS.limit]
 
@@ -194,7 +199,8 @@ if __name__ == '__main__':
         pred = SemLaserScan(project=False)
         pred.open_scan(scan_file)
         pred.open_label(pred_file)
-        u_pred_sem = remap_lut[pred.sem_label]  # remap to xentropy format
+        u_pred_sem = remap_lut[
+            pred.sem_label]  # remap to xentropy format
         if FLAGS.limit is not None:
             u_pred_sem = u_pred_sem[:FLAGS.limit]
 
@@ -213,7 +219,9 @@ if __name__ == '__main__':
     for i, jacc in enumerate(class_jaccard):
         if i not in ignore:
             print('IoU class {i:} [{class_str:}] = {jacc:.3f}'.format(
-                i=i, class_str=class_strings[class_inv_remap[i]], jacc=jacc))
+                i=i,
+                class_str=class_strings[class_inv_remap[i]],
+                jacc=jacc))
 
     # print for spreadsheet
     print("*" * 80)
