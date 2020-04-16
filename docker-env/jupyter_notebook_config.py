@@ -28,7 +28,12 @@ if 'GEN_CERT' in os.environ:
             raise
 
     # Generate an openssl.cnf file to set the distinguished name
-    cnf_file = os.path.join(os.getenv('CONDA_DIR', '/usr/lib'), 'ssl', 'openssl.cnf')
+    cnf_file = os.path.join(
+        os.getenv(
+            'CONDA_DIR',
+            '/usr/lib'),
+        'ssl',
+        'openssl.cnf')
     if not os.path.isfile(cnf_file):
         with open(cnf_file, 'w') as fh:
             fh.write('''\
