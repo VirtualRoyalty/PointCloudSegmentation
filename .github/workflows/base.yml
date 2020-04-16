@@ -23,11 +23,10 @@ jobs:
     steps:
     - name: VK Notifications
       uses: alphamusic/VK-Notifications@1.0.2
-      secrets:  ${{ secrets.VK_TOKEN }}
       env: 
-         VK_USERS = "136761433"
-         VK_MESSAGE = "Hi! The new build started"
-      
+         VK_USERS : "136761433"
+         VK_MESSAGE: "Hi! The new build started"
+         VK_TOKEN: ${{ secrets.VK_TOKEN }}      
 
     
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
