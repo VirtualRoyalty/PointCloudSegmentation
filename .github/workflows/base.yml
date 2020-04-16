@@ -14,13 +14,22 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
+
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+    - name: VK Notifications
+      uses: alphamusic/VK-Notifications@1.0.2
+      secrets:  ${{ secrets.VK_TOKEN }}
+      env: 
+         VK_USERS = "136761433"
+         VK_MESSAGE = "Hi! The new build started"
+      
+
+    
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
@@ -36,3 +45,4 @@ jobs:
       run: |
         echo Add other actions to build,
         echo test, and deploy your project.
+
