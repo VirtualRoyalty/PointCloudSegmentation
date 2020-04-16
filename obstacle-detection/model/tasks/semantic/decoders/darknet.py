@@ -70,10 +70,10 @@ class Decoder(nn.Module):
                                          [self.backbone_feature_depth, 512],
                                          bn_d=self.bn_d,
                                          stride=self.strides[0])
-        self.dec4 = self._make_dec_layer(BasicBlock, [512, 256], bn_d=self.bn_d,
-                                         stride=self.strides[1])
-        self.dec3 = self._make_dec_layer(BasicBlock, [256, 128], bn_d=self.bn_d,
-                                         stride=self.strides[2])
+        self.dec4 = self._make_dec_layer(
+            BasicBlock, [512, 256], bn_d=self.bn_d, stride=self.strides[1])
+        self.dec3 = self._make_dec_layer(
+            BasicBlock, [256, 128], bn_d=self.bn_d, stride=self.strides[2])
         self.dec2 = self._make_dec_layer(BasicBlock, [128, 64], bn_d=self.bn_d,
                                          stride=self.strides[3])
         self.dec1 = self._make_dec_layer(BasicBlock, [64, 32], bn_d=self.bn_d,
@@ -93,9 +93,12 @@ class Decoder(nn.Module):
 
         #  downsample
         if stride == 2:
-            layers.append(("upconv", nn.ConvTranspose2d(planes[0], planes[1],
-                                                        kernel_size=[1, 4], stride=[1, 2],
-                                                        padding=[0, 1])))
+            layers.append(
+                ("upconv", nn.ConvTranspose2d(
+                    planes[0], planes[1], kernel_size=[
+                        1, 4], stride=[
+                        1, 2], padding=[
+                        0, 1])))
         else:
             layers.append(("conv", nn.Conv2d(planes[0], planes[1],
                                              kernel_size=3, padding=1)))

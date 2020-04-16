@@ -95,14 +95,19 @@ class CRF(nn.Module):
 
         # define layers here
         # compat init
-        self.compat_kernel_init = np.reshape(np.ones((self.nclasses, self.nclasses)) -
-                                             np.identity(self.nclasses),
-                                             [self.nclasses, self.nclasses, 1, 1])
+        self.compat_kernel_init = np.reshape(
+            np.ones(
+                (self.nclasses, self.nclasses)) - np.identity(
+                self.nclasses), [
+                self.nclasses, self.nclasses, 1, 1])
 
         # bilateral compatibility matrixes
         self.compat_conv = nn.Conv2d(self.nclasses, self.nclasses, 1)
-        self.compat_conv.weight = torch.nn.Parameter(torch.from_numpy(
-            self.compat_kernel_init).float() * self.xyz_coef, requires_grad=True)
+        self.compat_conv.weight = torch.nn.Parameter(
+            torch.from_numpy(
+                self.compat_kernel_init).float() *
+            self.xyz_coef,
+            requires_grad=True)
 
         # locally connected layer for message passing
         self.local_conn_xyz = LocallyConnectedXYZLayer(params["lcn_size"]["h"],

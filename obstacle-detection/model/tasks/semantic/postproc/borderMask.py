@@ -119,8 +119,10 @@ class borderMask(nn.Module):
         # check connectivity
         # For obtaining the border mask we will be eroding the input image, for this
         # reason we only support erode_kernels with connectivity 4 or 8
-        assert self.kern_conn in (4, 8), ("The specified kernel connectivity(kern_conn= %r) is "
-                                          "not supported" % self.kern_conn)
+        assert self.kern_conn in (
+            4, 8), ("The specified kernel connectivity(kern_conn= %r) is "
+                    "not supported" %
+                    self.kern_conn)
 
         # make the onehot inferer
         self.onehot = oneHot(self.device,
@@ -151,8 +153,8 @@ class borderMask(nn.Module):
         # With predicted labels won't see this problem because all the pixels belongs
         # to at least one class
         if self.background_class is not None:
-            input_tensor[:, self.include_idx] = input_tensor[:, self.include_idx] + \
-                input_tensor[:, self.exclude_idx]
+            input_tensor[:, self.include_idx] = input_tensor[:,
+                                                             self.include_idx] + input_tensor[:, self.exclude_idx]
 
         # C denotes a number of channels, N, H and W are dismissed
         C = input_tensor.shape[1]

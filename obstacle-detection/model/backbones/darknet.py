@@ -109,16 +109,21 @@ class Backbone(nn.Module):
         self.relu1 = nn.LeakyReLU(0.1)
 
         # encoder
-        self.enc1 = self._make_enc_layer(BasicBlock, [32, 64], self.blocks[0],
-                                         stride=self.strides[0], bn_d=self.bn_d)
-        self.enc2 = self._make_enc_layer(BasicBlock, [64, 128], self.blocks[1],
-                                         stride=self.strides[1], bn_d=self.bn_d)
-        self.enc3 = self._make_enc_layer(BasicBlock, [128, 256], self.blocks[2],
-                                         stride=self.strides[2], bn_d=self.bn_d)
-        self.enc4 = self._make_enc_layer(BasicBlock, [256, 512], self.blocks[3],
-                                         stride=self.strides[3], bn_d=self.bn_d)
-        self.enc5 = self._make_enc_layer(BasicBlock, [512, 1024], self.blocks[4],
-                                         stride=self.strides[4], bn_d=self.bn_d)
+        self.enc1 = self._make_enc_layer(
+            BasicBlock, [
+                32, 64], self.blocks[0], stride=self.strides[0], bn_d=self.bn_d)
+        self.enc2 = self._make_enc_layer(
+            BasicBlock, [
+                64, 128], self.blocks[1], stride=self.strides[1], bn_d=self.bn_d)
+        self.enc3 = self._make_enc_layer(
+            BasicBlock, [
+                128, 256], self.blocks[2], stride=self.strides[2], bn_d=self.bn_d)
+        self.enc4 = self._make_enc_layer(
+            BasicBlock, [
+                256, 512], self.blocks[3], stride=self.strides[3], bn_d=self.bn_d)
+        self.enc5 = self._make_enc_layer(
+            BasicBlock, [
+                512, 1024], self.blocks[4], stride=self.strides[4], bn_d=self.bn_d)
 
         # for a bit of fun
         self.dropout = nn.Dropout2d(self.drop_prob)

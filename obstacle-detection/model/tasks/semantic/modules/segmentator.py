@@ -20,29 +20,35 @@ class Segmentator(nn.Module):
         self.strict = False
 
         # get the model
-        bboneModule = imp.load_source("bboneModule",
-                                      '/home/jovyan/work/obstacle-detection/model/backbones/' +
-                                      self.ARCH["backbone"]["name"] + '.py')
+        bboneModule = imp.load_source(
+            "bboneModule",
+            '/home/jovyan/work/obstacle-detection/model/backbones/' +
+            self.ARCH["backbone"]["name"] +
+            '.py')
         self.backbone = bboneModule.Backbone(params=self.ARCH["backbone"])
 
         # do a pass of the backbone to initialize the skip connections
-        stub = torch.zeros((1,
-                            self.backbone.get_input_depth(),
-                            self.ARCH["dataset"]["sensor"]["img_prop"]["height"],
-                            self.ARCH["dataset"]["sensor"]["img_prop"]["width"]))
+        stub = torch.zeros(
+            (1,
+             self.backbone.get_input_depth(),
+             self.ARCH["dataset"]["sensor"]["img_prop"]["height"],
+             self.ARCH["dataset"]["sensor"]["img_prop"]["width"]))
 
         if torch.cuda.is_available():
             stub = stub.cuda()
             self.backbone.cuda()
         _, stub_skips = self.backbone(stub)
 
-        decoderModule = imp.load_source("decoderModule",
-                                        '/home/jovyan/work/obstacle-detection/model/tasks/semantic/decoders/' +
-                                        self.ARCH["decoder"]["name"] + '.py')
-        self.decoder = decoderModule.Decoder(params=self.ARCH["decoder"],
-                                             stub_skips=stub_skips,
-                                             OS=self.ARCH["backbone"]["OS"],
-                                             feature_depth=self.backbone.get_last_depth())
+        decoderModule = imp.load_source(
+            "decoderModule",
+            '/home/jovyan/work/obstacle-detection/model/tasks/semantic/decoders/' +
+            self.ARCH["decoder"]["name"] +
+            '.py')
+        self.decoder = decoderModule.Decoder(
+            params=self.ARCH["decoder"],
+            stub_skips=stub_skips,
+            OS=self.ARCH["backbone"]["OS"],
+            feature_depth=self.backbone.get_last_depth())
 
         self.head = nn.Sequential(nn.Dropout2d(p=ARCH["head"]["dropout"]),
                                   nn.Conv2d(self.decoder.get_last_depth(),
@@ -111,8 +117,12 @@ class Segmentator(nn.Module):
 
             # try decoder
             try:
-                w_dict = torch.load(path + "/segmentation_decoder" + path_append,
-                                    map_location=lambda storage, loc: storage)
+                w_dict = torch.load(
+                    path +
+                    "/segmentation_decoder" +
+                    path_append,
+                    map_location=lambda storage,
+                    loc: storage)
                 self.decoder.load_state_dict(w_dict, strict=True)
                 print("Successfully loaded model decoder weights")
             except Exception as e:
@@ -138,8 +148,10 @@ class Segmentator(nn.Module):
             # try CRF
             if self.CRF:
                 try:
-                    w_dict = torch.load(path + "/segmentation_CRF" + path_append,
-                                        map_location=lambda storage, loc: storage)
+                    w_dict = torch.load(
+                        path + "/segmentation_CRF" + path_append,
+                        map_location=lambda storage,
+                        loc: storage)
                     self.CRF.load_state_dict(w_dict, strict=True)
                     print("Successfully loaded model CRF weights")
                 except Exception as e:

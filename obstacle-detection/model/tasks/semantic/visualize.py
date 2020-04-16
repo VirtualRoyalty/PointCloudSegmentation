@@ -32,7 +32,8 @@ if __name__ == '__main__':
         help='Sequence to visualize. Defaults to %(default)s',
     )
     parser.add_argument(
-        '--predictions', '-p',
+        '--predictions',
+        '-p',
         type=str,
         default=None,
         required=False,

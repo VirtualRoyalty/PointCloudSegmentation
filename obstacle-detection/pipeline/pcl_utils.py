@@ -136,10 +136,10 @@ def get_cluster_box_list(cluster_indices, cloud_obsts,
         # cloud_filtered = condrem.filter()
 
         # other filter
-        #cloud_filtered = cloud_cluster.make_statistical_outlier_filter()
+        # cloud_filtered = cloud_cluster.make_statistical_outlier_filter()
         # cloud_filtered.set_mean_k(50)
         # cloud_filtered.set_std_dev_mul_thresh(1.0)
-        #cloud_filtered = cloud_cluster
+        # cloud_filtered = cloud_cluster
 
         cloud_cluster_list.append(cloud_filtered)
         x_max, x_min = np.max(points[:, 0]), np.min(points[:, 0])
@@ -175,7 +175,9 @@ def box_center(box):
     y_min, y_max = min(box[1]), max(box[1])
     z_min, z_max = min(box[2]), max(box[2])
 
-    return ((x_min + x_max) / 2.0, (y_min + y_max) / 2.0, (z_min + z_max) / 2.0)
+    return ((x_min + x_max) / 2.0,
+            (y_min + y_max) / 2.0,
+            (z_min + z_max) / 2.0)
 
 
 def get_min_max_box(box):

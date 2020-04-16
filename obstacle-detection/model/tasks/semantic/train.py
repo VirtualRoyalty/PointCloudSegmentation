@@ -21,13 +21,15 @@ if __name__ == '__main__':
         help='Dataset to train with. No Default',
     )
     parser.add_argument(
-        '--arch_cfg', '-ac',
+        '--arch_cfg',
+        '-ac',
         type=str,
         required=True,
         help='Architecture yaml cfg file. See /config/arch for sample. No default!',
     )
     parser.add_argument(
-        '--data_cfg', '-dc',
+        '--data_cfg',
+        '-dc',
         type=str,
         required=False,
         default='config/labels/semantic-kitti.yaml',

@@ -33,7 +33,8 @@ if __name__ == '__main__':
         help='Sequence to visualize. Defaults to %(default)s',
     )
     parser.add_argument(
-        '--predictions', '-p',
+        '--predictions',
+        '-p',
         type=str,
         default=None,
         required=False,
@@ -43,7 +44,8 @@ if __name__ == '__main__':
         'Defaults to %(default)s',
     )
     parser.add_argument(
-        '--bboxes', '-b',
+        '--bboxes',
+        '-b',
         dest='draw_clusters',
         default=False,
         action='store_true',
@@ -51,7 +53,8 @@ if __name__ == '__main__':
     )
 
     parser.add_argument(
-        '--use_bbox_measurements', '-m',
+        '--use_bbox_measurements',
+        '-m',
         dest='use_bbox_measurements',
         default=False,
         action='store_true',
@@ -67,7 +70,8 @@ if __name__ == '__main__':
     )
 
     parser.add_argument(
-        '--roi_filter', '-r',
+        '--roi_filter',
+        '-r',
         dest='use_roi_filter',
         default=False,
         action='store_true',

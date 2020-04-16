@@ -26,8 +26,9 @@ class oneHot(nn.Module):
         n, b = x.shape
 
         # scatter to onehot
-        one_hot = torch.zeros((n, self.nclasses, b),
-                              device=self.device).scatter_(1, x.unsqueeze(1), 1)
+        one_hot = torch.zeros(
+            (n, self.nclasses, b), device=self.device).scatter_(
+            1, x.unsqueeze(1), 1)
 
         # x is now [n,classes,b]
 
@@ -51,8 +52,9 @@ class oneHot(nn.Module):
         n, h, w = x.shape
 
         # scatter to onehot
-        one_hot = torch.zeros((n, self.nclasses, h, w),
-                              device=self.device).scatter_(1, x.unsqueeze(1), 1)
+        one_hot = torch.zeros(
+            (n, self.nclasses, h, w), device=self.device).scatter_(
+            1, x.unsqueeze(1), 1)
 
         # x is now [n,classes,b]
 
@@ -95,8 +97,8 @@ if __name__ == "__main__":
     print("*" * 80)
     print("Tensor 1d spat dim, batched")
     tensor = torch.arange(0, nclasses).to(device)  # [0,1,2,3,4,5]
-    tensor = torch.cat([tensor.unsqueeze(0),
-                        tensor.unsqueeze(0)])      # [[0,1,2,3,4,5], [0,1,2,3,4,5]]
+    # [[0,1,2,3,4,5], [0,1,2,3,4,5]]
+    tensor = torch.cat([tensor.unsqueeze(0), tensor.unsqueeze(0)])
     print("in:", tensor)
     module = oneHot(device, nclasses, spatial_dim=1)
     print("out:", module(tensor))

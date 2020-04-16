@@ -40,8 +40,8 @@ def grid_search_optimization(scan, label, obstacle_lst, pipeline, params,
     try:
         for param in tqdm_notebook(ParameterGrid(params), total=len(
                 ParameterGrid(params)), desc='Scan processed'):
-            clusters, cls_data, exec_time = pipeline(scan, label, obstacle_lst, exec_time=True,
-                                                     verbose=False, **param)
+            clusters, cls_data, exec_time = pipeline(
+                scan, label, obstacle_lst, exec_time=True, verbose=False, **param)
             end_time = sum(exec_time.values())
             if verbose:
                 print(
@@ -73,9 +73,17 @@ def get_scan_id(scan):
     return re.findall(r'\d\d\d\d\d.', scan)[0]
 
 
-def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
-                      write_path=None, OBB=False, write_seg_id=False, detailed=False,
-                      seg_model=None, **pipeline_params):
+def get_bbox_and_stat(
+        scan_lst,
+        labels_lst,
+        obstacle_lst,
+        pipeline,
+        write_path=None,
+        OBB=False,
+        write_seg_id=False,
+        detailed=False,
+        seg_model=None,
+        **pipeline_params):
     """
     Gettitng bounding boxes for reqired sequence of scans and labels
     Also ability to grep time execution statistic.
@@ -108,8 +116,8 @@ def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
     stats = []
 
     try:
-        for scan, label in tqdm_notebook(zip(sorted(scan_lst), sorted(labels_lst)),
-                                         total=len(scan_lst), desc='Scan processed'):
+        for scan, label in tqdm_notebook(zip(sorted(scan_lst), sorted(
+                labels_lst)), total=len(scan_lst), desc='Scan processed'):
             # sanity check
             scan_id = get_scan_id(scan)
             assert scan_id == get_scan_id(label)
@@ -121,11 +129,26 @@ def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
             start_time = datetime.now()
             if seg_model:
                 seg_time = datetime.now()
-                scan = common.roi_filter(pd.DataFrame(scan, columns=['x', 'y', 'z', 'remission']),
-                                         min_x=pipeline_params['roi_x_min'], max_x=pipeline_params['roi_x_max'],
-                                         min_y=pipeline_params['roi_y_min'], max_y=pipeline_params['roi_y_max'],
-                                         min_z=pipeline_params['roi_z_min'], max_z=pipeline_params['roi_z_max'],
-                                         verbose=False)[['x', 'y', 'z', 'remission']].values
+                scan = common.roi_filter(
+                    pd.DataFrame(
+                        scan,
+                        columns=[
+                            'x',
+                            'y',
+                            'z',
+                            'remission']),
+                    min_x=pipeline_params['roi_x_min'],
+                    max_x=pipeline_params['roi_x_max'],
+                    min_y=pipeline_params['roi_y_min'],
+                    max_y=pipeline_params['roi_y_max'],
+                    min_z=pipeline_params['roi_z_min'],
+                    max_z=pipeline_params['roi_z_max'],
+                    verbose=False)[
+                    [
+                        'x',
+                        'y',
+                        'z',
+                        'remission']].values
                 label = seg_model.infer(scan)
                 seg_time = (datetime.now() - seg_time).total_seconds()
             else:
@@ -191,8 +214,15 @@ def get_bbox_and_stat(scan_lst, labels_lst, obstacle_lst, pipeline,
     return clusters_minmax_dct, exec_time_dct, stats
 
 
-def get_bbox_and_stat_pcl(scan_lst, labels_lst, obstacle_lst, pipeline,
-                          write_path=None, write_rotated=False, detailed=False, **pipeline_params):
+def get_bbox_and_stat_pcl(
+        scan_lst,
+        labels_lst,
+        obstacle_lst,
+        pipeline,
+        write_path=None,
+        write_rotated=False,
+        detailed=False,
+        **pipeline_params):
     """
     Gettitng bounding boxes for reqired sequence of scans and labels
     Also ability to grep time execution statistic.
@@ -218,8 +248,8 @@ def get_bbox_and_stat_pcl(scan_lst, labels_lst, obstacle_lst, pipeline,
     stats = []
 
     try:
-        for scan, label in tqdm_notebook(zip(sorted(scan_lst), sorted(labels_lst)),
-                                         total=len(scan_lst), desc='Scan processed'):
+        for scan, label in tqdm_notebook(zip(sorted(scan_lst), sorted(
+                labels_lst)), total=len(scan_lst), desc='Scan processed'):
             # sanity check
             scan_id = get_scan_id(scan)
             assert scan_id == get_scan_id(label)
