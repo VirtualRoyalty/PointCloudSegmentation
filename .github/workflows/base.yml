@@ -16,8 +16,9 @@ jobs:
     - name: Python Style Checker
       uses: andymckay/pycodestyle-action@0.1.3
       env:
+         filename: "obstacle-detection/pipeline/common.py"  
          PRECOMMAND_MESSAGE: Vaba Laba Dab Dab!
-         filenames: obstacle-detection/pipeline/common.py
+  
       
     - name: VK Notifications
       uses: alphamusic/VK-Notifications@1.0.2
