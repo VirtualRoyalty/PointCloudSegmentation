@@ -39,8 +39,8 @@ class FutureResult(object):
 
 
 _MasterRegistry = collections.namedtuple('MasterRegistry', ['result'])
-_SlavePipeBase = collections.namedtuple('_SlavePipeBase',
-                                        ['identifier', 'queue', 'result'])
+_SlavePipeBase = collections.namedtuple(
+    '_SlavePipeBase', ['identifier', 'queue', 'result'])
 
 
 class SlavePipe(_SlavePipeBase):

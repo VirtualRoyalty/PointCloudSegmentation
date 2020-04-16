@@ -11,7 +11,8 @@ import __init__ as booger
 def get_gaussian_kernel(kernel_size=3, sigma=2, channels=1):
     # Create a x, y coordinate grid of shape (kernel_size, kernel_size, 2)
     x_coord = torch.arange(kernel_size)
-    x_grid = x_coord.repeat(kernel_size).view(kernel_size, kernel_size)
+    x_grid = x_coord.repeat(kernel_size).view(kernel_size,
+                                              kernel_size)
     y_grid = x_grid.t()
     xy_grid = torch.stack([x_grid, y_grid], dim=-1).float()
 
@@ -70,7 +71,8 @@ class KNN(nn.Module):
 
         # check if size of kernel is odd and complain
         if (self.search % 2 == 0):
-            raise ValueError("Nearest neighbor kernel must be odd number")
+            raise ValueError(
+                "Nearest neighbor kernel must be odd number")
 
         # calculate padding
         pad = int((self.search - 1) / 2)
@@ -78,7 +80,8 @@ class KNN(nn.Module):
         # unfold neighborhood to get nearest neighbors for each pixel (range
         # image)
         proj_unfold_k_rang = F.unfold(proj_range[None, None, ...],
-                                      kernel_size=(self.search, self.search),
+                                      kernel_size=(self.search,
+                                                   self.search),
                                       padding=(pad, pad))
 
         # index with px, py to get ALL the pcld points
@@ -101,9 +104,9 @@ class KNN(nn.Module):
         # make a kernel to weigh the ranges according to distance in (x,y)
         # I make this 1 - kernel because I want distances that are close in (x,y)
         # to matter more
-        inv_gauss_k = (1 -
-                       get_gaussian_kernel(self.search, self.sigma, 1)).view(
-                           1, -1, 1)
+        inv_gauss_k = (
+            1 - get_gaussian_kernel(self.search, self.sigma, 1)).view(
+                1, -1, 1)
         inv_gauss_k = inv_gauss_k.to(device).type(proj_range.type())
 
         # apply weighing
@@ -116,8 +119,10 @@ class KNN(nn.Module):
                                        sorted=False)
 
         # do the same unfolding with the argmax
-        proj_unfold_1_argmax = F.unfold(proj_argmax[None, None, ...].float(),
-                                        kernel_size=(self.search, self.search),
+        proj_unfold_1_argmax = F.unfold(proj_argmax[None, None,
+                                                    ...].float(),
+                                        kernel_size=(self.search,
+                                                     self.search),
                                         padding=(pad, pad)).long()
         unproj_unfold_1_argmax = proj_unfold_1_argmax[:, :, idx_list]
 
@@ -136,10 +141,12 @@ class KNN(nn.Module):
 
         # now vote
         # argmax onehot has an extra class for objects after cutoff
-        knn_argmax_onehot = torch.zeros((1, self.nclasses + 1, P[0]),
-                                        device=device).type(proj_range.type())
+        knn_argmax_onehot = torch.zeros(
+            (1, self.nclasses + 1, P[0]),
+            device=device).type(proj_range.type())
         ones = torch.ones_like(knn_argmax).type(proj_range.type())
-        knn_argmax_onehot = knn_argmax_onehot.scatter_add_(1, knn_argmax, ones)
+        knn_argmax_onehot = knn_argmax_onehot.scatter_add_(
+            1, knn_argmax, ones)
 
         # now vote (as a sum over the onehot shit)  (don't let it choose
         # unlabeled OR invalid)

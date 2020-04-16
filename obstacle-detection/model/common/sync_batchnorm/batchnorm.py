@@ -37,15 +37,21 @@ def _unsqueeze_ft(tensor):
 
 _ChildMessage = collections.namedtuple('_ChildMessage',
                                        ['sum', 'ssum', 'sum_size'])
-_MasterMessage = collections.namedtuple('_MasterMessage', ['sum', 'inv_std'])
+_MasterMessage = collections.namedtuple('_MasterMessage',
+                                        ['sum', 'inv_std'])
 
 
 class _SynchronizedBatchNorm(_BatchNorm):
-    def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True):
-        super(_SynchronizedBatchNorm, self).__init__(num_features,
-                                                     eps=eps,
-                                                     momentum=momentum,
-                                                     affine=affine)
+    def __init__(self,
+                 num_features,
+                 eps=1e-5,
+                 momentum=0.1,
+                 affine=True):
+        super(_SynchronizedBatchNorm,
+              self).__init__(num_features,
+                             eps=eps,
+                             momentum=momentum,
+                             affine=affine)
 
         self._sync_master = SyncMaster(self._data_parallel_master)
 
@@ -57,8 +63,9 @@ class _SynchronizedBatchNorm(_BatchNorm):
         # If it is not parallel computation or is in evaluation mode, use
         # PyTorch's implementation.
         if not (self._is_parallel and self.training):
-            return F.batch_norm(input, self.running_mean, self.running_var,
-                                self.weight, self.bias, self.training,
+            return F.batch_norm(input, self.running_mean,
+                                self.running_var, self.weight,
+                                self.bias, self.training,
                                 self.momentum, self.eps)
 
         # Resize the input to (B, C, -1).
@@ -84,7 +91,8 @@ class _SynchronizedBatchNorm(_BatchNorm):
             output = (input - _unsqueeze_ft(mean)) * \
                 _unsqueeze_ft(inv_std * self.weight) + _unsqueeze_ft(self.bias)
         else:
-            output = (input - _unsqueeze_ft(mean)) * _unsqueeze_ft(inv_std)
+            output = (input -
+                      _unsqueeze_ft(mean)) * _unsqueeze_ft(inv_std)
 
         # Reshape it.
         return output.view(input_shape)
@@ -112,7 +120,8 @@ class _SynchronizedBatchNorm(_BatchNorm):
         target_gpus = [i[1].sum.get_device() for i in intermediates]
 
         sum_size = sum([i[1].sum_size for i in intermediates])
-        sum_, ssum = ReduceAddCoalesced.apply(target_gpus[0], 2, *to_reduce)
+        sum_, ssum = ReduceAddCoalesced.apply(target_gpus[0], 2,
+                                              *to_reduce)
         mean, inv_std = self._compute_mean_std(sum_, ssum, sum_size)
 
         broadcasted = Broadcast.apply(target_gpus, mean, inv_std)
@@ -120,7 +129,8 @@ class _SynchronizedBatchNorm(_BatchNorm):
         outputs = []
         for i, rec in enumerate(intermediates):
             outputs.append(
-                (rec[0], _MasterMessage(*broadcasted[i * 2:i * 2 + 2])))
+                (rec[0],
+                 _MasterMessage(*broadcasted[i * 2:i * 2 + 2])))
 
         return outputs
 
@@ -198,8 +208,9 @@ class SynchronizedBatchNorm1d(_SynchronizedBatchNorm):
     """
     def _check_input_dim(self, input):
         if input.dim() != 2 and input.dim() != 3:
-            raise ValueError('expected 2D or 3D input (got {}D input)'.format(
-                input.dim()))
+            raise ValueError(
+                'expected 2D or 3D input (got {}D input)'.format(
+                    input.dim()))
         super(SynchronizedBatchNorm1d, self)._check_input_dim(input)
 
 
@@ -260,8 +271,9 @@ class SynchronizedBatchNorm2d(_SynchronizedBatchNorm):
     """
     def _check_input_dim(self, input):
         if input.dim() != 4:
-            raise ValueError('expected 4D input (got {}D input)'.format(
-                input.dim()))
+            raise ValueError(
+                'expected 4D input (got {}D input)'.format(
+                    input.dim()))
         super(SynchronizedBatchNorm2d, self)._check_input_dim(input)
 
 
@@ -323,8 +335,9 @@ class SynchronizedBatchNorm3d(_SynchronizedBatchNorm):
     """
     def _check_input_dim(self, input):
         if input.dim() != 5:
-            raise ValueError('expected 5D input (got {}D input)'.format(
-                input.dim()))
+            raise ValueError(
+                'expected 5D input (got {}D input)'.format(
+                    input.dim()))
         super(SynchronizedBatchNorm3d, self)._check_input_dim(input)
 
 
@@ -361,8 +374,8 @@ def convert_model(module):
             SynchronizedBatchNorm3d
     ]):
         if isinstance(module, pth_module):
-            mod = sync_module(module.num_features, module.eps, module.momentum,
-                              module.affine)
+            mod = sync_module(module.num_features, module.eps,
+                              module.momentum, module.affine)
             mod.running_mean = module.running_mean
             mod.running_var = module.running_var
             if module.affine:

@@ -54,7 +54,8 @@ class Inference():
 
         # concatenate the encoder and the head
         with torch.no_grad():
-            self.model = Segmentator(self.ARCH, self.parser.get_n_classes(),
+            self.model = Segmentator(self.ARCH,
+                                     self.parser.get_n_classes(),
                                      self.modeldir)
 
         # use knn post processing?
@@ -80,7 +81,8 @@ class Inference():
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
         print("Infering in device: ", self.device)
-        if torch.cuda.is_available() and torch.cuda.device_count() > 0:
+        if torch.cuda.is_available(
+        ) and torch.cuda.device_count() > 0:
             cudnn.benchmark = True
             cudnn.fastest = True
             self.gpu = True
@@ -107,7 +109,8 @@ class Inference():
             unproj_xyz = torch.full((self.max_points, 3),
                                     -1.0,
                                     dtype=torch.float)
-            unproj_xyz[:unproj_n_points] = torch.from_numpy(scan.points)
+            unproj_xyz[:unproj_n_points] = torch.from_numpy(
+                scan.points)
             unproj_range = torch.full([self.max_points],
                                       -1.0,
                                       dtype=torch.float)
@@ -123,12 +126,17 @@ class Inference():
             # get points and labels
             proj_range = torch.from_numpy(scan.proj_range).clone()
             proj_xyz = torch.from_numpy(scan.proj_xyz).clone()
-            proj_remission = torch.from_numpy(scan.proj_remission).clone()
+            proj_remission = torch.from_numpy(
+                scan.proj_remission).clone()
             proj_mask = torch.from_numpy(scan.proj_mask)
             proj_labels = []
-            proj_x = torch.full([self.max_points], -1, dtype=torch.long)
+            proj_x = torch.full([self.max_points],
+                                -1,
+                                dtype=torch.long)
             proj_x[:unproj_n_points] = torch.from_numpy(scan.proj_x)
-            proj_y = torch.full([self.max_points], -1, dtype=torch.long)
+            proj_y = torch.full([self.max_points],
+                                -1,
+                                dtype=torch.long)
             proj_y[:unproj_n_points] = torch.from_numpy(scan.proj_y)
             proj = torch.cat([
                 proj_range.unsqueeze(0).clone(),

@@ -62,19 +62,19 @@ def grid_search_optimization(scan,
                 print('*' * 40)
                 print()
             if score:
-                if len(cls_data) > 0 and cls_data['cluster_id'].nunique() > 1:
-                    silh_score = silhouette_score(cls_data[['x', 'y', 'z']],
-                                                  cls_data['cluster_id'])
+                if len(cls_data
+                       ) > 0 and cls_data['cluster_id'].nunique() > 1:
+                    silh_score = silhouette_score(
+                        cls_data[['x', 'y', 'z']],
+                        cls_data['cluster_id'])
                 else:
                     silh_score = 0
-                time_exec_dct[json.dumps(param,
-                                         indent=3)] = (end_time,
-                                                       clusters.shape[0],
-                                                       silh_score)
+                time_exec_dct[json.dumps(
+                    param, indent=3)] = (end_time, clusters.shape[0],
+                                         silh_score)
             else:
-                time_exec_dct[json.dumps(param,
-                                         indent=3)] = (end_time,
-                                                       clusters.shape[0])
+                time_exec_dct[json.dumps(
+                    param, indent=3)] = (end_time, clusters.shape[0])
         return time_exec_dct
     except KeyboardInterrupt:
         print('User`s KeyboardInterruption...')
@@ -143,14 +143,17 @@ def get_bbox_and_stat(scan_lst,
             if seg_model:
                 seg_time = datetime.now()
                 scan = common.roi_filter(
-                    pd.DataFrame(scan, columns=['x', 'y', 'z', 'remission']),
+                    pd.DataFrame(scan,
+                                 columns=['x', 'y', 'z',
+                                          'remission']),
                     min_x=pipeline_params['roi_x_min'],
                     max_x=pipeline_params['roi_x_max'],
                     min_y=pipeline_params['roi_y_min'],
                     max_y=pipeline_params['roi_y_max'],
                     min_z=pipeline_params['roi_z_min'],
                     max_z=pipeline_params['roi_z_max'],
-                    verbose=False)[['x', 'y', 'z', 'remission']].values
+                    verbose=False)[['x', 'y', 'z',
+                                    'remission']].values
                 label = seg_model.infer(scan)
                 seg_time = (datetime.now() - seg_time).total_seconds()
             else:
@@ -160,11 +163,12 @@ def get_bbox_and_stat(scan_lst,
 
             # start pipeline
             if detailed:
-                clusters, cluster_data, stat = pipeline(scan[:, :3],
-                                                        label,
-                                                        obstacle_lst,
-                                                        exec_time=True,
-                                                        **pipeline_params)
+                clusters, cluster_data, stat = pipeline(
+                    scan[:, :3],
+                    label,
+                    obstacle_lst,
+                    exec_time=True,
+                    **pipeline_params)
                 if seg_model:
                     stat['segmentation_time'] = seg_time
                 stats.append(stat)
@@ -173,7 +177,8 @@ def get_bbox_and_stat(scan_lst,
                                        **pipeline_params)
 
             end_time = datetime.now() - start_time
-            exec_time_dct[str(scan_id)[-3:]] = end_time.total_seconds()
+            exec_time_dct[str(scan_id)
+                          [-3:]] = end_time.total_seconds()
             clusters_minmax_dct[str(scan_id)[-3:]] = clusters
 
             if write_path:
@@ -181,8 +186,9 @@ def get_bbox_and_stat(scan_lst,
                     np.savetxt(write_path + str(scan_id) + '.bbox',
                                np.empty((0, 0)))
                     if OBB:
-                        np.savetxt(write_path + str(scan_id) + '.segs',
-                                   np.empty((0, 0)))
+                        np.savetxt(
+                            write_path + str(scan_id) + '.segs',
+                            np.empty((0, 0)))
                     continue
                 # Oriented Bounding Boxes
                 if OBB:
@@ -192,27 +198,32 @@ def get_bbox_and_stat(scan_lst,
                         for v in cluster:
                             _obb = _obb + v.tolist()
                         _obb = np.asarray(_obb).reshape(1, 24)
-                        np_clusters = np.concatenate((np_clusters, _obb),
-                                                     axis=0)
+                        np_clusters = np.concatenate(
+                            (np_clusters, _obb), axis=0)
                     clusters = np_clusters
                 # Seg id for additional info e.g. for visualization
                 if write_seg_id:
                     seg_lst = []
-                    for cl_id in sorted(cluster_data['cluster_id'].unique()):
-                        seg = cluster_data[cluster_data['cluster_id'] ==
-                                           cl_id].agg({
-                                               'seg_id': 'mode'
+                    for cl_id in sorted(
+                            cluster_data['cluster_id'].unique()):
+                        seg = cluster_data[cluster_data['cluster_id']
+                                           == cl_id].agg({
+                                               'seg_id':
+                                               'mode'
                                            }).values
                         seg_lst.append(seg)
                     seg_arr = np.array(seg_lst,
-                                       dtype='int64').reshape(1, len(seg_lst))
-                    np.savetxt(write_path + str(scan_id) + '.segs', seg_arr)
+                                       dtype='int64').reshape(
+                                           1, len(seg_lst))
+                    np.savetxt(write_path + str(scan_id) + '.segs',
+                               seg_arr)
                 # sanity check
                 assert isinstance(clusters, np.ndarray)
                 # if OBB=False write bounding boxes in format x_min, x_max, y_min, y_max, z_min, z_max
                 # else write oriented bounding boxes in format 8 vertixes x1,
                 # y1, z1 ... x8, y8, z8
-                np.savetxt(write_path + str(scan_id) + '.bbox', clusters)
+                np.savetxt(write_path + str(scan_id) + '.bbox',
+                           clusters)
     except KeyboardInterrupt:
         print('User`s KeyboardInterruption...')
         return clusters_minmax_dct, exec_time_dct, stats
@@ -272,27 +283,31 @@ def get_bbox_and_stat_pcl(scan_lst,
             start_time = datetime.now()
             # start pipeline
             if detailed:
-                clusters, cluster_data, stat = pipeline(scan,
-                                                        label,
-                                                        obstacle_lst,
-                                                        exec_time=True,
-                                                        **pipeline_params)
+                clusters, cluster_data, stat = pipeline(
+                    scan,
+                    label,
+                    obstacle_lst,
+                    exec_time=True,
+                    **pipeline_params)
                 stats.append(stat)
             else:
                 clusters, _ = pipeline(scan, label, obstacle_lst,
                                        **pipeline_params)
 
             end_time = datetime.now() - start_time
-            exec_time_dct[str(scan_id)[-3:]] = end_time.total_seconds()
+            exec_time_dct[str(scan_id)
+                          [-3:]] = end_time.total_seconds()
             clusters_minmax_dct[str(scan_id)[-3:]] = clusters
 
             if write_path:
 
                 if write_rotated:
                     clusters_rotated = np.empty((0, 18))
-                    for cluster_id in cluster_data['cluster_id'].unique():
-                        tcluster = cluster_data[cluster_data['cluster_id'] ==
-                                                cluster_id][['x', 'y', 'z']]
+                    for cluster_id in cluster_data[
+                            'cluster_id'].unique():
+                        tcluster = cluster_data[
+                            cluster_data['cluster_id'] == cluster_id][
+                                ['x', 'y', 'z']]
                         min_poitns = [
                             tcluster[tcluster.index == indx].values
                             for indx in list(tcluster.idxmin())
@@ -304,7 +319,8 @@ def get_bbox_and_stat_pcl(scan_lst,
                         vertices_lst = min_poitns + max_points
                         varray = vertices_lst[0]
                         for v in vertices_lst[1:]:
-                            varray = np.concatenate((varray, v), axis=1)
+                            varray = np.concatenate((varray, v),
+                                                    axis=1)
                         clusters_rotated = np.concatenate(
                             (clusters_rotated, varray), axis=0)
                     clusters = clusters_rotated
@@ -312,7 +328,8 @@ def get_bbox_and_stat_pcl(scan_lst,
                 # write cluster in format x_min, x_max, y_min, y_max, z_min,
                 # z_max
                 assert isinstance(clusters, np.ndarray)
-                np.savetxt(write_path + str(scan_id) + '.bbox', clusters)
+                np.savetxt(write_path + str(scan_id) + '.bbox',
+                           clusters)
     except KeyboardInterrupt:
         print('User`s KeyboardInterruption...')
         return clusters_minmax_dct, exec_time_dct, stats

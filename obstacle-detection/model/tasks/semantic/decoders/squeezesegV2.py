@@ -15,8 +15,11 @@ class FireUp(nn.Module):
         self.bn_d = bn_d
         self.stride = stride
         self.activation = nn.ReLU(inplace=True)
-        self.squeeze = nn.Conv2d(inplanes, squeeze_planes, kernel_size=1)
-        self.squeeze_bn = nn.BatchNorm2d(squeeze_planes, momentum=self.bn_d)
+        self.squeeze = nn.Conv2d(inplanes,
+                                 squeeze_planes,
+                                 kernel_size=1)
+        self.squeeze_bn = nn.BatchNorm2d(squeeze_planes,
+                                         momentum=self.bn_d)
         if self.stride == 2:
             self.upconv = nn.ConvTranspose2d(squeeze_planes,
                                              squeeze_planes,

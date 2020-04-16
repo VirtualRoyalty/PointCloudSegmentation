@@ -41,7 +41,8 @@ if __name__ == '__main__':
         type=str,
         default=None,
         required=False,
-        help='Alternate location for labels, to use predictions folder. '
+        help=
+        'Alternate location for labels, to use predictions folder. '
         'Must point to directory containing the predictions in the proper format '
         ' (see readme)'
         'Defaults to %(default)s',
@@ -106,7 +107,8 @@ if __name__ == '__main__':
         dest='ignore_safety',
         default=False,
         action='store_true',
-        help='Normally you want the number of labels and ptcls to be the same,'
+        help=
+        'Normally you want the number of labels and ptcls to be the same,'
         ', but if you are not done inferring this is not the case, so this disables'
         ' that safety.'
         'Defaults to %(default)s',
@@ -142,10 +144,11 @@ if __name__ == '__main__':
     FLAGS.sequence = '{0:02d}'.format(int(FLAGS.sequence))
 
     # does sequence folder exist?
-    scan_paths = os.path.join(FLAGS.dataset, "sequences", FLAGS.sequence,
-                              "velodyne")
+    scan_paths = os.path.join(FLAGS.dataset, "sequences",
+                              FLAGS.sequence, "velodyne")
     if os.path.isdir(scan_paths):
-        print("Sequence folder exists! Using sequence from %s" % scan_paths)
+        print("Sequence folder exists! Using sequence from %s" %
+              scan_paths)
     else:
         print("Sequence folder doesn't exist! Exiting...")
         quit()
@@ -153,7 +156,8 @@ if __name__ == '__main__':
     # populate the pointclouds
     scan_names = sorted([
         os.path.join(dp, f)
-        for dp, dn, fn in os.walk(os.path.expanduser(scan_paths)) for f in fn
+        for dp, dn, fn in os.walk(os.path.expanduser(scan_paths))
+        for f in fn
     ])
 
     # does sequence folder exist?
@@ -165,7 +169,8 @@ if __name__ == '__main__':
             label_paths = os.path.join(FLAGS.dataset, "sequences",
                                        FLAGS.sequence, "labels")
         if os.path.isdir(label_paths):
-            print("Labels folder exists! Using labels from %s" % label_paths)
+            print("Labels folder exists! Using labels from %s" %
+                  label_paths)
         else:
             print("Labels folder doesn't exist! Exiting...")
             quit()
@@ -184,29 +189,32 @@ if __name__ == '__main__':
             bboxes_paths = os.path.join(FLAGS.dataset, "sequences",
                                         FLAGS.sequence, "clusters")
             if os.path.isdir(bboxes_paths):
-                print("Bounding boxes folder exists! Using bboxes from %s" %
-                      bboxes_paths)
+                print(
+                    "Bounding boxes folder exists! Using bboxes from %s"
+                    % bboxes_paths)
             else:
-                print("Bounding boxes folder doesn't exist! Exiting...")
+                print(
+                    "Bounding boxes folder doesn't exist! Exiting...")
                 quit()
             # populate the pointclouds
             bboxes_names = sorted([
-                os.path.join(dp, f)
-                for dp, dn, fn in os.walk(os.path.expanduser(bboxes_paths))
-                for f in fn if f.endswith(".bbox")
+                os.path.join(dp, f) for dp, dn, fn in os.walk(
+                    os.path.expanduser(bboxes_paths)) for f in fn
+                if f.endswith(".bbox")
             ])
             if FLAGS.use_bbox_labels:
                 bboxes_labels_names = sorted([
-                    os.path.join(dp, f)
-                    for dp, dn, fn in os.walk(os.path.expanduser(bboxes_paths))
-                    for f in fn if f.endswith(".segs")
+                    os.path.join(dp, f) for dp, dn, fn in os.walk(
+                        os.path.expanduser(bboxes_paths)) for f in fn
+                    if f.endswith(".segs")
                 ])
 
         # check that there are same amount of bboxes and scans
             if not FLAGS.ignore_safety:
                 assert (len(bboxes_names) == len(scan_names))
                 if FLAGS.use_bbox_labels:
-                    assert (len(bboxes_names) == len(bboxes_labels_names))
+                    assert (
+                        len(bboxes_names) == len(bboxes_labels_names))
     # create a scan
     if FLAGS.ignore_semantics:
         # project all opened scans to spheric proj
@@ -229,16 +237,17 @@ if __name__ == '__main__':
         bboxes_labels_names = None
     if not semantics:
         label_names = None
-    vis = LaserScanVis(scan=scan,
-                       scan_names=scan_names,
-                       label_names=label_names,
-                       offset=FLAGS.offset,
-                       semantics=semantics,
-                       bboxes_names=bboxes_names,
-                       use_bbox_measurements=FLAGS.use_bbox_measurements,
-                       bboxes_labels_names=bboxes_labels_names,
-                       roi_filter=roi_filter,
-                       instances=False)
+    vis = LaserScanVis(
+        scan=scan,
+        scan_names=scan_names,
+        label_names=label_names,
+        offset=FLAGS.offset,
+        semantics=semantics,
+        bboxes_names=bboxes_names,
+        use_bbox_measurements=FLAGS.use_bbox_measurements,
+        bboxes_labels_names=bboxes_labels_names,
+        roi_filter=roi_filter,
+        instances=False)
 
     # print instructions
     print("To navigate:")

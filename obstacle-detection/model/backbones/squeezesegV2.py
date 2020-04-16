@@ -18,8 +18,11 @@ class Fire(nn.Module):
         self.inplanes = inplanes
         self.bn_d = bn_d
         self.activation = nn.ReLU(inplace=True)
-        self.squeeze = nn.Conv2d(inplanes, squeeze_planes, kernel_size=1)
-        self.squeeze_bn = nn.BatchNorm2d(squeeze_planes, momentum=self.bn_d)
+        self.squeeze = nn.Conv2d(inplanes,
+                                 squeeze_planes,
+                                 kernel_size=1)
+        self.squeeze_bn = nn.BatchNorm2d(squeeze_planes,
+                                         momentum=self.bn_d)
         self.expand1x1 = nn.Conv2d(squeeze_planes,
                                    expand1x1_planes,
                                    kernel_size=1)
@@ -50,13 +53,15 @@ class CAM(nn.Module):
                                  inplanes // 16,
                                  kernel_size=1,
                                  stride=1)
-        self.squeeze_bn = nn.BatchNorm2d(inplanes // 16, momentum=self.bn_d)
+        self.squeeze_bn = nn.BatchNorm2d(inplanes // 16,
+                                         momentum=self.bn_d)
         self.relu = nn.ReLU(inplace=True)
         self.unsqueeze = nn.Conv2d(inplanes // 16,
                                    inplanes,
                                    kernel_size=1,
                                    stride=1)
-        self.unsqueeze_bn = nn.BatchNorm2d(inplanes, momentum=self.bn_d)
+        self.unsqueeze_bn = nn.BatchNorm2d(inplanes,
+                                           momentum=self.bn_d)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
@@ -132,23 +137,35 @@ class Backbone(nn.Module):
                       64,
                       kernel_size=3,
                       stride=[1, self.strides[0]],
-                      padding=1), nn.BatchNorm2d(64, momentum=self.bn_d),
+                      padding=1),
+            nn.BatchNorm2d(64, momentum=self.bn_d),
             nn.ReLU(inplace=True), CAM(64, bn_d=self.bn_d))
         self.conv1b = nn.Sequential(
-            nn.Conv2d(self.input_depth, 64, kernel_size=1, stride=1,
-                      padding=0), nn.BatchNorm2d(64, momentum=self.bn_d))
+            nn.Conv2d(self.input_depth,
+                      64,
+                      kernel_size=1,
+                      stride=1,
+                      padding=0),
+            nn.BatchNorm2d(64, momentum=self.bn_d))
         self.fire23 = nn.Sequential(
-            nn.MaxPool2d(kernel_size=3, stride=[1, self.strides[1]],
-                         padding=1), Fire(64, 16, 64, 64, bn_d=self.bn_d),
-            CAM(128, bn_d=self.bn_d), Fire(128, 16, 64, 64, bn_d=self.bn_d),
+            nn.MaxPool2d(kernel_size=3,
+                         stride=[1, self.strides[1]],
+                         padding=1),
+            Fire(64, 16, 64, 64, bn_d=self.bn_d),
+            CAM(128, bn_d=self.bn_d),
+            Fire(128, 16, 64, 64, bn_d=self.bn_d),
             CAM(128, bn_d=self.bn_d))
         self.fire45 = nn.Sequential(
-            nn.MaxPool2d(kernel_size=3, stride=[1, self.strides[2]],
-                         padding=1), Fire(128, 32, 128, 128, bn_d=self.bn_d),
+            nn.MaxPool2d(kernel_size=3,
+                         stride=[1, self.strides[2]],
+                         padding=1),
+            Fire(128, 32, 128, 128, bn_d=self.bn_d),
             Fire(256, 32, 128, 128, bn_d=self.bn_d))
         self.fire6789 = nn.Sequential(
-            nn.MaxPool2d(kernel_size=3, stride=[1, self.strides[3]],
-                         padding=1), Fire(256, 48, 192, 192, bn_d=self.bn_d),
+            nn.MaxPool2d(kernel_size=3,
+                         stride=[1, self.strides[3]],
+                         padding=1),
+            Fire(256, 48, 192, 192, bn_d=self.bn_d),
             Fire(384, 48, 192, 192, bn_d=self.bn_d),
             Fire(384, 64, 256, 256, bn_d=self.bn_d),
             Fire(512, 64, 256, 256, bn_d=self.bn_d))

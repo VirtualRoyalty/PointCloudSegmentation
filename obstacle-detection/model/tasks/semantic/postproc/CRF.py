@@ -17,7 +17,8 @@ class LocallyConnectedXYZLayer(nn.Module):
         self.padh = h // 2
         self.w = w
         self.padw = w // 2
-        assert (self.h % 2 == 1 and self.w % 2 == 1)  # window must be odd
+        assert (self.h % 2 == 1
+                and self.w % 2 == 1)  # window must be odd
         self.sigma = sigma
         self.gauss_den = 2 * self.sigma**2
         self.nclasses = nclasses
@@ -68,7 +69,8 @@ class LocallyConnectedXYZLayer(nn.Module):
                                        padding=(self.padh, self.padw))
             unravel_w_softmax = unravel_softmax * unravel_gaussian
             # add dimenssion 1 to obtain the new softmax for this class
-            unravel_added_softmax = unravel_w_softmax.sum(dim=1).unsqueeze(1)
+            unravel_added_softmax = unravel_w_softmax.sum(
+                dim=1).unsqueeze(1)
             # fold it and put it in new tensor
             added_softmax = unravel_added_softmax.view(N, H, W)
             cloned_softmax[:, i] = added_softmax
@@ -85,10 +87,12 @@ class CRF(nn.Module):
         self.lcn_size = torch.nn.Parameter(torch.tensor(
             [params["lcn_size"]["h"], params["lcn_size"]["w"]]),
                                            requires_grad=False)
-        self.xyz_coef = torch.nn.Parameter(torch.tensor(params["xyz_coef"]),
-                                           requires_grad=False).float()
-        self.xyz_sigma = torch.nn.Parameter(torch.tensor(params["xyz_sigma"]),
-                                            requires_grad=False).float()
+        self.xyz_coef = torch.nn.Parameter(
+            torch.tensor(params["xyz_coef"]),
+            requires_grad=False).float()
+        self.xyz_sigma = torch.nn.Parameter(
+            torch.tensor(params["xyz_sigma"]),
+            requires_grad=False).float()
 
         self.nclasses = nclasses
         print("Using CRF!")
@@ -96,21 +100,21 @@ class CRF(nn.Module):
         # define layers here
         # compat init
         self.compat_kernel_init = np.reshape(
-            np.ones(
-                (self.nclasses, self.nclasses)) - np.identity(self.nclasses),
+            np.ones((self.nclasses, self.nclasses)) -
+            np.identity(self.nclasses),
             [self.nclasses, self.nclasses, 1, 1])
 
         # bilateral compatibility matrixes
         self.compat_conv = nn.Conv2d(self.nclasses, self.nclasses, 1)
         self.compat_conv.weight = torch.nn.Parameter(
-            torch.from_numpy(self.compat_kernel_init).float() * self.xyz_coef,
+            torch.from_numpy(self.compat_kernel_init).float() *
+            self.xyz_coef,
             requires_grad=True)
 
         # locally connected layer for message passing
-        self.local_conn_xyz = LocallyConnectedXYZLayer(params["lcn_size"]["h"],
-                                                       params["lcn_size"]["w"],
-                                                       params["xyz_coef"],
-                                                       self.nclasses)
+        self.local_conn_xyz = LocallyConnectedXYZLayer(
+            params["lcn_size"]["h"], params["lcn_size"]["w"],
+            params["xyz_coef"], self.nclasses)
 
     def forward(self, input, softmax, mask):
         # use xyz
@@ -119,7 +123,8 @@ class CRF(nn.Module):
         # iteratively
         for iter in range(self.iter):
             # message passing as locally connected layer
-            locally_connected = self.local_conn_xyz(xyz, softmax, mask)
+            locally_connected = self.local_conn_xyz(
+                xyz, softmax, mask)
 
             # reweigh with the 1x1 convolution
             reweight_softmax = self.compat_conv(locally_connected)

@@ -46,8 +46,8 @@ class LaserScanVis:
         self.grid = self.canvas.central_widget.add_grid()
 
         # laserscan part
-        self.scan_view = vispy.scene.widgets.ViewBox(border_color='white',
-                                                     parent=self.canvas.scene)
+        self.scan_view = vispy.scene.widgets.ViewBox(
+            border_color='white', parent=self.canvas.scene)
         self.grid.add_widget(self.scan_view, 0, 0)
         self.scan_vis = visuals.Markers()
         self.scan_view.camera = 'turntable'
@@ -86,10 +86,10 @@ class LaserScanVis:
             self.multiplier += 1
 
         # new canvas for img
-        self.img_canvas = SceneCanvas(keys='interactive',
-                                      show=True,
-                                      size=(self.canvas_W,
-                                            self.canvas_H * self.multiplier))
+        self.img_canvas = SceneCanvas(
+            keys='interactive',
+            show=True,
+            size=(self.canvas_W, self.canvas_H * self.multiplier))
         # grid
         self.img_grid = self.img_canvas.central_widget.add_grid()
         # interface (n next, b back, q quit, very simple)
@@ -126,7 +126,8 @@ class LaserScanVis:
         sm = plt.cm.ScalarMappable(cmap=cmap)
 
         # Obtain linear color range
-        color_range = sm.to_rgba(np.linspace(0, 1, 256), bytes=True)[:, 2::-1]
+        color_range = sm.to_rgba(np.linspace(0, 1, 256),
+                                 bytes=True)[:, 2::-1]
 
         return color_range.reshape(256, 3).astype(np.float32) / 255.0
 
@@ -138,7 +139,8 @@ class LaserScanVis:
             self.scan.colorize()
 
         # then change names
-        title = "scan " + str(self.offset) + " of " + str(len(self.scan_names))
+        title = "scan " + str(self.offset) + " of " + str(
+            len(self.scan_names))
         self.canvas.title = title
         self.img_canvas.title = title
 
@@ -152,8 +154,8 @@ class LaserScanVis:
         range_data = range_data**(1 / power)
         # print(range_data.max(), range_data.min())
         viridis_range = ((range_data - range_data.min()) /
-                         (range_data.max() - range_data.min()) * 255).astype(
-                             np.uint8)
+                         (range_data.max() - range_data.min()) *
+                         255).astype(np.uint8)
         viridis_map = self.get_mpl_colormap("viridis")
         viridis_colors = viridis_map[viridis_range]
         self.scan_vis.set_data(self.scan.points,
@@ -191,11 +193,13 @@ class LaserScanVis:
         self.img_vis.update()
 
         if self.semantics:
-            self.sem_img_vis.set_data(self.scan.proj_sem_color[..., ::-1])
+            self.sem_img_vis.set_data(
+                self.scan.proj_sem_color[..., ::-1])
             self.sem_img_vis.update()
 
         if self.instances:
-            self.inst_img_vis.set_data(self.scan.proj_inst_color[..., ::-1])
+            self.inst_img_vis.set_data(
+                self.scan.proj_inst_color[..., ::-1])
             self.inst_img_vis.update()
 
     # interface

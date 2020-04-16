@@ -15,8 +15,9 @@ class iouEval:
         self.device = device
         # if ignore is larger than n_classes, consider no ignoreIndex
         self.ignore = torch.tensor(ignore).long()
-        self.include = torch.tensor(
-            [n for n in range(self.n_classes) if n not in self.ignore]).long()
+        self.include = torch.tensor([
+            n for n in range(self.n_classes) if n not in self.ignore
+        ]).long()
         print("[IOU EVAL] IGNORE: ", self.ignore)
         print("[IOU EVAL] INCLUDE: ", self.include)
         self.reset()
@@ -25,8 +26,9 @@ class iouEval:
         return self.n_classes
 
     def reset(self):
-        self.conf_matrix = torch.zeros((self.n_classes, self.n_classes),
-                                       device=self.device).long()
+        self.conf_matrix = torch.zeros(
+            (self.n_classes, self.n_classes),
+            device=self.device).long()
         self.ones = None
         self.last_scan_size = None  # for when variable scan size is used
 
@@ -47,13 +49,13 @@ class iouEval:
 
         # ones is what I want to add to conf when I
         if self.ones is None or self.last_scan_size != idxs.shape[-1]:
-            self.ones = torch.ones((idxs.shape[-1]), device=self.device).long()
+            self.ones = torch.ones((idxs.shape[-1]),
+                                   device=self.device).long()
             self.last_scan_size = idxs.shape[-1]
 
         # make confusion matrix (cols = gt, rows = pred)
-        self.conf_matrix = self.conf_matrix.index_put_(tuple(idxs),
-                                                       self.ones,
-                                                       accumulate=True)
+        self.conf_matrix = self.conf_matrix.index_put_(
+            tuple(idxs), self.ones, accumulate=True)
 
         # print(self.tp.shape)
         # print(self.fp.shape)
@@ -76,13 +78,15 @@ class iouEval:
         intersection = tp
         union = tp + fp + fn + 1e-15
         iou = intersection / union
-        iou_mean = (intersection[self.include] / union[self.include]).mean()
+        iou_mean = (intersection[self.include] /
+                    union[self.include]).mean()
         return iou_mean, iou  # returns "iou mean", "iou per class" ALL CLASSES
 
     def getacc(self):
         tp, fp, fn = self.getStats()
         total_tp = tp.sum()
-        total = tp[self.include].sum() + fp[self.include].sum() + 1e-15
+        total = tp[self.include].sum() + fp[
+            self.include].sum() + 1e-15
         acc_mean = total_tp / total
         return acc_mean  # returns "acc mean"
 
@@ -100,7 +104,8 @@ class biouEval(iouEval):
 
         # check that I am only ignoring one class
         if len(ignore) > 1:
-            raise ValueError("Length of ignored class list should be 1 or 0")
+            raise ValueError(
+                "Length of ignored class list should be 1 or 0")
         elif len(ignore) == 0:
             ignore = None
         else:
