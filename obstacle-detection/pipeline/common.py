@@ -18,9 +18,10 @@ def roi_filter_rounded(pcloud, verbose=True, **params):
 
     if verbose:
         print('Input pcloud size: {}'.format(len(pcloud)))
-    pcloud['equation'] = (pcloud['x'] ** 2) / (a ** 2) + (pcloud['y'] ** 2) / (b ** 2)
+    pcloud['equation'] = (pcloud['x'] ** 2) / (a ** 2) + \
+        (pcloud['y'] ** 2) / (b ** 2)
 
-    pcloud['camera'] = ((pcloud['z'] >  params['min_z']) & (pcloud['z'] <  params['max_z']) &
+    pcloud['camera'] = ((pcloud['z'] > params['min_z']) & (pcloud['z'] < params['max_z']) &
                         (pcloud['x'] > params['min_x']) &
                         (pcloud['equation'] <= 1.0))
 
@@ -30,6 +31,7 @@ def roi_filter_rounded(pcloud, verbose=True, **params):
         print('Output ROI pcloud size: {}'.format(len(pcloud)))
     return pcloud
 
+
 def roi_filter(pcloud, verbose=True, **params):
     """
     Region Of Interest function, which filter required area
@@ -38,8 +40,8 @@ def roi_filter(pcloud, verbose=True, **params):
     if verbose:
         print('Input pcloud size: {}'.format(len(pcloud)))
     pcloud['camera'] = ((pcloud['x'] > params['min_x']) & (pcloud['x'] < params['max_x']) &
-                        (pcloud['y'] >  params['min_y']) & (pcloud['y'] < params['max_y']) &
-                        (pcloud['z'] >  params['min_z']) & (pcloud['z'] <  params['max_z']))
+                        (pcloud['y'] > params['min_y']) & (pcloud['y'] < params['max_y']) &
+                        (pcloud['z'] > params['min_z']) & (pcloud['z'] < params['max_z']))
     pcloud = pcloud[pcloud['camera'] == True]
     if verbose:
         print('Output ROI pcloud size: {}'.format(len(pcloud)))
@@ -67,7 +69,10 @@ def obstacle_filter(pcloud, obstacle_lst, proc_labels=True, verbose=True):
         pcloud = pcloud[pcloud['seg_id'].isin(obstacle_lst)]
     if verbose:
         print('Filter required segments')
-        print('Point size before: {} and after filtering: {}'.format(origin_point_size, len(pcloud)))
+        print(
+            'Point size before: {} and after filtering: {}'.format(
+                origin_point_size,
+                len(pcloud)))
 
     return pcloud
 
@@ -80,8 +85,9 @@ def outlier_filter(tcluster, verbose=True):
     try:
         _mean, _std = tcluster['norm'].mean(), tcluster['norm'].std()
         lower, higher = _mean - 3 * _std, _mean + 3 * _std
-    except:
-        tcluster['norm'] = np.sqrt(np.square(tcluster[['x', 'y', 'z']]).sum(axis=1))
+    except BaseException:
+        tcluster['norm'] = np.sqrt(
+            np.square(tcluster[['x', 'y', 'z']]).sum(axis=1))
         _mean, _std = tcluster['norm'].mean(), tcluster['norm'].std()
         lower, higher = _mean - 3 * _std, _mean + 3 * _std
     end_time = (datetime.now() - start_time).total_seconds()
@@ -89,7 +95,8 @@ def outlier_filter(tcluster, verbose=True):
         print('Computing lower-higher bounds {}'.format(end_time))
 
     start_time = datetime.now()
-    tcluster = tcluster[(tcluster['norm'] > lower) & (tcluster['norm'] < higher)]
+    tcluster = tcluster[(tcluster['norm'] > lower) &
+                        (tcluster['norm'] < higher)]
     end_time = (datetime.now() - start_time).total_seconds()
     if verbose:
         print('Applying  bounds {}'.format(end_time))
@@ -99,7 +106,7 @@ def outlier_filter(tcluster, verbose=True):
 def get_bounding_boxes(clusters):
     box_coord_list = []
     for i in range(len(clusters)):
-        x_min, x_max, y_min, y_max, z_min, z_max =  list(clusters.iloc[i])
+        x_min, x_max, y_min, y_max, z_min, z_max = list(clusters.iloc[i])
         box = np.zeros([8, 3])
         box[0, :] = [x_min, y_min, z_min]
         box[1, :] = [x_max, y_min, z_min]
@@ -127,7 +134,7 @@ def get_OBB(cluster):
     xy_minimum_bb = minimum_bounding_box(cluster[['x', 'y']].values)
 
     # make array [z_min, z_min , z_min , z_min , z_max,  z_max,  z_max,  z_max]
-    z_array =  np.array([z_min] * 4 + [z_max] * 4)
+    z_array = np.array([z_min] * 4 + [z_max] * 4)
 
     # double xy bbox z_array
     xy_minimum_bb = np.concatenate((xy_minimum_bb, xy_minimum_bb), axis=0)

@@ -10,7 +10,8 @@ import __init__ as booger
 
 
 class Segmentator(nn.Module):
-    def __init__(self, ARCH, nclasses, path=None, path_append="", strict=False):
+    def __init__(self, ARCH, nclasses, path=None,
+                 path_append="", strict=False):
         super().__init__()
         self.ARCH = ARCH
         self.nclasses = nclasses
@@ -76,7 +77,8 @@ class Segmentator(nn.Module):
         # print number of parameters and the ones requiring gradients
         # print number of parameters and the ones requiring gradients
         weights_total = sum(p.numel() for p in self.parameters())
-        weights_grad = sum(p.numel() for p in self.parameters() if p.requires_grad)
+        weights_grad = sum(p.numel()
+                           for p in self.parameters() if p.requires_grad)
         print("Total number of parameters: ", weights_total)
         print("Total number of parameters requires_grad: ", weights_grad)
 
@@ -103,7 +105,8 @@ class Segmentator(nn.Module):
                 print()
                 print("Couldn't load backbone, using random weights. Error: ", e)
                 if strict:
-                    print("I'm in strict mode and failure to load weights blows me up :)")
+                    print(
+                        "I'm in strict mode and failure to load weights blows me up :)")
                     raise e
 
             # try decoder
@@ -115,7 +118,8 @@ class Segmentator(nn.Module):
             except Exception as e:
                 print("Couldn't load decoder, using random weights. Error: ", e)
                 if strict:
-                    print("I'm in strict mode and failure to load weights blows me up :)")
+                    print(
+                        "I'm in strict mode and failure to load weights blows me up :)")
                     raise e
 
             # try head
@@ -127,7 +131,8 @@ class Segmentator(nn.Module):
             except Exception as e:
                 print("Couldn't load head, using random weights. Error: ", e)
                 if strict:
-                    print("I'm in strict mode and failure to load weights blows me up :)")
+                    print(
+                        "I'm in strict mode and failure to load weights blows me up :)")
                     raise e
 
             # try CRF
@@ -140,7 +145,8 @@ class Segmentator(nn.Module):
                 except Exception as e:
                     print("Couldn't load CRF, using random weights. Error: ", e)
                     if strict:
-                        print("I'm in strict mode and failure to load weights blows me up :)")
+                        print(
+                            "I'm in strict mode and failure to load weights blows me up :)")
                         raise e
         else:
             print("No path to pretrained, using random init.")

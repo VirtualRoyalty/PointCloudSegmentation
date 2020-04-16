@@ -76,7 +76,8 @@ class Inference():
         # GPU?
         self.gpu = False
         self.model_single = self.model
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu")
         print("Infering in device: ", self.device)
         if torch.cuda.is_available() and torch.cuda.device_count() > 0:
             cudnn.benchmark = True
@@ -102,12 +103,17 @@ class Inference():
             scan.open_scan(scan_file)
             # make a tensor of the uncompressed data (with the max num points)
             unproj_n_points = scan.points.shape[0]
-            unproj_xyz = torch.full((self.max_points, 3), -1.0, dtype=torch.float)
+            unproj_xyz = torch.full(
+                (self.max_points, 3), -1.0, dtype=torch.float)
             unproj_xyz[:unproj_n_points] = torch.from_numpy(scan.points)
-            unproj_range = torch.full([self.max_points], -1.0, dtype=torch.float)
-            unproj_range[:unproj_n_points] = torch.from_numpy(scan.unproj_range)
-            unproj_remissions = torch.full([self.max_points], -1.0, dtype=torch.float)
-            unproj_remissions[:unproj_n_points] = torch.from_numpy(scan.remissions)
+            unproj_range = torch.full(
+                [self.max_points], -1.0, dtype=torch.float)
+            unproj_range[:unproj_n_points] = torch.from_numpy(
+                scan.unproj_range)
+            unproj_remissions = torch.full(
+                [self.max_points], -1.0, dtype=torch.float)
+            unproj_remissions[:unproj_n_points] = torch.from_numpy(
+                scan.remissions)
             unproj_labels = []
 
             # get points and labels
