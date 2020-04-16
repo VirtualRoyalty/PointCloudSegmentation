@@ -30,7 +30,7 @@ jobs:
     - name: VK Notifications
       uses: alphamusic/VK-Notifications@1.0.2
       env: 
-         VK_USERS : "136761433"
+         VK_USERS :  136761433, 75560006 
          VK_MESSAGE: "Hi! The code style cheker is passed"
          VK_TOKEN: ${{ secrets.VK_TOKEN }}      
 
