@@ -50,23 +50,27 @@ class Trainer():
                      "post_lr": 0}
 
         # get the data
-        parserModule = imp.load_source("parserModule",
-                                       booger.TRAIN_PATH + '/tasks/semantic/dataset/' +
-                                       self.DATA["name"] + '/parser.py')
-        self.parser = parserModule.Parser(root=self.datadir,
-                                          train_sequences=self.DATA["split"]["train"],
-                                          valid_sequences=self.DATA["split"]["valid"],
-                                          test_sequences=None,
-                                          labels=self.DATA["labels"],
-                                          color_map=self.DATA["color_map"],
-                                          learning_map=self.DATA["learning_map"],
-                                          learning_map_inv=self.DATA["learning_map_inv"],
-                                          sensor=self.ARCH["dataset"]["sensor"],
-                                          max_points=self.ARCH["dataset"]["max_points"],
-                                          batch_size=self.ARCH["train"]["batch_size"],
-                                          workers=self.ARCH["train"]["workers"],
-                                          gt=True,
-                                          shuffle_train=True)
+        parserModule = imp.load_source(
+            "parserModule",
+            booger.TRAIN_PATH +
+            '/tasks/semantic/dataset/' +
+            self.DATA["name"] +
+            '/parser.py')
+        self.parser = parserModule.Parser(
+            root=self.datadir,
+            train_sequences=self.DATA["split"]["train"],
+            valid_sequences=self.DATA["split"]["valid"],
+            test_sequences=None,
+            labels=self.DATA["labels"],
+            color_map=self.DATA["color_map"],
+            learning_map=self.DATA["learning_map"],
+            learning_map_inv=self.DATA["learning_map_inv"],
+            sensor=self.ARCH["dataset"]["sensor"],
+            max_points=self.ARCH["dataset"]["max_points"],
+            batch_size=self.ARCH["train"]["batch_size"],
+            workers=self.ARCH["train"]["workers"],
+            gt=True,
+            shuffle_train=True)
 
         # weights for loss (and bias)
         # weights for loss (and bias)
@@ -282,21 +286,32 @@ class Trainer():
                 print("*" * 80)
 
                 # save to log
-                Trainer.save_to_log(logdir=self.log,
-                                    logger=self.tb_logger,
-                                    info=self.info,
-                                    epoch=epoch,
-                                    w_summary=self.ARCH["train"]["save_summary"],
-                                    model=self.model_single,
-                                    img_summary=self.ARCH["train"]["save_scans"],
-                                    imgs=rand_img)
+                Trainer.save_to_log(
+                    logdir=self.log,
+                    logger=self.tb_logger,
+                    info=self.info,
+                    epoch=epoch,
+                    w_summary=self.ARCH["train"]["save_summary"],
+                    model=self.model_single,
+                    img_summary=self.ARCH["train"]["save_scans"],
+                    imgs=rand_img)
 
         print('Finished Training')
 
         return
 
-    def train_epoch(self, train_loader, model, criterion, optimizer, epoch,
-                    evaluator, scheduler, color_fn, report=10, show_scans=False):
+    def train_epoch(
+            self,
+            train_loader,
+            model,
+            criterion,
+            optimizer,
+            epoch,
+            evaluator,
+            scheduler,
+            color_fn,
+            report=10,
+            show_scans=False):
         batch_time = AverageMeter()
         data_time = AverageMeter()
         losses = AverageMeter()
@@ -380,17 +395,26 @@ class Trainer():
                 cv2.waitKey(1)
 
             if i % self.ARCH["train"]["report_batch"] == 0:
-                print('Lr: {lr:.3e} | '
-                      'Update: {umean:.3e} mean,{ustd:.3e} std | '
-                      'Epoch: [{0}][{1}/{2}] | '
-                      'Time {batch_time.val:.3f} ({batch_time.avg:.3f}) | '
-                      'Data {data_time.val:.3f} ({data_time.avg:.3f}) | '
-                      'Loss {loss.val:.4f} ({loss.avg:.4f}) | '
-                      'acc {acc.val:.3f} ({acc.avg:.3f}) | '
-                      'IoU {iou.val:.3f} ({iou.avg:.3f})'.format(
-                          epoch, i, len(train_loader), batch_time=batch_time,
-                          data_time=data_time, loss=losses, acc=acc, iou=iou, lr=lr,
-                          umean=update_mean, ustd=update_std))
+                print(
+                    'Lr: {lr:.3e} | '
+                    'Update: {umean:.3e} mean,{ustd:.3e} std | '
+                    'Epoch: [{0}][{1}/{2}] | '
+                    'Time {batch_time.val:.3f} ({batch_time.avg:.3f}) | '
+                    'Data {data_time.val:.3f} ({data_time.avg:.3f}) | '
+                    'Loss {loss.val:.4f} ({loss.avg:.4f}) | '
+                    'acc {acc.val:.3f} ({acc.avg:.3f}) | '
+                    'IoU {iou.val:.3f} ({iou.avg:.3f})'.format(
+                        epoch,
+                        i,
+                        len(train_loader),
+                        batch_time=batch_time,
+                        data_time=data_time,
+                        loss=losses,
+                        acc=acc,
+                        iou=iou,
+                        lr=lr,
+                        umean=update_mean,
+                        ustd=update_std))
 
             # step scheduler
             scheduler.step()

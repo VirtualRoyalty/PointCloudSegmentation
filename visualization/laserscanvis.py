@@ -13,8 +13,18 @@ labels = []
 class LaserScanVis:
     """Class that creates and handles a visualizer for a pointcloud"""
 
-    def __init__(self, scan, scan_names, label_names, offset=0,
-                 semantics=True, bboxes_names=None, use_bbox_measurements=False, bboxes_labels_names=None, roi_filter=False, instances=False):
+    def __init__(
+            self,
+            scan,
+            scan_names,
+            label_names,
+            offset=0,
+            semantics=True,
+            bboxes_names=None,
+            use_bbox_measurements=False,
+            bboxes_labels_names=None,
+            roi_filter=False,
+            instances=False):
         self.scan = scan
         self.scan_names = scan_names
         self.label_names = label_names
@@ -89,8 +99,9 @@ class LaserScanVis:
             self.multiplier += 1
 
         # new canvas for img
-        self.img_canvas = SceneCanvas(keys='interactive', show=True,
-                                      size=(self.canvas_W, self.canvas_H * self.multiplier))
+        self.img_canvas = SceneCanvas(
+            keys='interactive', show=True, size=(
+                self.canvas_W, self.canvas_H * self.multiplier))
         # grid
         self.img_grid = self.img_canvas.central_widget.add_grid()
         # interface (n next, b back, q quit, very simple)
@@ -224,9 +235,14 @@ class LaserScanVis:
                 depth = bbox[1]
                 height = bbox[2]
 
-                bboxes.append(vispy.scene.visuals.Box(width=width, height=height,
-                                                      depth=depth, color=color, edge_color=edge_color,
-                                                      parent=self.sem_view.scene))
+                bboxes.append(
+                    vispy.scene.visuals.Box(
+                        width=width,
+                        height=height,
+                        depth=depth,
+                        color=color,
+                        edge_color=edge_color,
+                        parent=self.sem_view.scene))
 
             for cluster, i in zip(bboxes, range(len(self.scan.bboxes))):
                 bbox = self.scan.bboxes[i]
@@ -241,9 +257,12 @@ class LaserScanVis:
                     bbox = self.scan.bboxes[i]
                     center = bbox[3]
                     #labels.append(vispy.scene.visuals.Text(text = self.scan.bbox_labels[i], parent = self.sem_view.scene,  color = self.scan.bbox_label_color[i], bold=True))
-                    labels.append(vispy.scene.visuals.Text(text=self.scan.bbox_labels[i],
-                                                           parent=self.sem_view.scene,
-                                                           color="red", bold=True))
+                    labels.append(
+                        vispy.scene.visuals.Text(
+                            text=self.scan.bbox_labels[i],
+                            parent=self.sem_view.scene,
+                            color="red",
+                            bold=True))
                     labels[i].pos = center[0], center[1], center[2] + 1
                     labels[i].font_size = 600
 

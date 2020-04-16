@@ -132,7 +132,11 @@ class KNN(nn.Module):
         # now vote
         # argmax onehot has an extra class for objects after cutoff
         knn_argmax_onehot = torch.zeros(
-            (1, self.nclasses + 1, P[0]), device=device).type(proj_range.type())
+            (1,
+             self.nclasses + 1,
+             P[0]),
+            device=device).type(
+            proj_range.type())
         ones = torch.ones_like(knn_argmax).type(proj_range.type())
         knn_argmax_onehot = knn_argmax_onehot.scatter_add_(1, knn_argmax, ones)
 

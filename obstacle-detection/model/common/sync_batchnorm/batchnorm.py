@@ -54,8 +54,14 @@ class _SynchronizedBatchNorm(_BatchNorm):
         # PyTorch's implementation.
         if not (self._is_parallel and self.training):
             return F.batch_norm(
-                input, self.running_mean, self.running_var, self.weight, self.bias,
-                self.training, self.momentum, self.eps)
+                input,
+                self.running_mean,
+                self.running_var,
+                self.weight,
+                self.bias,
+                self.training,
+                self.momentum,
+                self.eps)
 
         # Resize the input to (B, C, -1).
         input_shape = input.size()

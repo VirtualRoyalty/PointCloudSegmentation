@@ -24,13 +24,13 @@ if __name__ == '__main__':
         help='Dataset dir. No Default',
     )
     parser.add_argument(
-        '--predictions', '-p',
+        '--predictions',
+        '-p',
         type=str,
         required=None,
         help='Prediction dir. Same organization as dataset, but predictions in'
         'each sequences "prediction" directory. No Default. If no option is set'
-        ' we look for the labels in the same directory as dataset'
-    )
+        ' we look for the labels in the same directory as dataset')
     parser.add_argument(
         '--split', '-s',
         type=str,

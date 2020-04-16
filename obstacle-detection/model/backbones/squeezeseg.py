@@ -82,10 +82,11 @@ class Backbone(nn.Module):
             print("Strides: ", self.strides)
 
         # encoder
-        self.conv1a = nn.Sequential(nn.Conv2d(self.input_depth, 64, kernel_size=3,
-                                              stride=[1, self.strides[0]],
-                                              padding=1),
-                                    nn.ReLU(inplace=True))
+        self.conv1a = nn.Sequential(
+            nn.Conv2d(
+                self.input_depth, 64, kernel_size=3, stride=[
+                    1, self.strides[0]], padding=1), nn.ReLU(
+                inplace=True))
         self.conv1b = nn.Conv2d(self.input_depth, 64, kernel_size=1,
                                 stride=1, padding=0)
         self.fire23 = nn.Sequential(nn.MaxPool2d(kernel_size=3,
