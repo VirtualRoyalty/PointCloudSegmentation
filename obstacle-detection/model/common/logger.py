@@ -7,11 +7,10 @@ import scipy.misc
 try:
     from StringIO import StringIO  # Python 2.7
 except ImportError:
-    from io import BytesIO         # Python 3.x
+    from io import BytesIO  # Python 3.x
 
 
 class Logger(object):
-
     def __init__(self, log_dir):
         """Create a summary writer logging to log_dir."""
         self.writer = tf.summary.FileWriter(log_dir)
@@ -40,8 +39,8 @@ class Logger(object):
                                        height=img.shape[0],
                                        width=img.shape[1])
             # Create a Summary value
-            img_summaries.append(tf.Summary.Value(
-                tag='%s/%d' % (tag, i), image=img_sum))
+            img_summaries.append(
+                tf.Summary.Value(tag='%s/%d' % (tag, i), image=img_sum))
 
         # Create and write Summary
         summary = tf.Summary(value=img_summaries)

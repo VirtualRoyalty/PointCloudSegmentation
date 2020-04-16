@@ -19,8 +19,10 @@ from torch.nn.parallel._functions import ReduceAddCoalesced, Broadcast
 from .comm import SyncMaster
 from .replicate import DataParallelWithCallback
 
-__all__ = ['SynchronizedBatchNorm1d', 'SynchronizedBatchNorm2d',
-           'SynchronizedBatchNorm3d', 'convert_model']
+__all__ = [
+    'SynchronizedBatchNorm1d', 'SynchronizedBatchNorm2d',
+    'SynchronizedBatchNorm3d', 'convert_model'
+]
 
 
 def _sum_ft(tensor):
@@ -33,15 +35,17 @@ def _unsqueeze_ft(tensor):
     return tensor.unsqueeze(0).unsqueeze(-1)
 
 
-_ChildMessage = collections.namedtuple(
-    '_ChildMessage', ['sum', 'ssum', 'sum_size'])
+_ChildMessage = collections.namedtuple('_ChildMessage',
+                                       ['sum', 'ssum', 'sum_size'])
 _MasterMessage = collections.namedtuple('_MasterMessage', ['sum', 'inv_std'])
 
 
 class _SynchronizedBatchNorm(_BatchNorm):
     def __init__(self, num_features, eps=1e-5, momentum=0.1, affine=True):
-        super(_SynchronizedBatchNorm, self).__init__(
-            num_features, eps=eps, momentum=momentum, affine=affine)
+        super(_SynchronizedBatchNorm, self).__init__(num_features,
+                                                     eps=eps,
+                                                     momentum=momentum,
+                                                     affine=affine)
 
         self._sync_master = SyncMaster(self._data_parallel_master)
 
@@ -53,15 +57,9 @@ class _SynchronizedBatchNorm(_BatchNorm):
         # If it is not parallel computation or is in evaluation mode, use
         # PyTorch's implementation.
         if not (self._is_parallel and self.training):
-            return F.batch_norm(
-                input,
-                self.running_mean,
-                self.running_var,
-                self.weight,
-                self.bias,
-                self.training,
-                self.momentum,
-                self.eps)
+            return F.batch_norm(input, self.running_mean, self.running_var,
+                                self.weight, self.bias, self.training,
+                                self.momentum, self.eps)
 
         # Resize the input to (B, C, -1).
         input_shape = input.size()
@@ -70,7 +68,7 @@ class _SynchronizedBatchNorm(_BatchNorm):
         # Compute the sum and square-sum.
         sum_size = input.size(0) * input.size(2)
         input_sum = _sum_ft(input)
-        input_ssum = _sum_ft(input ** 2)
+        input_ssum = _sum_ft(input**2)
 
         # Reduce-and-broadcast the statistics.
         if self._parallel_id == 0:
@@ -106,9 +104,8 @@ class _SynchronizedBatchNorm(_BatchNorm):
 
         # Always using same "device order" makes the ReduceAdd operation faster.
         # Thanks to:: Tete Xiao (http://tetexiao.com/)
-        intermediates = sorted(
-            intermediates,
-            key=lambda i: i[1].sum.get_device())
+        intermediates = sorted(intermediates,
+                               key=lambda i: i[1].sum.get_device())
 
         to_reduce = [i[1][:2] for i in intermediates]
         to_reduce = [j for i in to_reduce for j in i]  # flatten
@@ -122,8 +119,8 @@ class _SynchronizedBatchNorm(_BatchNorm):
 
         outputs = []
         for i, rec in enumerate(intermediates):
-            outputs.append((rec[0], _MasterMessage(
-                *broadcasted[i * 2:i * 2 + 2])))
+            outputs.append(
+                (rec[0], _MasterMessage(*broadcasted[i * 2:i * 2 + 2])))
 
         return outputs
 
@@ -141,7 +138,7 @@ class _SynchronizedBatchNorm(_BatchNorm):
         self.running_var = (1 - self.momentum) * \
             self.running_var + self.momentum * unbias_var.data
 
-        return mean, bias_var.clamp(self.eps) ** -0.5
+        return mean, bias_var.clamp(self.eps)**-0.5
 
 
 class SynchronizedBatchNorm1d(_SynchronizedBatchNorm):
@@ -199,11 +196,10 @@ class SynchronizedBatchNorm1d(_SynchronizedBatchNorm):
         >>> input = torch.autograd.Variable(torch.randn(20, 100))
         >>> output = m(input)
     """
-
     def _check_input_dim(self, input):
         if input.dim() != 2 and input.dim() != 3:
-            raise ValueError('expected 2D or 3D input (got {}D input)'
-                             .format(input.dim()))
+            raise ValueError('expected 2D or 3D input (got {}D input)'.format(
+                input.dim()))
         super(SynchronizedBatchNorm1d, self)._check_input_dim(input)
 
 
@@ -262,11 +258,10 @@ class SynchronizedBatchNorm2d(_SynchronizedBatchNorm):
         >>> input = torch.autograd.Variable(torch.randn(20, 100, 35, 45))
         >>> output = m(input)
     """
-
     def _check_input_dim(self, input):
         if input.dim() != 4:
-            raise ValueError('expected 4D input (got {}D input)'
-                             .format(input.dim()))
+            raise ValueError('expected 4D input (got {}D input)'.format(
+                input.dim()))
         super(SynchronizedBatchNorm2d, self)._check_input_dim(input)
 
 
@@ -326,11 +321,10 @@ class SynchronizedBatchNorm3d(_SynchronizedBatchNorm):
         >>> input = torch.autograd.Variable(torch.randn(20, 100, 35, 45, 10))
         >>> output = m(input)
     """
-
     def _check_input_dim(self, input):
         if input.dim() != 5:
-            raise ValueError('expected 5D input (got {}D input)'
-                             .format(input.dim()))
+            raise ValueError('expected 5D input (got {}D input)'.format(
+                input.dim()))
         super(SynchronizedBatchNorm3d, self)._check_input_dim(input)
 
 
@@ -358,15 +352,17 @@ def convert_model(module):
         return mod
 
     mod = module
-    for pth_module, sync_module in zip([torch.nn.modules.batchnorm.BatchNorm1d,
-                                        torch.nn.modules.batchnorm.BatchNorm2d,
-                                        torch.nn.modules.batchnorm.BatchNorm3d],
-                                       [SynchronizedBatchNorm1d,
-                                        SynchronizedBatchNorm2d,
-                                        SynchronizedBatchNorm3d]):
+    for pth_module, sync_module in zip([
+            torch.nn.modules.batchnorm.BatchNorm1d,
+            torch.nn.modules.batchnorm.BatchNorm2d,
+            torch.nn.modules.batchnorm.BatchNorm3d
+    ], [
+            SynchronizedBatchNorm1d, SynchronizedBatchNorm2d,
+            SynchronizedBatchNorm3d
+    ]):
         if isinstance(module, pth_module):
-            mod = sync_module(module.num_features, module.eps,
-                              module.momentum, module.affine)
+            mod = sync_module(module.num_features, module.eps, module.momentum,
+                              module.affine)
             mod.running_mean = module.running_mean
             mod.running_var = module.running_var
             if module.affine:

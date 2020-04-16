@@ -9,7 +9,6 @@ class warmupLR(toptim._LRScheduler):
         certain number of steps. After this number of steps, each step decreases
         LR exponentially.
     """
-
     def __init__(self, optimizer, lr, warmup_steps, momentum, decay):
         # cyclic params
         self.optimizer = optimizer
@@ -39,8 +38,9 @@ class warmupLR(toptim._LRScheduler):
         super().__init__(optimizer)
 
     def get_lr(self):
-        return [self.lr * (self.decay ** self.last_epoch)
-                for lr in self.base_lrs]
+        return [
+            self.lr * (self.decay**self.last_epoch) for lr in self.base_lrs
+        ]
 
     def step(self, epoch=None):
         if self.finished or self.initial_scheduler.last_epoch >= self.warmup_steps:

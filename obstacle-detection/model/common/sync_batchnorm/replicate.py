@@ -13,10 +13,8 @@ import functools
 from torch.nn.parallel.data_parallel import DataParallel
 
 __all__ = [
-    'CallbackContext',
-    'execute_replication_callbacks',
-    'DataParallelWithCallback',
-    'patch_replication_callback'
+    'CallbackContext', 'execute_replication_callbacks',
+    'DataParallelWithCallback', 'patch_replication_callback'
 ]
 
 
@@ -60,7 +58,6 @@ class DataParallelWithCallback(DataParallel):
         > sync_bn = DataParallelWithCallback(sync_bn, device_ids=[0, 1])
         # sync_bn.__data_parallel_replicate__ will be invoked.
     """
-
     def replicate(self, module, device_ids):
         modules = super(DataParallelWithCallback,
                         self).replicate(module, device_ids)

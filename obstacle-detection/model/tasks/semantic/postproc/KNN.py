@@ -101,16 +101,19 @@ class KNN(nn.Module):
         # make a kernel to weigh the ranges according to distance in (x,y)
         # I make this 1 - kernel because I want distances that are close in (x,y)
         # to matter more
-        inv_gauss_k = (
-            1 - get_gaussian_kernel(self.search, self.sigma, 1)).view(1, -1, 1)
+        inv_gauss_k = (1 -
+                       get_gaussian_kernel(self.search, self.sigma, 1)).view(
+                           1, -1, 1)
         inv_gauss_k = inv_gauss_k.to(device).type(proj_range.type())
 
         # apply weighing
         k2_distances = k2_distances * inv_gauss_k
 
         # find nearest neighbors
-        _, knn_idx = k2_distances.topk(
-            self.knn, dim=1, largest=False, sorted=False)
+        _, knn_idx = k2_distances.topk(self.knn,
+                                       dim=1,
+                                       largest=False,
+                                       sorted=False)
 
         # do the same unfolding with the argmax
         proj_unfold_1_argmax = F.unfold(proj_argmax[None, None, ...].float(),
@@ -119,24 +122,22 @@ class KNN(nn.Module):
         unproj_unfold_1_argmax = proj_unfold_1_argmax[:, :, idx_list]
 
         # get the top k predictions from the knn at each pixel
-        knn_argmax = torch.gather(
-            input=unproj_unfold_1_argmax, dim=1, index=knn_idx)
+        knn_argmax = torch.gather(input=unproj_unfold_1_argmax,
+                                  dim=1,
+                                  index=knn_idx)
 
         # fake an invalid argmax of classes + 1 for all cutoff items
         if self.cutoff > 0:
-            knn_distances = torch.gather(
-                input=k2_distances, dim=1, index=knn_idx)
+            knn_distances = torch.gather(input=k2_distances,
+                                         dim=1,
+                                         index=knn_idx)
             knn_invalid_idx = knn_distances > self.cutoff
             knn_argmax[knn_invalid_idx] = self.nclasses
 
         # now vote
         # argmax onehot has an extra class for objects after cutoff
-        knn_argmax_onehot = torch.zeros(
-            (1,
-             self.nclasses + 1,
-             P[0]),
-            device=device).type(
-            proj_range.type())
+        knn_argmax_onehot = torch.zeros((1, self.nclasses + 1, P[0]),
+                                        device=device).type(proj_range.type())
         ones = torch.ones_like(knn_argmax).type(proj_range.type())
         knn_argmax_onehot = knn_argmax_onehot.scatter_add_(1, knn_argmax, ones)
 

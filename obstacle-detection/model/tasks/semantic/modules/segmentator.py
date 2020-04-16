@@ -10,8 +10,12 @@ import __init__ as booger
 
 
 class Segmentator(nn.Module):
-    def __init__(self, ARCH, nclasses, path=None,
-                 path_append="", strict=False):
+    def __init__(self,
+                 ARCH,
+                 nclasses,
+                 path=None,
+                 path_append="",
+                 strict=False):
         super().__init__()
         self.ARCH = ARCH
         self.nclasses = nclasses
@@ -23,14 +27,12 @@ class Segmentator(nn.Module):
         bboneModule = imp.load_source(
             "bboneModule",
             '/home/jovyan/work/obstacle-detection/model/backbones/' +
-            self.ARCH["backbone"]["name"] +
-            '.py')
+            self.ARCH["backbone"]["name"] + '.py')
         self.backbone = bboneModule.Backbone(params=self.ARCH["backbone"])
 
         # do a pass of the backbone to initialize the skip connections
         stub = torch.zeros(
-            (1,
-             self.backbone.get_input_depth(),
+            (1, self.backbone.get_input_depth(),
              self.ARCH["dataset"]["sensor"]["img_prop"]["height"],
              self.ARCH["dataset"]["sensor"]["img_prop"]["width"]))
 
@@ -41,19 +43,21 @@ class Segmentator(nn.Module):
 
         decoderModule = imp.load_source(
             "decoderModule",
-            '/home/jovyan/work/obstacle-detection/model/tasks/semantic/decoders/' +
-            self.ARCH["decoder"]["name"] +
-            '.py')
+            '/home/jovyan/work/obstacle-detection/model/tasks/semantic/decoders/'
+            + self.ARCH["decoder"]["name"] + '.py')
         self.decoder = decoderModule.Decoder(
             params=self.ARCH["decoder"],
             stub_skips=stub_skips,
             OS=self.ARCH["backbone"]["OS"],
             feature_depth=self.backbone.get_last_depth())
 
-        self.head = nn.Sequential(nn.Dropout2d(p=ARCH["head"]["dropout"]),
-                                  nn.Conv2d(self.decoder.get_last_depth(),
-                                            self.nclasses, kernel_size=3,
-                                            stride=1, padding=1))
+        self.head = nn.Sequential(
+            nn.Dropout2d(p=ARCH["head"]["dropout"]),
+            nn.Conv2d(self.decoder.get_last_depth(),
+                      self.nclasses,
+                      kernel_size=3,
+                      stride=1,
+                      padding=1))
 
         if self.ARCH["post"]["CRF"]["use"]:
             self.CRF = CRF(self.ARCH["post"]["CRF"]["params"], self.nclasses)
@@ -83,8 +87,8 @@ class Segmentator(nn.Module):
         # print number of parameters and the ones requiring gradients
         # print number of parameters and the ones requiring gradients
         weights_total = sum(p.numel() for p in self.parameters())
-        weights_grad = sum(p.numel()
-                           for p in self.parameters() if p.requires_grad)
+        weights_grad = sum(p.numel() for p in self.parameters()
+                           if p.requires_grad)
         print("Total number of parameters: ", weights_total)
         print("Total number of parameters requires_grad: ", weights_grad)
 
@@ -109,27 +113,28 @@ class Segmentator(nn.Module):
                 print("Successfully loaded model backbone weights")
             except Exception as e:
                 print()
-                print("Couldn't load backbone, using random weights. Error: ", e)
+                print("Couldn't load backbone, using random weights. Error: ",
+                      e)
                 if strict:
                     print(
-                        "I'm in strict mode and failure to load weights blows me up :)")
+                        "I'm in strict mode and failure to load weights blows me up :)"
+                    )
                     raise e
 
             # try decoder
             try:
-                w_dict = torch.load(
-                    path +
-                    "/segmentation_decoder" +
-                    path_append,
-                    map_location=lambda storage,
-                    loc: storage)
+                w_dict = torch.load(path + "/segmentation_decoder" +
+                                    path_append,
+                                    map_location=lambda storage, loc: storage)
                 self.decoder.load_state_dict(w_dict, strict=True)
                 print("Successfully loaded model decoder weights")
             except Exception as e:
-                print("Couldn't load decoder, using random weights. Error: ", e)
+                print("Couldn't load decoder, using random weights. Error: ",
+                      e)
                 if strict:
                     print(
-                        "I'm in strict mode and failure to load weights blows me up :)")
+                        "I'm in strict mode and failure to load weights blows me up :)"
+                    )
                     raise e
 
             # try head
@@ -142,7 +147,8 @@ class Segmentator(nn.Module):
                 print("Couldn't load head, using random weights. Error: ", e)
                 if strict:
                     print(
-                        "I'm in strict mode and failure to load weights blows me up :)")
+                        "I'm in strict mode and failure to load weights blows me up :)"
+                    )
                     raise e
 
             # try CRF
@@ -150,15 +156,16 @@ class Segmentator(nn.Module):
                 try:
                     w_dict = torch.load(
                         path + "/segmentation_CRF" + path_append,
-                        map_location=lambda storage,
-                        loc: storage)
+                        map_location=lambda storage, loc: storage)
                     self.CRF.load_state_dict(w_dict, strict=True)
                     print("Successfully loaded model CRF weights")
                 except Exception as e:
-                    print("Couldn't load CRF, using random weights. Error: ", e)
+                    print("Couldn't load CRF, using random weights. Error: ",
+                          e)
                     if strict:
                         print(
-                            "I'm in strict mode and failure to load weights blows me up :)")
+                            "I'm in strict mode and failure to load weights blows me up :)"
+                        )
                         raise e
         else:
             print("No path to pretrained, using random init.")
@@ -175,12 +182,11 @@ class Segmentator(nn.Module):
 
     def save_checkpoint(self, logdir, suffix=""):
         # Save the weights
-        torch.save(self.backbone.state_dict(), logdir +
-                   "/backbone" + suffix)
-        torch.save(self.decoder.state_dict(), logdir +
-                   "/segmentation_decoder" + suffix)
-        torch.save(self.head.state_dict(), logdir +
-                   "/segmentation_head" + suffix)
+        torch.save(self.backbone.state_dict(), logdir + "/backbone" + suffix)
+        torch.save(self.decoder.state_dict(),
+                   logdir + "/segmentation_decoder" + suffix)
+        torch.save(self.head.state_dict(),
+                   logdir + "/segmentation_head" + suffix)
         if self.CRF:
-            torch.save(self.CRF.state_dict(), logdir +
-                       "/segmentation_CRF" + suffix)
+            torch.save(self.CRF.state_dict(),
+                       logdir + "/segmentation_CRF" + suffix)

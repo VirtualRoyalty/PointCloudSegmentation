@@ -17,7 +17,7 @@ class LocallyConnectedXYZLayer(nn.Module):
         self.padh = h // 2
         self.w = w
         self.padw = w // 2
-        assert(self.h % 2 == 1 and self.w % 2 == 1)  # window must be odd
+        assert (self.h % 2 == 1 and self.w % 2 == 1)  # window must be odd
         self.sigma = sigma
         self.gauss_den = 2 * self.sigma**2
         self.nclasses = nclasses
@@ -35,18 +35,18 @@ class LocallyConnectedXYZLayer(nn.Module):
         z = xyz[:, 2].unsqueeze(1)
 
         # im2col in size of window of input (x,y,z separately)
-        window_x = F.unfold(x, kernel_size=(self.h, self.w),
+        window_x = F.unfold(x,
+                            kernel_size=(self.h, self.w),
                             padding=(self.padh, self.padw))
-        center_x = F.unfold(x, kernel_size=(1, 1),
-                            padding=(0, 0))
-        window_y = F.unfold(y, kernel_size=(self.h, self.w),
+        center_x = F.unfold(x, kernel_size=(1, 1), padding=(0, 0))
+        window_y = F.unfold(y,
+                            kernel_size=(self.h, self.w),
                             padding=(self.padh, self.padw))
-        center_y = F.unfold(y, kernel_size=(1, 1),
-                            padding=(0, 0))
-        window_z = F.unfold(z, kernel_size=(self.h, self.w),
+        center_y = F.unfold(y, kernel_size=(1, 1), padding=(0, 0))
+        window_z = F.unfold(z,
+                            kernel_size=(self.h, self.w),
                             padding=(self.padh, self.padw))
-        center_z = F.unfold(z, kernel_size=(1, 1),
-                            padding=(0, 0))
+        center_z = F.unfold(z, kernel_size=(1, 1), padding=(0, 0))
 
         # sq distance to center (center distance is zero)
         unravel_dist2 = (window_x - center_x)**2 + \
@@ -54,7 +54,7 @@ class LocallyConnectedXYZLayer(nn.Module):
             (window_z - center_z)**2
 
         # weight input distance by gaussian weights
-        unravel_gaussian = torch.exp(- unravel_dist2 / self.gauss_den)
+        unravel_gaussian = torch.exp(-unravel_dist2 / self.gauss_den)
 
         # im2col in size of window of softmax to reweight by gaussian weights
         # from input
@@ -82,8 +82,8 @@ class CRF(nn.Module):
         self.params = params
         self.iter = torch.nn.Parameter(torch.tensor(params["iter"]),
                                        requires_grad=False)
-        self.lcn_size = torch.nn.Parameter(torch.tensor([params["lcn_size"]["h"],
-                                                         params["lcn_size"]["w"]]),
+        self.lcn_size = torch.nn.Parameter(torch.tensor(
+            [params["lcn_size"]["h"], params["lcn_size"]["w"]]),
                                            requires_grad=False)
         self.xyz_coef = torch.nn.Parameter(torch.tensor(params["xyz_coef"]),
                                            requires_grad=False).float()
@@ -97,16 +97,13 @@ class CRF(nn.Module):
         # compat init
         self.compat_kernel_init = np.reshape(
             np.ones(
-                (self.nclasses, self.nclasses)) - np.identity(
-                self.nclasses), [
-                self.nclasses, self.nclasses, 1, 1])
+                (self.nclasses, self.nclasses)) - np.identity(self.nclasses),
+            [self.nclasses, self.nclasses, 1, 1])
 
         # bilateral compatibility matrixes
         self.compat_conv = nn.Conv2d(self.nclasses, self.nclasses, 1)
         self.compat_conv.weight = torch.nn.Parameter(
-            torch.from_numpy(
-                self.compat_kernel_init).float() *
-            self.xyz_coef,
+            torch.from_numpy(self.compat_kernel_init).float() * self.xyz_coef,
             requires_grad=True)
 
         # locally connected layer for message passing

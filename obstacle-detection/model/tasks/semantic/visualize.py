@@ -12,20 +12,23 @@ from common.laserscanvis import LaserScanVis
 if __name__ == '__main__':
     parser = argparse.ArgumentParser("./visualize.py")
     parser.add_argument(
-        '--dataset', '-d',
+        '--dataset',
+        '-d',
         type=str,
         required=True,
         help='Dataset to visualize. No Default',
     )
     parser.add_argument(
-        '--config', '-c',
+        '--config',
+        '-c',
         type=str,
         required=False,
         default="config/labels/semantic-kitti.yaml",
         help='Dataset config file. Defaults to %(default)s',
     )
     parser.add_argument(
-        '--sequence', '-s',
+        '--sequence',
+        '-s',
         type=str,
         default="00",
         required=False,
@@ -43,7 +46,8 @@ if __name__ == '__main__':
         'Defaults to %(default)s',
     )
     parser.add_argument(
-        '--ignore_semantics', '-i',
+        '--ignore_semantics',
+        '-i',
         dest='ignore_semantics',
         default=False,
         action='store_true',
@@ -94,8 +98,8 @@ if __name__ == '__main__':
     FLAGS.sequence = '{0:02d}'.format(int(FLAGS.sequence))
 
     # does sequence folder exist?
-    scan_paths = os.path.join(FLAGS.dataset, "sequences",
-                              FLAGS.sequence, "velodyne")
+    scan_paths = os.path.join(FLAGS.dataset, "sequences", FLAGS.sequence,
+                              "velodyne")
     if os.path.isdir(scan_paths):
         print("Sequence folder exists! Using sequence from %s" % scan_paths)
     else:
@@ -103,8 +107,10 @@ if __name__ == '__main__':
         quit()
 
     # populate the pointclouds
-    scan_names = sorted([os.path.join(dp, f) for dp, dn, fn in os.walk(
-        os.path.expanduser(scan_paths)) for f in fn])
+    scan_names = sorted([
+        os.path.join(dp, f)
+        for dp, dn, fn in os.walk(os.path.expanduser(scan_paths)) for f in fn
+    ])
 
     # does sequence folder exist?
     if not FLAGS.ignore_semantics:
@@ -120,12 +126,15 @@ if __name__ == '__main__':
             print("Labels folder doesn't exist! Exiting...")
             quit()
         # populate the pointclouds
-        label_names = sorted([os.path.join(dp, f) for dp, dn, fn in os.walk(
-            os.path.expanduser(label_paths)) for f in fn])
+        label_names = sorted([
+            os.path.join(dp, f)
+            for dp, dn, fn in os.walk(os.path.expanduser(label_paths))
+            for f in fn
+        ])
 
         # check that there are same amount of labels and scans
         if not FLAGS.ignore_safety:
-            assert(len(label_names) == len(scan_names))
+            assert (len(label_names) == len(scan_names))
 
     # create a scan
     if FLAGS.ignore_semantics:

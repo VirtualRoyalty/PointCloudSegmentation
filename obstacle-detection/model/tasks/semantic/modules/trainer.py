@@ -37,25 +37,24 @@ class Trainer():
 
         # put logger where it belongs
         self.tb_logger = Logger(self.log + "/tb")
-        self.info = {"train_update": 0,
-                     "train_loss": 0,
-                     "train_acc": 0,
-                     "train_iou": 0,
-                     "valid_loss": 0,
-                     "valid_acc": 0,
-                     "valid_iou": 0,
-                     "backbone_lr": 0,
-                     "decoder_lr": 0,
-                     "head_lr": 0,
-                     "post_lr": 0}
+        self.info = {
+            "train_update": 0,
+            "train_loss": 0,
+            "train_acc": 0,
+            "train_iou": 0,
+            "valid_loss": 0,
+            "valid_acc": 0,
+            "valid_iou": 0,
+            "backbone_lr": 0,
+            "decoder_lr": 0,
+            "head_lr": 0,
+            "post_lr": 0
+        }
 
         # get the data
         parserModule = imp.load_source(
-            "parserModule",
-            booger.TRAIN_PATH +
-            '/tasks/semantic/dataset/' +
-            self.DATA["name"] +
-            '/parser.py')
+            "parserModule", booger.TRAIN_PATH + '/tasks/semantic/dataset/' +
+            self.DATA["name"] + '/parser.py')
         self.parser = parserModule.Parser(
             root=self.datadir,
             train_sequences=self.DATA["split"]["train"],
@@ -80,7 +79,7 @@ class Trainer():
             # map actual class to xentropy class
             x_cl = self.parser.to_xentropy(cl)
             content[x_cl] += freq
-        self.loss_w = 1 / (content + epsilon_w)   # get weights
+        self.loss_w = 1 / (content + epsilon_w)  # get weights
         for x_cl, w in enumerate(
                 self.loss_w):  # ignore the ones necessary to ignore
             if DATA["learning_ignore"][x_cl]:
@@ -90,8 +89,7 @@ class Trainer():
 
         # concatenate the encoder and the head
         with torch.no_grad():
-            self.model = Segmentator(self.ARCH,
-                                     self.parser.get_n_classes(),
+            self.model = Segmentator(self.ARCH, self.parser.get_n_classes(),
                                      self.path)
 
         # GPU?
@@ -110,7 +108,7 @@ class Trainer():
             self.model.cuda()
         if torch.cuda.is_available() and torch.cuda.device_count() > 1:
             print("Let's use", torch.cuda.device_count(), "GPUs!")
-            self.model = nn.DataParallel(self.model)   # spread in gpus
+            self.model = nn.DataParallel(self.model)  # spread in gpus
             self.model = convert_model(self.model).cuda()  # sync batchnorm
             self.model_single = self.model.module  # single model to get weight names
             self.multi_gpu = True
@@ -128,7 +126,8 @@ class Trainer():
                 self.criterion).cuda()  # spread in gpus
 
         # optimizer
-        if self.ARCH["post"]["CRF"]["use"] and self.ARCH["post"]["CRF"]["train"]:
+        if self.ARCH["post"]["CRF"]["use"] and self.ARCH["post"]["CRF"][
+                "train"]:
             self.lr_group_names = ["post_lr"]
             self.train_dicts = [{'params': self.model_single.CRF.parameters()}]
         else:
@@ -157,7 +156,7 @@ class Trainer():
         # post decay and step sizes come in epochs and we want it in steps
         steps_per_epoch = self.parser.get_train_size()
         up_steps = int(self.ARCH["train"]["wup_epochs"] * steps_per_epoch)
-        final_decay = self.ARCH["train"]["lr_decay"] ** (1 / steps_per_epoch)
+        final_decay = self.ARCH["train"]["lr_decay"]**(1 / steps_per_epoch)
         self.scheduler = warmupLR(optimizer=self.optimizer,
                                   lr=self.ARCH["train"]["lr"],
                                   warmup_steps=up_steps,
@@ -177,7 +176,10 @@ class Trainer():
     def make_log_img(depth, mask, pred, gt, color_fn):
         # input should be [depth, pred, gt]
         # make range image (normalized to 0,1 for saving)
-        depth = (cv2.normalize(depth, None, alpha=0, beta=1,
+        depth = (cv2.normalize(depth,
+                               None,
+                               alpha=0,
+                               beta=1,
                                norm_type=cv2.NORM_MINMAX,
                                dtype=cv2.CV_32F) * 255.0).astype(np.uint8)
         out_img = cv2.applyColorMap(
@@ -191,8 +193,14 @@ class Trainer():
         return (out_img).astype(np.uint8)
 
     @staticmethod
-    def save_to_log(logdir, logger, info, epoch, w_summary=False,
-                    model=None, img_summary=False, imgs=[]):
+    def save_to_log(logdir,
+                    logger,
+                    info,
+                    epoch,
+                    w_summary=False,
+                    model=None,
+                    img_summary=False,
+                    imgs=[]):
         # save scalars
         for tag, value in info.items():
             logger.scalar_summary(tag, value, epoch)
@@ -203,8 +211,8 @@ class Trainer():
                 tag = tag.replace('.', '/')
                 logger.histo_summary(tag, value.data.cpu().numpy(), epoch)
                 if value.grad is not None:
-                    logger.histo_summary(
-                        tag + '/grad', value.grad.data.cpu().numpy(), epoch)
+                    logger.histo_summary(tag + '/grad',
+                                         value.grad.data.cpu().numpy(), epoch)
 
         if img_summary and len(imgs) > 0:
             directory = os.path.join(logdir, "predictions")
@@ -224,8 +232,8 @@ class Trainer():
             if w < 1e-10:
                 self.ignore_class.append(i)
                 print("Ignoring class ", i, " in IoU evaluation")
-        self.evaluator = iouEval(self.parser.get_n_classes(),
-                                 self.device, self.ignore_class)
+        self.evaluator = iouEval(self.parser.get_n_classes(), self.device,
+                                 self.ignore_class)
 
         # train for n epochs
         for epoch in range(self.ARCH["train"]["max_epochs"]):
@@ -235,16 +243,17 @@ class Trainer():
                 self.info[name] = g['lr']
 
             # train for 1 epoch
-            acc, iou, loss, update_mean = self.train_epoch(train_loader=self.parser.get_train_set(),
-                                                           model=self.model,
-                                                           criterion=self.criterion,
-                                                           optimizer=self.optimizer,
-                                                           epoch=epoch,
-                                                           evaluator=self.evaluator,
-                                                           scheduler=self.scheduler,
-                                                           color_fn=self.parser.to_color,
-                                                           report=self.ARCH["train"]["report_batch"],
-                                                           show_scans=self.ARCH["train"]["show_scans"])
+            acc, iou, loss, update_mean = self.train_epoch(
+                train_loader=self.parser.get_train_set(),
+                model=self.model,
+                criterion=self.criterion,
+                optimizer=self.optimizer,
+                epoch=epoch,
+                evaluator=self.evaluator,
+                scheduler=self.scheduler,
+                color_fn=self.parser.to_color,
+                report=self.ARCH["train"]["report_batch"],
+                show_scans=self.ARCH["train"]["show_scans"])
 
             # update info
             self.info["train_update"] = update_mean
@@ -261,13 +270,14 @@ class Trainer():
             if epoch % self.ARCH["train"]["report_epoch"] == 0:
                 # evaluate on validation set
                 print("*" * 80)
-                acc, iou, loss, rand_img = self.validate(val_loader=self.parser.get_valid_set(),
-                                                         model=self.model,
-                                                         criterion=self.criterion,
-                                                         evaluator=self.evaluator,
-                                                         class_func=self.parser.get_xentropy_class_string,
-                                                         color_fn=self.parser.to_color,
-                                                         save_scans=self.ARCH["train"]["save_scans"])
+                acc, iou, loss, rand_img = self.validate(
+                    val_loader=self.parser.get_valid_set(),
+                    model=self.model,
+                    criterion=self.criterion,
+                    evaluator=self.evaluator,
+                    class_func=self.parser.get_xentropy_class_string,
+                    color_fn=self.parser.to_color,
+                    save_scans=self.ARCH["train"]["save_scans"])
 
                 # update info
                 self.info["valid_loss"] = loss
@@ -300,18 +310,17 @@ class Trainer():
 
         return
 
-    def train_epoch(
-            self,
-            train_loader,
-            model,
-            criterion,
-            optimizer,
-            epoch,
-            evaluator,
-            scheduler,
-            color_fn,
-            report=10,
-            show_scans=False):
+    def train_epoch(self,
+                    train_loader,
+                    model,
+                    criterion,
+                    optimizer,
+                    epoch,
+                    evaluator,
+                    scheduler,
+                    color_fn,
+                    report=10,
+                    show_scans=False):
         batch_time = AverageMeter()
         data_time = AverageMeter()
         losses = AverageMeter()
@@ -327,8 +336,8 @@ class Trainer():
         model.train()
 
         end = time.time()
-        for i, (in_vol, proj_mask, proj_labels, _, path_seq, path_name,
-                _, _, _, _, _, _, _, _, _) in enumerate(train_loader):
+        for i, (in_vol, proj_mask, proj_labels, _, path_seq, path_name, _, _,
+                _, _, _, _, _, _, _) in enumerate(train_loader):
             # measure data loading time
             data_time.update(time.time() - end)
             if not self.multi_gpu and self.gpu:
@@ -373,10 +382,11 @@ class Trainer():
                 lr = g["lr"]
                 for value in g["params"]:
                     if value.grad is not None:
-                        w = np.linalg.norm(
-                            value.data.cpu().numpy().reshape((-1)))
-                        update = np.linalg.norm(-max(lr, 1e-10) *
-                                                value.grad.cpu().numpy().reshape((-1)))
+                        w = np.linalg.norm(value.data.cpu().numpy().reshape(
+                            (-1)))
+                        update = np.linalg.norm(
+                            -max(lr, 1e-10) * value.grad.cpu().numpy().reshape(
+                                (-1)))
                         update_ratios.append(update / max(w, 1e-10))
             update_ratios = np.array(update_ratios)
             update_mean = update_ratios.mean()
@@ -389,40 +399,39 @@ class Trainer():
                 depth_np = in_vol[0][0].cpu().numpy()
                 pred_np = argmax[0].cpu().numpy()
                 gt_np = proj_labels[0].cpu().numpy()
-                out = Trainer.make_log_img(
-                    depth_np, mask_np, pred_np, gt_np, color_fn)
+                out = Trainer.make_log_img(depth_np, mask_np, pred_np, gt_np,
+                                           color_fn)
                 cv2.imshow("sample_training", out)
                 cv2.waitKey(1)
 
             if i % self.ARCH["train"]["report_batch"] == 0:
-                print(
-                    'Lr: {lr:.3e} | '
-                    'Update: {umean:.3e} mean,{ustd:.3e} std | '
-                    'Epoch: [{0}][{1}/{2}] | '
-                    'Time {batch_time.val:.3f} ({batch_time.avg:.3f}) | '
-                    'Data {data_time.val:.3f} ({data_time.avg:.3f}) | '
-                    'Loss {loss.val:.4f} ({loss.avg:.4f}) | '
-                    'acc {acc.val:.3f} ({acc.avg:.3f}) | '
-                    'IoU {iou.val:.3f} ({iou.avg:.3f})'.format(
-                        epoch,
-                        i,
-                        len(train_loader),
-                        batch_time=batch_time,
-                        data_time=data_time,
-                        loss=losses,
-                        acc=acc,
-                        iou=iou,
-                        lr=lr,
-                        umean=update_mean,
-                        ustd=update_std))
+                print('Lr: {lr:.3e} | '
+                      'Update: {umean:.3e} mean,{ustd:.3e} std | '
+                      'Epoch: [{0}][{1}/{2}] | '
+                      'Time {batch_time.val:.3f} ({batch_time.avg:.3f}) | '
+                      'Data {data_time.val:.3f} ({data_time.avg:.3f}) | '
+                      'Loss {loss.val:.4f} ({loss.avg:.4f}) | '
+                      'acc {acc.val:.3f} ({acc.avg:.3f}) | '
+                      'IoU {iou.val:.3f} ({iou.avg:.3f})'.format(
+                          epoch,
+                          i,
+                          len(train_loader),
+                          batch_time=batch_time,
+                          data_time=data_time,
+                          loss=losses,
+                          acc=acc,
+                          iou=iou,
+                          lr=lr,
+                          umean=update_mean,
+                          ustd=update_std))
 
             # step scheduler
             scheduler.step()
 
         return acc.avg, iou.avg, losses.avg, update_ratio_meter.avg
 
-    def validate(self, val_loader, model, criterion,
-                 evaluator, class_func, color_fn, save_scans):
+    def validate(self, val_loader, model, criterion, evaluator, class_func,
+                 color_fn, save_scans):
         batch_time = AverageMeter()
         losses = AverageMeter()
         acc = AverageMeter()
@@ -439,8 +448,8 @@ class Trainer():
 
         with torch.no_grad():
             end = time.time()
-            for i, (in_vol, proj_mask, proj_labels, _, path_seq, path_name,
-                    _, _, _, _, _, _, _, _, _) in enumerate(val_loader):
+            for i, (in_vol, proj_mask, proj_labels, _, path_seq, path_name, _,
+                    _, _, _, _, _, _, _, _) in enumerate(val_loader):
                 if not self.multi_gpu and self.gpu:
                     in_vol = in_vol.cuda()
                     proj_mask = proj_mask.cuda()
@@ -449,11 +458,8 @@ class Trainer():
 
                 # compute output
                 output = model(in_vol, proj_mask)
-                loss = criterion(
-                    torch.log(
-                        output.clamp(
-                            min=1e-8)),
-                    proj_labels)
+                loss = criterion(torch.log(output.clamp(min=1e-8)),
+                                 proj_labels)
 
                 # measure accuracy and record loss
                 argmax = output.argmax(dim=1)
@@ -466,11 +472,8 @@ class Trainer():
                     depth_np = in_vol[0][0].cpu().numpy()
                     pred_np = argmax[0].cpu().numpy()
                     gt_np = proj_labels[0].cpu().numpy()
-                    out = Trainer.make_log_img(depth_np,
-                                               mask_np,
-                                               pred_np,
-                                               gt_np,
-                                               color_fn)
+                    out = Trainer.make_log_img(depth_np, mask_np, pred_np,
+                                               gt_np, color_fn)
                     rand_imgs.append(out)
 
                 # measure elapsed time
@@ -488,7 +491,8 @@ class Trainer():
                   'Acc avg {acc.avg:.3f}\n'
                   'IoU avg {iou.avg:.3f}'.format(batch_time=batch_time,
                                                  loss=losses,
-                                                 acc=acc, iou=iou))
+                                                 acc=acc,
+                                                 iou=iou))
             # print also classwise
             for i, jacc in enumerate(class_jaccard):
                 print('IoU class {i:} [{class_str:}] = {jacc:.3f}'.format(

@@ -14,7 +14,7 @@ class oneHot(nn.Module):
 
     def onehot1dspatial(self, x):
         # we only do tensors that 1d tensors that are batched or not, so check
-        assert(len(x.shape) == 1 or len(x.shape) == 2)
+        assert (len(x.shape) == 1 or len(x.shape) == 2)
         # if not batched, batch
         remove_dim = False  # flag to unbatch
         if len(x.shape) == 1:
@@ -27,8 +27,8 @@ class oneHot(nn.Module):
 
         # scatter to onehot
         one_hot = torch.zeros(
-            (n, self.nclasses, b), device=self.device).scatter_(
-            1, x.unsqueeze(1), 1)
+            (n, self.nclasses, b),
+            device=self.device).scatter_(1, x.unsqueeze(1), 1)
 
         # x is now [n,classes,b]
 
@@ -40,7 +40,7 @@ class oneHot(nn.Module):
 
     def onehot2dspatial(self, x):
         # we only do tensors that 2d tensors that are batched or not, so check
-        assert(len(x.shape) == 2 or len(x.shape) == 3)
+        assert (len(x.shape) == 2 or len(x.shape) == 3)
         # if not batched, batch
         remove_dim = False  # flag to unbatch
         if len(x.shape) == 2:
@@ -53,8 +53,8 @@ class oneHot(nn.Module):
 
         # scatter to onehot
         one_hot = torch.zeros(
-            (n, self.nclasses, h, w), device=self.device).scatter_(
-            1, x.unsqueeze(1), 1)
+            (n, self.nclasses, h, w),
+            device=self.device).scatter_(1, x.unsqueeze(1), 1)
 
         # x is now [n,classes,b]
 
@@ -114,10 +114,12 @@ if __name__ == "__main__":
     print("*" * 80)
     print("Tensor 2d spat dim, unbatched")
     tensor = torch.arange(0, nclasses).to(device)  # [0,1,2]
-    tensor = torch.cat([tensor.unsqueeze(0),   # [[0,1,2],
-                        tensor.unsqueeze(0),   # [0,1,2],
-                        tensor.unsqueeze(0),   # [0,1,2],
-                        tensor.unsqueeze(0)])  # [0,1,2]]
+    tensor = torch.cat([
+        tensor.unsqueeze(0),  # [[0,1,2],
+        tensor.unsqueeze(0),  # [0,1,2],
+        tensor.unsqueeze(0),  # [0,1,2],
+        tensor.unsqueeze(0)
+    ])  # [0,1,2]]
     print("in:", tensor)
     module = oneHot(device, nclasses, spatial_dim=2)
     print("out:", module(tensor))
@@ -127,10 +129,12 @@ if __name__ == "__main__":
     print("*" * 80)
     print("Tensor 2d spat dim, unbatched")
     tensor = torch.arange(0, nclasses).to(device)  # [0,1,2]
-    tensor = torch.cat([tensor.unsqueeze(0),   # [[0,1,2],
-                        tensor.unsqueeze(0),   # [0,1,2],
-                        tensor.unsqueeze(0),   # [0,1,2],
-                        tensor.unsqueeze(0)])  # [0,1,2]]
+    tensor = torch.cat([
+        tensor.unsqueeze(0),  # [[0,1,2],
+        tensor.unsqueeze(0),  # [0,1,2],
+        tensor.unsqueeze(0),  # [0,1,2],
+        tensor.unsqueeze(0)
+    ])  # [0,1,2]]
     tensor = torch.cat([tensor.unsqueeze(0),
                         tensor.unsqueeze(0)])  # 2 of the same 2d tensor
     print("in:", tensor)

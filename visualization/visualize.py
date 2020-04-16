@@ -13,20 +13,23 @@ from laserscanvis import LaserScanVis
 if __name__ == '__main__':
     parser = argparse.ArgumentParser("./visualize.py")
     parser.add_argument(
-        '--dataset', '-d',
+        '--dataset',
+        '-d',
         type=str,
         required=True,
         help='Dataset to visualize. No Default',
     )
     parser.add_argument(
-        '--config', '-c',
+        '--config',
+        '-c',
         type=str,
         required=False,
         default="config/labels/semantic-kitti.yaml",
         help='Dataset config file. Defaults to %(default)s',
     )
     parser.add_argument(
-        '--sequence', '-s',
+        '--sequence',
+        '-s',
         type=str,
         default="00",
         required=False,
@@ -49,7 +52,8 @@ if __name__ == '__main__':
         dest='draw_clusters',
         default=False,
         action='store_true',
-        help='Use 8 vertex coordinates of oriented bounding box to visualize cluster. Defaults to %(default)s',
+        help=
+        'Use 8 vertex coordinates of oriented bounding box to visualize cluster. Defaults to %(default)s',
     )
 
     parser.add_argument(
@@ -58,11 +62,13 @@ if __name__ == '__main__':
         dest='use_bbox_measurements',
         default=False,
         action='store_true',
-        help='Use width, depth, height, center coordinate and angle of rotation of oriented bounding box to visualize cluster . Defaults to %(default)s',
+        help=
+        'Use width, depth, height, center coordinate and angle of rotation of oriented bounding box to visualize cluster . Defaults to %(default)s',
     )
 
     parser.add_argument(
-        '--use_bbox_labels', '-l',
+        '--use_bbox_labels',
+        '-l',
         dest='use_bbox_labels',
         default=False,
         action='store_true',
@@ -75,11 +81,13 @@ if __name__ == '__main__':
         dest='use_roi_filter',
         default=False,
         action='store_true',
-        help='Use roi filter to visualize only 3d points used for clustering . Defaults to %(default)s',
+        help=
+        'Use roi filter to visualize only 3d points used for clustering . Defaults to %(default)s',
     )
 
     parser.add_argument(
-        '--ignore_semantics', '-i',
+        '--ignore_semantics',
+        '-i',
         dest='ignore_semantics',
         default=False,
         action='store_true',
@@ -134,8 +142,8 @@ if __name__ == '__main__':
     FLAGS.sequence = '{0:02d}'.format(int(FLAGS.sequence))
 
     # does sequence folder exist?
-    scan_paths = os.path.join(FLAGS.dataset, "sequences",
-                              FLAGS.sequence, "velodyne")
+    scan_paths = os.path.join(FLAGS.dataset, "sequences", FLAGS.sequence,
+                              "velodyne")
     if os.path.isdir(scan_paths):
         print("Sequence folder exists! Using sequence from %s" % scan_paths)
     else:
@@ -143,8 +151,10 @@ if __name__ == '__main__':
         quit()
 
     # populate the pointclouds
-    scan_names = sorted([os.path.join(dp, f) for dp, dn, fn in os.walk(
-        os.path.expanduser(scan_paths)) for f in fn])
+    scan_names = sorted([
+        os.path.join(dp, f)
+        for dp, dn, fn in os.walk(os.path.expanduser(scan_paths)) for f in fn
+    ])
 
     # does sequence folder exist?
     if not FLAGS.ignore_semantics:
@@ -160,35 +170,43 @@ if __name__ == '__main__':
             print("Labels folder doesn't exist! Exiting...")
             quit()
         # populate the pointclouds
-        label_names = sorted([os.path.join(dp, f) for dp, dn, fn in os.walk(
-            os.path.expanduser(label_paths)) for f in fn])
+        label_names = sorted([
+            os.path.join(dp, f)
+            for dp, dn, fn in os.walk(os.path.expanduser(label_paths))
+            for f in fn
+        ])
 
         # check that there are same amount of labels and scans
         if not FLAGS.ignore_safety:
-            assert(len(label_names) == len(scan_names))
+            assert (len(label_names) == len(scan_names))
 
         if FLAGS.draw_clusters:
             bboxes_paths = os.path.join(FLAGS.dataset, "sequences",
                                         FLAGS.sequence, "clusters")
             if os.path.isdir(bboxes_paths):
-                print(
-                    "Bounding boxes folder exists! Using bboxes from %s" %
-                    bboxes_paths)
+                print("Bounding boxes folder exists! Using bboxes from %s" %
+                      bboxes_paths)
             else:
                 print("Bounding boxes folder doesn't exist! Exiting...")
                 quit()
-              # populate the pointclouds
-            bboxes_names = sorted([os.path.join(dp, f) for dp, dn, fn in os.walk(
-                os.path.expanduser(bboxes_paths)) for f in fn if f.endswith(".bbox")])
+            # populate the pointclouds
+            bboxes_names = sorted([
+                os.path.join(dp, f)
+                for dp, dn, fn in os.walk(os.path.expanduser(bboxes_paths))
+                for f in fn if f.endswith(".bbox")
+            ])
             if FLAGS.use_bbox_labels:
-                bboxes_labels_names = sorted([os.path.join(dp, f) for dp, dn, fn in os.walk(
-                    os.path.expanduser(bboxes_paths)) for f in fn if f.endswith(".segs")])
+                bboxes_labels_names = sorted([
+                    os.path.join(dp, f)
+                    for dp, dn, fn in os.walk(os.path.expanduser(bboxes_paths))
+                    for f in fn if f.endswith(".segs")
+                ])
 
-           # check that there are same amount of bboxes and scans
+        # check that there are same amount of bboxes and scans
             if not FLAGS.ignore_safety:
-                assert(len(bboxes_names) == len(scan_names))
+                assert (len(bboxes_names) == len(scan_names))
                 if FLAGS.use_bbox_labels:
-                    assert(len(bboxes_names) == len(bboxes_labels_names))
+                    assert (len(bboxes_names) == len(bboxes_labels_names))
     # create a scan
     if FLAGS.ignore_semantics:
         # project all opened scans to spheric proj
