@@ -40,14 +40,13 @@ def roi_filter(cloud, x_roi, y_roi, z_roi):
         ROI region filtered point cloud
     """
     clipper = cloud.make_cropbox()
-    cloud_roi_filtered= pcl.PointCloud()
+    cloud_roi_filtered = pcl.PointCloud()
     xc_min, xc_max = x_roi
     yc_min, yc_max = y_roi
     zc_min, zc_max = z_roi
     clipper.set_MinMax(xc_min, yc_min, zc_min, 0, xc_max, yc_max, zc_max, 0)
-    cloud_roi_filtered =clipper.filter()
+    cloud_roi_filtered = clipper.filter()
     return cloud_roi_filtered
-
 
 
 def plane_segmentation(cloud, dist_thold, max_iter):
@@ -60,7 +59,7 @@ def plane_segmentation(cloud, dist_thold, max_iter):
         indices: list of indices of the PCL points that belongs to the plane
         coefficient: the coefficients of the plane-fitting (e.g., [a, b, c, d] for ax + by +cz + d =0)
     """
-    seg = cloud.make_segmenter_normals(ksearch=50)# For simplicity,hard coded
+    seg = cloud.make_segmenter_normals(ksearch=50)  # For simplicity,hard coded
     seg.set_optimize_coefficients(True)
     seg.set_model_type(pcl.SACMODEL_NORMAL_PLANE)
     seg.set_method_type(pcl.SAC_RANSAC)
@@ -91,8 +90,8 @@ def clustering(cloud, tol, min_size, max_size):
     return cluster_indices
 
 
-
-def get_cluster_box_list(cluster_indices, cloud_obsts, radius_search=0.8, min_neighbors_in_radius=2):
+def get_cluster_box_list(cluster_indices, cloud_obsts,
+                         radius_search=0.8, min_neighbors_in_radius=2):
     """
     Input parameters:
         cluster_indices: a list of list. Each element list contains the indices of the points that belongs to
@@ -102,10 +101,10 @@ def get_cluster_box_list(cluster_indices, cloud_obsts, radius_search=0.8, min_ne
         cloud_cluster_list: a list for the PCL clusters: each element is a point cloud of a cluster
         box_coord_list: a list of corrdinates for bounding boxes
     """
-    cloud_cluster_list =[]
-    box_coord_list =[]
+    cloud_cluster_list = []
+    box_coord_list = []
     box_min_max_list = np.zeros((len(cluster_indices), 8, 3))
-    
+
     for j, indices in enumerate(cluster_indices):
         points = np.zeros((len(indices), 3), dtype=np.float32)
         for i, indice in enumerate(indices):
@@ -117,14 +116,14 @@ def get_cluster_box_list(cluster_indices, cloud_obsts, radius_search=0.8, min_ne
 
         # http://pointclouds.org/documentation/tutorials/remove_outliers.php
 
-        #### radius remove-outliers
+        # radius remove-outliers
 
         outrem = cloud_cluster.make_RadiusOutlierRemoval()
         outrem.set_radius_search(radius_search)
         outrem.set_MinNeighborsInRadius(min_neighbors_in_radius)
         cloud_filtered = outrem.filter()
 
-        #### condition remove-outliers
+        # condition remove-outliers
         # range_cond = cloud_cluster.make_ConditionAnd()
 
         # range_cond.add_Comparison2('z', pcl.CythonCompareOp_Type.GT, 0.0)
@@ -136,10 +135,10 @@ def get_cluster_box_list(cluster_indices, cloud_obsts, radius_search=0.8, min_ne
 
         # cloud_filtered = condrem.filter()
 
-        #### other filter
+        # other filter
         #cloud_filtered = cloud_cluster.make_statistical_outlier_filter()
-        #cloud_filtered.set_mean_k(50)
-        #cloud_filtered.set_std_dev_mul_thresh(1.0)
+        # cloud_filtered.set_mean_k(50)
+        # cloud_filtered.set_std_dev_mul_thresh(1.0)
         #cloud_filtered = cloud_cluster
 
         cloud_cluster_list.append(cloud_filtered)
@@ -176,7 +175,8 @@ def box_center(box):
     y_min, y_max = min(box[1]), max(box[1])
     z_min, z_max = min(box[2]), max(box[2])
 
-    return ((x_min + x_max)/2.0, (y_min + y_max)/2.0, (z_min + z_max)/2.0)
+    return ((x_min + x_max) / 2.0, (y_min + y_max) / 2.0, (z_min + z_max) / 2.0)
+
 
 def get_min_max_box(box):
     """
