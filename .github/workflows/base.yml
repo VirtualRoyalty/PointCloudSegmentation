@@ -12,11 +12,10 @@ jobs:
   codeStyle:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@master/obstacle-detection/pipeline
     - name: Python Style Checker
       uses: andymckay/pycodestyle-action@0.1.3
-      env:
-         FILENAMES: "obstacle-detection/pipeline/common.py"  
+      env:  
          PRECOMMAND_MESSAGE: Vaba Laba Dab Dab!
   
       
