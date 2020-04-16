@@ -15,7 +15,8 @@ from tasks.semantic.modules.trainer import *
 if __name__ == '__main__':
     parser = argparse.ArgumentParser("./train.py")
     parser.add_argument(
-        '--dataset', '-d',
+        '--dataset',
+        '-d',
         type=str,
         required=True,
         help='Dataset to train with. No Default',
@@ -25,7 +26,8 @@ if __name__ == '__main__':
         '-ac',
         type=str,
         required=True,
-        help='Architecture yaml cfg file. See /config/arch for sample. No default!',
+        help=
+        'Architecture yaml cfg file. See /config/arch for sample. No default!',
     )
     parser.add_argument(
         '--data_cfg',
@@ -33,21 +35,24 @@ if __name__ == '__main__':
         type=str,
         required=False,
         default='config/labels/semantic-kitti.yaml',
-        help='Classification yaml cfg file. See /config/labels for sample. No default!',
+        help=
+        'Classification yaml cfg file. See /config/labels for sample. No default!',
     )
     parser.add_argument(
-        '--log', '-l',
+        '--log',
+        '-l',
         type=str,
         default=os.path.expanduser("~") + '/logs/' +
         datetime.datetime.now().strftime("%Y-%-m-%d-%H:%M") + '/',
-        help='Directory to put the log data. Default: ~/logs/date+time'
-    )
+        help='Directory to put the log data. Default: ~/logs/date+time')
     parser.add_argument(
-        '--pretrained', '-p',
+        '--pretrained',
+        '-p',
         type=str,
         required=False,
         default=None,
-        help='Directory to get the pretrained model. If not passed, do from scratch!'
+        help=
+        'Directory to get the pretrained model. If not passed, do from scratch!'
     )
     FLAGS, unparsed = parser.parse_known_args()
 
@@ -60,8 +65,11 @@ if __name__ == '__main__':
     print("log", FLAGS.log)
     print("pretrained", FLAGS.pretrained)
     print("----------\n")
-    print("Commit hash (training version): ", str(
-        subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).strip()))
+    print(
+        "Commit hash (training version): ",
+        str(
+            subprocess.check_output(['git', 'rev-parse', '--short',
+                                     'HEAD']).strip()))
     print("----------\n")
 
     # open arch config file
@@ -95,9 +103,8 @@ if __name__ == '__main__':
     # does model folder exist?
     if FLAGS.pretrained is not None:
         if os.path.isdir(FLAGS.pretrained):
-            print(
-                "model folder exists! Using model from %s" %
-                (FLAGS.pretrained))
+            print("model folder exists! Using model from %s" %
+                  (FLAGS.pretrained))
         else:
             print("model folder doesnt exist! Start with random weights...")
     else:

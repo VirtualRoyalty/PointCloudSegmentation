@@ -18,7 +18,8 @@ splits = ["train", "valid", "test"]
 if __name__ == '__main__':
     parser = argparse.ArgumentParser("./evaluate_biou.py")
     parser.add_argument(
-        '--dataset', '-d',
+        '--dataset',
+        '-d',
         type=str,
         required=True,
         help='Dataset dir. No Default',
@@ -32,30 +33,34 @@ if __name__ == '__main__':
         'each sequences "prediction" directory. No Default. If no option is set'
         ' we look for the labels in the same directory as dataset')
     parser.add_argument(
-        '--split', '-s',
+        '--split',
+        '-s',
         type=str,
         required=False,
         choices=["train", "valid", "test"],
         default="valid",
-        help='Split to evaluate on. One of ' +
-        str(splits) + '. Defaults to %(default)s',
+        help='Split to evaluate on. One of ' + str(splits) +
+        '. Defaults to %(default)s',
     )
     parser.add_argument(
-        '--data_cfg', '-dc',
+        '--data_cfg',
+        '-dc',
         type=str,
         required=False,
         default="config/labels/semantic-kitti.yaml",
         help='Dataset config file. Defaults to %(default)s',
     )
     parser.add_argument(
-        '--border', '-bs',
+        '--border',
+        '-bs',
         type=int,
         required=False,
         default=1,
         help='Border size. Defaults to %(default)s',
     )
     parser.add_argument(
-        '--conn', '-c',
+        '--conn',
+        '-c',
         type=int,
         required=False,
         default=4,
@@ -79,7 +84,7 @@ if __name__ == '__main__':
     print("*" * 80)
 
     # assert split
-    assert(FLAGS.split in splits)
+    assert (FLAGS.split in splits)
 
     # open data config file
     try:
@@ -122,8 +127,7 @@ if __name__ == '__main__':
     # create evaluator
     device = torch.device(
         "cuda") if torch.cuda.is_available() else torch.device('cpu')
-    evaluator = biouEval(nr_classes, device, ignore,
-                         FLAGS.border, FLAGS.conn)
+    evaluator = biouEval(nr_classes, device, ignore, FLAGS.border, FLAGS.conn)
     evaluator.reset()
 
     # get test set
@@ -133,11 +137,14 @@ if __name__ == '__main__':
     scan_names = []
     for sequence in test_sequences:
         sequence = '{0:02d}'.format(int(sequence))
-        scan_paths = os.path.join(FLAGS.dataset, "sequences",
-                                  str(sequence), "velodyne")
+        scan_paths = os.path.join(FLAGS.dataset, "sequences", str(sequence),
+                                  "velodyne")
         # populate the scan names
-        seq_scan_names = sorted([os.path.join(dp, f) for dp, dn, fn in os.walk(
-            os.path.expanduser(scan_paths)) for f in fn if ".bin" in f])
+        seq_scan_names = sorted([
+            os.path.join(dp, f)
+            for dp, dn, fn in os.walk(os.path.expanduser(scan_paths))
+            for f in fn if ".bin" in f
+        ])
         scan_names.extend(seq_scan_names)
     # print(scan_names)
 
@@ -145,11 +152,14 @@ if __name__ == '__main__':
     label_names = []
     for sequence in test_sequences:
         sequence = '{0:02d}'.format(int(sequence))
-        label_paths = os.path.join(FLAGS.dataset, "sequences",
-                                   str(sequence), "labels")
+        label_paths = os.path.join(FLAGS.dataset, "sequences", str(sequence),
+                                   "labels")
         # populate the label names
-        seq_label_names = sorted([os.path.join(dp, f) for dp, dn, fn in os.walk(
-            os.path.expanduser(label_paths)) for f in fn if ".label" in f])
+        seq_label_names = sorted([
+            os.path.join(dp, f)
+            for dp, dn, fn in os.walk(os.path.expanduser(label_paths))
+            for f in fn if ".label" in f
+        ])
         label_names.extend(seq_label_names)
     # print(label_names)
 
@@ -157,24 +167,27 @@ if __name__ == '__main__':
     pred_names = []
     for sequence in test_sequences:
         sequence = '{0:02d}'.format(int(sequence))
-        pred_paths = os.path.join(FLAGS.predictions, "sequences",
-                                  sequence, "predictions")
+        pred_paths = os.path.join(FLAGS.predictions, "sequences", sequence,
+                                  "predictions")
         # populate the label names
-        seq_pred_names = sorted([os.path.join(dp, f) for dp, dn, fn in os.walk(
-            os.path.expanduser(pred_paths)) for f in fn if ".label" in f])
+        seq_pred_names = sorted([
+            os.path.join(dp, f)
+            for dp, dn, fn in os.walk(os.path.expanduser(pred_paths))
+            for f in fn if ".label" in f
+        ])
         pred_names.extend(seq_pred_names)
     # print(pred_names)
 
     # check that I have the same number of files
     # print("labels: ", len(label_names))
     # print("predictions: ", len(pred_names))
-    assert(len(label_names) == len(scan_names) and
-           len(label_names) == len(pred_names))
+    assert (len(label_names) == len(scan_names)
+            and len(label_names) == len(pred_names))
 
     print("Evaluating sequences: ")
     # open each file, get the tensor, and make the iou comparison
-    for scan_file, label_file, pred_file in zip(
-            scan_names, label_names, pred_names):
+    for scan_file, label_file, pred_file in zip(scan_names, label_names,
+                                                pred_names):
         print("evaluating label ", label_file, "with", pred_file)
         # open label
         label = SemLaserScan(project=True)

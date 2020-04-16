@@ -34,9 +34,8 @@ class Inference():
         # get the data
         parserModule = imp.load_source(
             "parserModule",
-            '/home/jovyan/work/obstacle-detection/model/tasks/semantic/dataset/' +
-            self.DATA["name"] +
-            '/parser.py')
+            '/home/jovyan/work/obstacle-detection/model/tasks/semantic/dataset/'
+            + self.DATA["name"] + '/parser.py')
         self.parser = parserModule.Parser(
             root=self.datadir,
             train_sequences=self.DATA["split"]["train"],
@@ -55,8 +54,7 @@ class Inference():
 
         # concatenate the encoder and the head
         with torch.no_grad():
-            self.model = Segmentator(self.ARCH,
-                                     self.parser.get_n_classes(),
+            self.model = Segmentator(self.ARCH, self.parser.get_n_classes(),
                                      self.modeldir)
 
         # use knn post processing?
@@ -106,15 +104,18 @@ class Inference():
             scan.open_scan(scan_file)
             # make a tensor of the uncompressed data (with the max num points)
             unproj_n_points = scan.points.shape[0]
-            unproj_xyz = torch.full(
-                (self.max_points, 3), -1.0, dtype=torch.float)
+            unproj_xyz = torch.full((self.max_points, 3),
+                                    -1.0,
+                                    dtype=torch.float)
             unproj_xyz[:unproj_n_points] = torch.from_numpy(scan.points)
-            unproj_range = torch.full(
-                [self.max_points], -1.0, dtype=torch.float)
+            unproj_range = torch.full([self.max_points],
+                                      -1.0,
+                                      dtype=torch.float)
             unproj_range[:unproj_n_points] = torch.from_numpy(
                 scan.unproj_range)
-            unproj_remissions = torch.full(
-                [self.max_points], -1.0, dtype=torch.float)
+            unproj_remissions = torch.full([self.max_points],
+                                           -1.0,
+                                           dtype=torch.float)
             unproj_remissions[:unproj_n_points] = torch.from_numpy(
                 scan.remissions)
             unproj_labels = []
@@ -129,9 +130,11 @@ class Inference():
             proj_x[:unproj_n_points] = torch.from_numpy(scan.proj_x)
             proj_y = torch.full([self.max_points], -1, dtype=torch.long)
             proj_y[:unproj_n_points] = torch.from_numpy(scan.proj_y)
-            proj = torch.cat([proj_range.unsqueeze(0).clone(),
-                              proj_xyz.clone().permute(2, 0, 1),
-                              proj_remission.unsqueeze(0).clone()])
+            proj = torch.cat([
+                proj_range.unsqueeze(0).clone(),
+                proj_xyz.clone().permute(2, 0, 1),
+                proj_remission.unsqueeze(0).clone()
+            ])
             proj = (proj - self.sensor_img_means[:, None, None]
                     ) / self.sensor_img_stds[:, None, None]
             proj = proj * proj_mask.float()

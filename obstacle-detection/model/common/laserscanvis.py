@@ -10,9 +10,13 @@ from common.laserscan import LaserScan, SemLaserScan
 
 class LaserScanVis:
     """Class that creates and handles a visualizer for a pointcloud"""
-
-    def __init__(self, scan, scan_names, label_names, offset=0,
-                 semantics=True, instances=False):
+    def __init__(self,
+                 scan,
+                 scan_names,
+                 label_names,
+                 offset=0,
+                 semantics=True,
+                 instances=False):
         self.scan = scan
         self.scan_names = scan_names
         self.label_names = label_names
@@ -42,8 +46,8 @@ class LaserScanVis:
         self.grid = self.canvas.central_widget.add_grid()
 
         # laserscan part
-        self.scan_view = vispy.scene.widgets.ViewBox(
-            border_color='white', parent=self.canvas.scene)
+        self.scan_view = vispy.scene.widgets.ViewBox(border_color='white',
+                                                     parent=self.canvas.scene)
         self.grid.add_widget(self.scan_view, 0, 0)
         self.scan_vis = visuals.Markers()
         self.scan_view.camera = 'turntable'
@@ -82,9 +86,10 @@ class LaserScanVis:
             self.multiplier += 1
 
         # new canvas for img
-        self.img_canvas = SceneCanvas(
-            keys='interactive', show=True, size=(
-                self.canvas_W, self.canvas_H * self.multiplier))
+        self.img_canvas = SceneCanvas(keys='interactive',
+                                      show=True,
+                                      size=(self.canvas_W,
+                                            self.canvas_H * self.multiplier))
         # grid
         self.img_grid = self.img_canvas.central_widget.add_grid()
         # interface (n next, b back, q quit, very simple)
@@ -147,8 +152,8 @@ class LaserScanVis:
         range_data = range_data**(1 / power)
         # print(range_data.max(), range_data.min())
         viridis_range = ((range_data - range_data.min()) /
-                         (range_data.max() - range_data.min()) *
-                         255).astype(np.uint8)
+                         (range_data.max() - range_data.min()) * 255).astype(
+                             np.uint8)
         viridis_map = self.get_mpl_colormap("viridis")
         viridis_colors = viridis_map[viridis_range]
         self.scan_vis.set_data(self.scan.points,
@@ -158,17 +163,19 @@ class LaserScanVis:
 
         # plot semantics
         if self.semantics:
-            self.sem_vis.set_data(self.scan.points,
-                                  face_color=self.scan.sem_label_color[..., ::-1],
-                                  edge_color=self.scan.sem_label_color[..., ::-1],
-                                  size=1)
+            self.sem_vis.set_data(
+                self.scan.points,
+                face_color=self.scan.sem_label_color[..., ::-1],
+                edge_color=self.scan.sem_label_color[..., ::-1],
+                size=1)
 
         # plot instances
         if self.instances:
-            self.inst_vis.set_data(self.scan.points,
-                                   face_color=self.scan.inst_label_color[..., ::-1],
-                                   edge_color=self.scan.inst_label_color[..., ::-1],
-                                   size=1)
+            self.inst_vis.set_data(
+                self.scan.points,
+                face_color=self.scan.inst_label_color[..., ::-1],
+                edge_color=self.scan.inst_label_color[..., ::-1],
+                size=1)
 
         # now do all the range image stuff
         # plot range image

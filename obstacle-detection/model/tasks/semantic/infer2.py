@@ -25,10 +25,8 @@ def get_user(model):
         print("Opening arch config file from %s" % model)
         ARCH = yaml.safe_load(
             open(
-                "/home/jovyan/work/obstacle-detection/model/" +
-                model +
-                "/arch_cfg.yaml",
-                'r'))
+                "/home/jovyan/work/obstacle-detection/model/" + model +
+                "/arch_cfg.yaml", 'r'))
     except Exception as e:
         print(e)
         print("Error opening arch yaml file.")
@@ -39,10 +37,8 @@ def get_user(model):
         print("Opening data config file from %s" % model)
         DATA = yaml.safe_load(
             open(
-                "/home/jovyan/work/obstacle-detection/model/" +
-                model +
-                "/data_cfg.yaml",
-                'r'))
+                "/home/jovyan/work/obstacle-detection/model/" + model +
+                "/data_cfg.yaml", 'r'))
     except Exception as e:
         print(e)
         print("Error opening data yaml file.")

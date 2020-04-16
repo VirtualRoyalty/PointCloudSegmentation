@@ -17,7 +17,6 @@ __all__ = ['FutureResult', 'SlavePipe', 'SyncMaster']
 
 class FutureResult(object):
     """A thread-safe future implementation. Used only as one-to-one pipe."""
-
     def __init__(self):
         self._result = None
         self._lock = threading.Lock()
@@ -40,13 +39,12 @@ class FutureResult(object):
 
 
 _MasterRegistry = collections.namedtuple('MasterRegistry', ['result'])
-_SlavePipeBase = collections.namedtuple(
-    '_SlavePipeBase', ['identifier', 'queue', 'result'])
+_SlavePipeBase = collections.namedtuple('_SlavePipeBase',
+                                        ['identifier', 'queue', 'result'])
 
 
 class SlavePipe(_SlavePipeBase):
     """Pipe for master-slave communication."""
-
     def run_slave(self, msg):
         self.queue.put((self.identifier, msg))
         ret = self.result.get()
@@ -64,7 +62,6 @@ class SyncMaster(object):
     - After receiving the messages, the master device should gather the information and determine to message passed
     back to each slave devices.
     """
-
     def __init__(self, master_callback):
         """
 
@@ -93,7 +90,8 @@ class SyncMaster(object):
 
         """
         if self._activated:
-            assert self._queue.empty(), 'Queue is not clean before next initialization.'
+            assert self._queue.empty(
+            ), 'Queue is not clean before next initialization.'
             self._activated = False
             self._registry.clear()
         future = FutureResult()
@@ -121,7 +119,8 @@ class SyncMaster(object):
             intermediates.append(self._queue.get())
 
         results = self._master_callback(intermediates)
-        assert results[0][0] == 0, 'The first result should belongs to the master.'
+        assert results[0][
+            0] == 0, 'The first result should belongs to the master.'
 
         for i, res in results:
             if i == 0:

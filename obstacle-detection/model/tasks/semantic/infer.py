@@ -12,29 +12,28 @@ import __init__ as booger
 
 from tasks.semantic.modules.user import *
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser("./infer.py")
     parser.add_argument(
-        '--dataset', '-d',
+        '--dataset',
+        '-d',
         type=str,
         required=True,
         help='Dataset to train with. No Default',
     )
     parser.add_argument(
-        '--log', '-l',
+        '--log',
+        '-l',
         type=str,
         default=os.path.expanduser("~") + '/logs/' +
         datetime.datetime.now().strftime("%Y-%-m-%d-%H:%M") + '/',
-        help='Directory to put the predictions. Default: ~/logs/date+time'
-    )
-    parser.add_argument(
-        '--model', '-m',
-        type=str,
-        required=True,
-        default=None,
-        help='Directory to get the trained model.'
-    )
+        help='Directory to put the predictions. Default: ~/logs/date+time')
+    parser.add_argument('--model',
+                        '-m',
+                        type=str,
+                        required=True,
+                        default=None,
+                        help='Directory to get the trained model.')
     FLAGS, unparsed = parser.parse_known_args()
 
     # print summary of what we will do
@@ -44,8 +43,11 @@ if __name__ == '__main__':
     print("log", FLAGS.log)
     print("model", FLAGS.model)
     print("----------\n")
-    print("Commit hash (training version): ", str(
-        subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).strip()))
+    print(
+        "Commit hash (training version): ",
+        str(
+            subprocess.check_output(['git', 'rev-parse', '--short',
+                                     'HEAD']).strip()))
     print("----------\n")
 
     # open arch config file
@@ -77,31 +79,19 @@ if __name__ == '__main__':
             print("train", seq)
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
             os.makedirs(
-                os.path.join(
-                    FLAGS.log,
-                    "sequences",
-                    seq,
-                    "predictions"))
+                os.path.join(FLAGS.log, "sequences", seq, "predictions"))
         for seq in DATA["split"]["valid"]:
             seq = '{0:02d}'.format(int(seq))
             print("valid", seq)
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
             os.makedirs(
-                os.path.join(
-                    FLAGS.log,
-                    "sequences",
-                    seq,
-                    "predictions"))
+                os.path.join(FLAGS.log, "sequences", seq, "predictions"))
         for seq in DATA["split"]["test"]:
             seq = '{0:02d}'.format(int(seq))
             print("test", seq)
             os.makedirs(os.path.join(FLAGS.log, "sequences", seq))
             os.makedirs(
-                os.path.join(
-                    FLAGS.log,
-                    "sequences",
-                    seq,
-                    "predictions"))
+                os.path.join(FLAGS.log, "sequences", seq, "predictions"))
     except Exception as e:
         print(e)
         print("Error creating log directory. Check permissions!")

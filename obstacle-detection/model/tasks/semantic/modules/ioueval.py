@@ -25,8 +25,8 @@ class iouEval:
         return self.n_classes
 
     def reset(self):
-        self.conf_matrix = torch.zeros(
-            (self.n_classes, self.n_classes), device=self.device).long()
+        self.conf_matrix = torch.zeros((self.n_classes, self.n_classes),
+                                       device=self.device).long()
         self.ones = None
         self.last_scan_size = None  # for when variable scan size is used
 
@@ -51,8 +51,9 @@ class iouEval:
             self.last_scan_size = idxs.shape[-1]
 
         # make confusion matrix (cols = gt, rows = pred)
-        self.conf_matrix = self.conf_matrix.index_put_(
-            tuple(idxs), self.ones, accumulate=True)
+        self.conf_matrix = self.conf_matrix.index_put_(tuple(idxs),
+                                                       self.ones,
+                                                       accumulate=True)
 
         # print(self.tp.shape)
         # print(self.fp.shape)
@@ -87,8 +88,12 @@ class iouEval:
 
 
 class biouEval(iouEval):
-    def __init__(self, n_classes, device, ignore=None,
-                 border_size=1, kern_conn=4):
+    def __init__(self,
+                 n_classes,
+                 device,
+                 ignore=None,
+                 border_size=1,
+                 kern_conn=4):
         super().__init__(n_classes, device, ignore)
         self.border_size = border_size
         self.kern_conn = kern_conn
@@ -101,8 +106,10 @@ class biouEval(iouEval):
         else:
             ignore = ignore[0]
 
-        self.borderer = borderMask(self.n_classes, self.device,
-                                   self.border_size, self.kern_conn,
+        self.borderer = borderMask(self.n_classes,
+                                   self.device,
+                                   self.border_size,
+                                   self.kern_conn,
                                    background_class=ignore)
         self.reset()
 
@@ -118,8 +125,7 @@ class biouEval(iouEval):
         # if numpy, pass to pytorch
         # to tensor
         if isinstance(range_y, np.ndarray):
-            range_y = torch.from_numpy(
-                np.array(range_y)).long().to(
+            range_y = torch.from_numpy(np.array(range_y)).long().to(
                 self.device)
         if isinstance(x, np.ndarray):
             x = torch.from_numpy(np.array(x)).long().to(self.device)

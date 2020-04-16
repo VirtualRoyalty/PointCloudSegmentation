@@ -9,12 +9,20 @@ import torch.nn.functional as F
 class BasicBlock(nn.Module):
     def __init__(self, inplanes, planes, bn_d=0.1):
         super(BasicBlock, self).__init__()
-        self.conv1 = nn.Conv2d(inplanes, planes[0], kernel_size=1,
-                               stride=1, padding=0, bias=False)
+        self.conv1 = nn.Conv2d(inplanes,
+                               planes[0],
+                               kernel_size=1,
+                               stride=1,
+                               padding=0,
+                               bias=False)
         self.bn1 = nn.BatchNorm2d(planes[0], momentum=bn_d)
         self.relu1 = nn.LeakyReLU(0.1)
-        self.conv2 = nn.Conv2d(planes[0], planes[1], kernel_size=3,
-                               stride=1, padding=1, bias=False)
+        self.conv2 = nn.Conv2d(planes[0],
+                               planes[1],
+                               kernel_size=3,
+                               stride=1,
+                               padding=1,
+                               bias=False)
         self.bn2 = nn.BatchNorm2d(planes[1], momentum=bn_d)
         self.relu2 = nn.LeakyReLU(0.1)
 
@@ -35,11 +43,11 @@ class BasicBlock(nn.Module):
 
 # ******************************************************************************
 
+
 class Decoder(nn.Module):
     """
        Class for DarknetSeg. Subclasses PyTorch's own "nn" module
     """
-
     def __init__(self, params, stub_skips, OS=32, feature_depth=1024):
         super(Decoder, self).__init__()
         self.backbone_OS = OS
@@ -70,13 +78,17 @@ class Decoder(nn.Module):
                                          [self.backbone_feature_depth, 512],
                                          bn_d=self.bn_d,
                                          stride=self.strides[0])
-        self.dec4 = self._make_dec_layer(
-            BasicBlock, [512, 256], bn_d=self.bn_d, stride=self.strides[1])
-        self.dec3 = self._make_dec_layer(
-            BasicBlock, [256, 128], bn_d=self.bn_d, stride=self.strides[2])
-        self.dec2 = self._make_dec_layer(BasicBlock, [128, 64], bn_d=self.bn_d,
+        self.dec4 = self._make_dec_layer(BasicBlock, [512, 256],
+                                         bn_d=self.bn_d,
+                                         stride=self.strides[1])
+        self.dec3 = self._make_dec_layer(BasicBlock, [256, 128],
+                                         bn_d=self.bn_d,
+                                         stride=self.strides[2])
+        self.dec2 = self._make_dec_layer(BasicBlock, [128, 64],
+                                         bn_d=self.bn_d,
                                          stride=self.strides[3])
-        self.dec1 = self._make_dec_layer(BasicBlock, [64, 32], bn_d=self.bn_d,
+        self.dec1 = self._make_dec_layer(BasicBlock, [64, 32],
+                                         bn_d=self.bn_d,
                                          stride=self.strides[4])
 
         # layer list to execute with skips
@@ -93,15 +105,18 @@ class Decoder(nn.Module):
 
         #  downsample
         if stride == 2:
-            layers.append(
-                ("upconv", nn.ConvTranspose2d(
-                    planes[0], planes[1], kernel_size=[
-                        1, 4], stride=[
-                        1, 2], padding=[
-                        0, 1])))
+            layers.append(("upconv",
+                           nn.ConvTranspose2d(planes[0],
+                                              planes[1],
+                                              kernel_size=[1, 4],
+                                              stride=[1, 2],
+                                              padding=[0, 1])))
         else:
-            layers.append(("conv", nn.Conv2d(planes[0], planes[1],
-                                             kernel_size=3, padding=1)))
+            layers.append(("conv",
+                           nn.Conv2d(planes[0],
+                                     planes[1],
+                                     kernel_size=3,
+                                     padding=1)))
         layers.append(("bn", nn.BatchNorm2d(planes[1], momentum=bn_d)))
         layers.append(("relu", nn.LeakyReLU(0.1)))
 

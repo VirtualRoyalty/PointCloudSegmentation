@@ -28,12 +28,8 @@ if 'GEN_CERT' in os.environ:
             raise
 
     # Generate an openssl.cnf file to set the distinguished name
-    cnf_file = os.path.join(
-        os.getenv(
-            'CONDA_DIR',
-            '/usr/lib'),
-        'ssl',
-        'openssl.cnf')
+    cnf_file = os.path.join(os.getenv('CONDA_DIR', '/usr/lib'), 'ssl',
+                            'openssl.cnf')
     if not os.path.isfile(cnf_file):
         with open(cnf_file, 'w') as fh:
             fh.write('''\
@@ -43,13 +39,12 @@ distinguished_name = req_distinguished_name
 ''')
 
     # Generate a certificate if one doesn't exist on disk
-    subprocess.check_call(['openssl', 'req', '-new',
-                           '-newkey', 'rsa:2048',
-                           '-days', '365',
-                           '-nodes', '-x509',
-                           '-subj', '/C=XX/ST=XX/L=XX/O=generated/CN=generated',
-                           '-keyout', pem_file,
-                           '-out', pem_file])
+    subprocess.check_call([
+        'openssl', 'req', '-new', '-newkey', 'rsa:2048', '-days', '365',
+        '-nodes', '-x509', '-subj',
+        '/C=XX/ST=XX/L=XX/O=generated/CN=generated', '-keyout', pem_file,
+        '-out', pem_file
+    ])
     # Restrict access to the file
     os.chmod(pem_file, stat.S_IRUSR | stat.S_IWUSR)
     c.NotebookApp.certfile = pem_file

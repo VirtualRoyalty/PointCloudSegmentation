@@ -90,8 +90,12 @@ import __init__ as booger
 
 
 class borderMask(nn.Module):
-    def __init__(self, nclasses, device, border_size,
-                 kern_conn=4, background_class=None):
+    def __init__(self,
+                 nclasses,
+                 device,
+                 border_size,
+                 kern_conn=4,
+                 background_class=None):
         """Get the binary border mask of a labeled 2d range image.
 
       Args:
@@ -119,14 +123,12 @@ class borderMask(nn.Module):
         # check connectivity
         # For obtaining the border mask we will be eroding the input image, for this
         # reason we only support erode_kernels with connectivity 4 or 8
-        assert self.kern_conn in (
-            4, 8), ("The specified kernel connectivity(kern_conn= %r) is "
-                    "not supported" %
-                    self.kern_conn)
+        assert self.kern_conn in (4, 8), (
+            "The specified kernel connectivity(kern_conn= %r) is "
+            "not supported" % self.kern_conn)
 
         # make the onehot inferer
-        self.onehot = oneHot(self.device,
-                             self.nclasses,
+        self.onehot = oneHot(self.device, self.nclasses,
                              spatial_dim=2)  # range labels
 
     def forward(self, range_label):
@@ -153,8 +155,12 @@ class borderMask(nn.Module):
         # With predicted labels won't see this problem because all the pixels belongs
         # to at least one class
         if self.background_class is not None:
-            input_tensor[:, self.include_idx] = input_tensor[:,
-                                                             self.include_idx] + input_tensor[:, self.exclude_idx]
+            input_tensor[:, self.
+                         include_idx] = input_tensor[:, self.
+                                                     include_idx] + input_tensor[:,
+                                                                                 self
+                                                                                 .
+                                                                                 exclude_idx]
 
         # C denotes a number of channels, N, H and W are dismissed
         C = input_tensor.shape[1]
@@ -162,13 +168,11 @@ class borderMask(nn.Module):
         # Create an empty erode kernel and send it to 'device'
         erode_kernel = torch.zeros((C, 1, 3, 3), device=self.device)
         if self.kern_conn == 4:
-            erode_kernel[:] = torch.tensor([[0, 1, 0],
-                                            [1, 1, 1],
-                                            [0, 1, 0]], device=self.device)
+            erode_kernel[:] = torch.tensor([[0, 1, 0], [1, 1, 1], [0, 1, 0]],
+                                           device=self.device)
         else:
-            erode_kernel[:] = torch.tensor([[1, 1, 1],
-                                            [1, 1, 1],
-                                            [1, 1, 1]], device=self.device)
+            erode_kernel[:] = torch.tensor([[1, 1, 1], [1, 1, 1], [1, 1, 1]],
+                                           device=self.device)
 
         # to check connectivity
         kernel_sum = erode_kernel[0][0].sum()  # should be kern_conn + 1
@@ -176,8 +180,10 @@ class borderMask(nn.Module):
         # erode the input image border_size times
         erode_input = input_tensor
         for _ in range(self.border_size):
-            eroded_output = F.conv2d(
-                erode_input, erode_kernel, groups=C, padding=1)
+            eroded_output = F.conv2d(erode_input,
+                                     erode_kernel,
+                                     groups=C,
+                                     padding=1)
             # Pick the elements that match the kernel_sum to obtain the eroded
             # output and convert to dtype=float32
             eroded_output = (eroded_output == kernel_sum).float()
@@ -219,33 +225,38 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser("./borderMask.py")
     parser.add_argument(
-        '--scan', '-s',
+        '--scan',
+        '-s',
         type=str,
         required=True,
         help='Scan to get xyz. No Default',
     )
     parser.add_argument(
-        '--label', '-l',
+        '--label',
+        '-l',
         type=str,
         required=True,
         help='Label to calculate border mask. No Default',
     )
     parser.add_argument(
-        '--exclude_class', '-e',
+        '--exclude_class',
+        '-e',
         type=int,
         required=False,
         default=None,
         help='Label to ignore. No Default',
     )
     parser.add_argument(
-        '--border', '-b',
+        '--border',
+        '-b',
         type=int,
         required=False,
         default=1,
         help='Border size. Defaults to %(default)s',
     )
     parser.add_argument(
-        '--conn', '-c',
+        '--conn',
+        '-c',
         type=int,
         required=False,
         default=4,
@@ -270,8 +281,7 @@ if __name__ == "__main__":
         device = torch.device('cpu')
 
     # define the border mask
-    bm = borderMask(300, device, FLAGS.border,
-                    FLAGS.conn, FLAGS.exclude_class)
+    bm = borderMask(300, device, FLAGS.border, FLAGS.conn, FLAGS.exclude_class)
 
     # imports for inference part
     import cv2

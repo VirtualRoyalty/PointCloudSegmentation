@@ -17,16 +17,17 @@ def is_label(filename):
 
 
 class SemanticKitti(Dataset):
-
-    def __init__(self, root,    # directory where data is
-                 sequences,     # sequences for this data (e.g. [1,3,4,6])
-                 labels,  # label dict: (e.g 10: "car")
-                 color_map,     # colors dict bgr (e.g 10: [255, 0, 0])
-                 learning_map,  # classes to learn (0 to N-1 for xentropy)
-                 learning_map_inv,    # inverse of previous (recover labels)
-                 sensor,              # sensor to parse scans from
-                 max_points=150000,   # max number of points present in dataset
-                 gt=True):            # send ground truth?
+    def __init__(
+        self,
+        root,  # directory where data is
+        sequences,  # sequences for this data (e.g. [1,3,4,6])
+        labels,  # label dict: (e.g 10: "car")
+        color_map,  # colors dict bgr (e.g 10: [255, 0, 0])
+        learning_map,  # classes to learn (0 to N-1 for xentropy)
+        learning_map_inv,  # inverse of previous (recover labels)
+        sensor,  # sensor to parse scans from
+        max_points=150000,  # max number of points present in dataset
+        gt=True):  # send ground truth?
         # save deats
         self.root = os.path.join(root, "sequences")
         self.sequences = sequences
@@ -55,21 +56,20 @@ class SemanticKitti(Dataset):
 
         # make sure directory exists
         if os.path.isdir(self.root):
-            print(
-                "Sequences folder exists! Using sequences from %s" %
-                self.root)
+            print("Sequences folder exists! Using sequences from %s" %
+                  self.root)
         else:
             raise ValueError("Sequences folder doesn't exist! Exiting...")
         # make sure labels is a dict
         assert (isinstance(self.labels, dict))
         # make sure color_map is a dict
-        assert(isinstance(self.color_map, dict))
+        assert (isinstance(self.color_map, dict))
 
         # make sure learning_map is a dict
-        assert(isinstance(self.learning_map, dict))
+        assert (isinstance(self.learning_map, dict))
 
         # make sure sequences is a list
-        assert(isinstance(self.sequences, list))
+        assert (isinstance(self.sequences, list))
 
         # placeholder for filenames
         self.scan_files = []
@@ -83,17 +83,20 @@ class SemanticKitti(Dataset):
             # get paths for each
             scan_path = os.path.join(self.root, seq, "velodyne")
             # get files
-            scan_files = [os.path.join(dp, f) for dp, dn, fn in os.walk(
-                os.path.expanduser(scan_path)) for f in fn if is_scan(f)]
+            scan_files = [
+                os.path.join(dp, f)
+                for dp, dn, fn in os.walk(os.path.expanduser(scan_path))
+                for f in fn if is_scan(f)
+            ]
 
             # check all scans have labels
-           # if self.gt:
+            # if self.gt:
             # assert(len(scan_files) == len(label_files))
 
             # extend list
             self.scan_files.extend(scan_files)
-        print("Using {} scans from sequences {}".format(len(self.scan_files),
-                                                        self.sequences))
+        print("Using {} scans from sequences {}".format(
+            len(self.scan_files), self.sequences))
 
     def __getitem__(self, index):
         # get item in tensor shape
@@ -113,8 +116,9 @@ class SemanticKitti(Dataset):
         unproj_xyz[:unproj_n_points] = torch.from_numpy(scan.points)
         unproj_range = torch.full([self.max_points], -1.0, dtype=torch.float)
         unproj_range[:unproj_n_points] = torch.from_numpy(scan.unproj_range)
-        unproj_remissions = torch.full(
-            [self.max_points], -1.0, dtype=torch.float)
+        unproj_remissions = torch.full([self.max_points],
+                                       -1.0,
+                                       dtype=torch.float)
         unproj_remissions[:unproj_n_points] = torch.from_numpy(scan.remissions)
         unproj_labels = []
 
@@ -128,9 +132,11 @@ class SemanticKitti(Dataset):
         proj_x[:unproj_n_points] = torch.from_numpy(scan.proj_x)
         proj_y = torch.full([self.max_points], -1, dtype=torch.long)
         proj_y[:unproj_n_points] = torch.from_numpy(scan.proj_y)
-        proj = torch.cat([proj_range.unsqueeze(0).clone(),
-                          proj_xyz.clone().permute(2, 0, 1),
-                          proj_remission.unsqueeze(0).clone()])
+        proj = torch.cat([
+            proj_range.unsqueeze(0).clone(),
+            proj_xyz.clone().permute(2, 0, 1),
+            proj_remission.unsqueeze(0).clone()
+        ])
         proj = (proj - self.sensor_img_means[:, None, None]
                 ) / self.sensor_img_stds[:, None, None]
         proj = proj * proj_mask.float()
@@ -176,21 +182,22 @@ class SemanticKitti(Dataset):
 
 class Parser():
     # standard conv, BN, relu
-    def __init__(self,
-                 root,              # directory for data
-                 train_sequences,   # sequences to train
-                 valid_sequences,   # sequences to validate.
-                 test_sequences,    # sequences to test (if none, don't get)
-                 labels,            # labels in data
-                 color_map,         # color for each label
-                 learning_map,      # mapping for training labels
-                 learning_map_inv,  # recover labels from xentropy
-                 sensor,            # sensor to use
-                 max_points,        # max points in each scan in entire dataset
-                 batch_size,        # batch size for train and val
-                 workers,           # threads to load data
-                 gt=False,           # get gt?
-                 shuffle_train=True):  # shuffle training set?
+    def __init__(
+        self,
+        root,  # directory for data
+        train_sequences,  # sequences to train
+        valid_sequences,  # sequences to validate.
+        test_sequences,  # sequences to test (if none, don't get)
+        labels,  # labels in data
+        color_map,  # color for each label
+        learning_map,  # mapping for training labels
+        learning_map_inv,  # recover labels from xentropy
+        sensor,  # sensor to use
+        max_points,  # max points in each scan in entire dataset
+        batch_size,  # batch size for train and val
+        workers,  # threads to load data
+        gt=False,  # get gt?
+        shuffle_train=True):  # shuffle training set?
         super(Parser, self).__init__()
         print("parser started")
         # if I am training, get the dataset

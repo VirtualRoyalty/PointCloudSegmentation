@@ -21,10 +21,19 @@ def draw_box(pyplot_axis, vertices, axes=[0, 1, 2], color='red'):
     """
     vertices = vertices[axes, :]
     connections = [
-        [0, 1], [1, 2], [2, 3], [3, 0],  # Lower plane parallel to Z=0 plane
-        [4, 5], [5, 6], [6, 7], [7, 4],  # Upper plane parallel to Z=0 plane
+        [0, 1],
+        [1, 2],
+        [2, 3],
+        [3, 0],  # Lower plane parallel to Z=0 plane
+        [4, 5],
+        [5, 6],
+        [6, 7],
+        [7, 4],  # Upper plane parallel to Z=0 plane
         # Connections between upper and lower planes
-        [0, 4], [1, 5], [2, 6], [3, 7]
+        [0, 4],
+        [1, 5],
+        [2, 6],
+        [3, 7]
     ]
     for connection in connections:
         pyplot_axis.plot(*vertices[:, connection], c=color, lw=0.5)
@@ -36,13 +45,18 @@ def draw_point_cloud(cloud, ax, title, axes_str, axes=[0, 1, 2]):
     no_points = np.shape(cloud)[0]
     # Adjust the point size based on the point cloud size
     point_size = 10**(3 - int(np.log10(no_points)))
-    if np.shape(cloud)[
-            1] == 4:  # If point cloud is XYZI format (e.g., I stands for intensity)
+    if np.shape(
+            cloud
+    )[1] == 4:  # If point cloud is XYZI format (e.g., I stands for intensity)
         ax.scatter(*np.transpose(cloud[:, axes]),
-                   s=point_size, c=cloud[:, 3], cmap='gray')
-    elif np.shape(cloud)[1] == 3:   # If point cloud is XYZ format
+                   s=point_size,
+                   c=cloud[:, 3],
+                   cmap='gray')
+    elif np.shape(cloud)[1] == 3:  # If point cloud is XYZ format
         ax.scatter(*np.transpose(cloud[:, axes]),
-                   s=point_size, c='b', alpha=0.7)
+                   s=point_size,
+                   c='b',
+                   alpha=0.7)
     ax.set_xlabel('{} axis'.format(axes_str[axes[0]]))
     ax.set_ylabel('{} axis'.format(axes_str[axes[1]]))
     # if len(axes) > 2: # 3-D plot
@@ -53,11 +67,11 @@ def draw_point_cloud(cloud, ax, title, axes_str, axes=[0, 1, 2]):
     # else: # 2-D plot
     #     ax.set_xlim(*axes_limits[axes[0]])
     #     ax.set_ylim(*axes_limits[axes[1]])
-#        # User specified limits
-#        if xlim3d!=None:
-#            ax.set_xlim3d(xlim3d)
-#        if ylim3d!=None:
-#            ax.set_ylim3d(ylim3d)
-#        if zlim3d!=None:
-#            ax.set_zlim3d(zlim3d)
+    #        # User specified limits
+    #        if xlim3d!=None:
+    #            ax.set_xlim3d(xlim3d)
+    #        if ylim3d!=None:
+    #            ax.set_ylim3d(ylim3d)
+    #        if zlim3d!=None:
+    #            ax.set_zlim3d(zlim3d)
     ax.set_title(title)

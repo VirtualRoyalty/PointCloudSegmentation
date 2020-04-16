@@ -90,8 +90,10 @@ def clustering(cloud, tol, min_size, max_size):
     return cluster_indices
 
 
-def get_cluster_box_list(cluster_indices, cloud_obsts,
-                         radius_search=0.8, min_neighbors_in_radius=2):
+def get_cluster_box_list(cluster_indices,
+                         cloud_obsts,
+                         radius_search=0.8,
+                         min_neighbors_in_radius=2):
     """
     Input parameters:
         cluster_indices: a list of list. Each element list contains the indices of the points that belongs to
@@ -175,8 +177,7 @@ def box_center(box):
     y_min, y_max = min(box[1]), max(box[1])
     z_min, z_max = min(box[2]), max(box[2])
 
-    return ((x_min + x_max) / 2.0,
-            (y_min + y_max) / 2.0,
+    return ((x_min + x_max) / 2.0, (y_min + y_max) / 2.0,
             (z_min + z_max) / 2.0)
 
 

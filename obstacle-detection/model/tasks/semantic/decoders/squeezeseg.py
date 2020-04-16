@@ -6,22 +6,26 @@ import torch.nn.functional as F
 
 
 class FireUp(nn.Module):
-
-    def __init__(self, inplanes, squeeze_planes,
-                 expand1x1_planes, expand3x3_planes, stride):
+    def __init__(self, inplanes, squeeze_planes, expand1x1_planes,
+                 expand3x3_planes, stride):
         super(FireUp, self).__init__()
         self.inplanes = inplanes
         self.stride = stride
         self.activation = nn.ReLU(inplace=True)
         self.squeeze = nn.Conv2d(inplanes, squeeze_planes, kernel_size=1)
         if self.stride == 2:
-            self.upconv = nn.ConvTranspose2d(squeeze_planes, squeeze_planes,
-                                             kernel_size=[1, 4], stride=[1, 2],
+            self.upconv = nn.ConvTranspose2d(squeeze_planes,
+                                             squeeze_planes,
+                                             kernel_size=[1, 4],
+                                             stride=[1, 2],
                                              padding=[0, 1])
-        self.expand1x1 = nn.Conv2d(squeeze_planes, expand1x1_planes,
+        self.expand1x1 = nn.Conv2d(squeeze_planes,
+                                   expand1x1_planes,
                                    kernel_size=1)
-        self.expand3x3 = nn.Conv2d(squeeze_planes, expand3x3_planes,
-                                   kernel_size=3, padding=1)
+        self.expand3x3 = nn.Conv2d(squeeze_planes,
+                                   expand3x3_planes,
+                                   kernel_size=3,
+                                   padding=1)
 
     def forward(self, x):
         x = self.activation(self.squeeze(x))
@@ -35,11 +39,11 @@ class FireUp(nn.Module):
 
 # ******************************************************************************
 
+
 class Decoder(nn.Module):
     """
        Class for DarknetSeg. Subclasses PyTorch's own "nn" module
     """
-
     def __init__(self, params, stub_skips, OS=32, feature_depth=512):
         super(Decoder, self).__init__()
         self.backbone_OS = OS
@@ -66,18 +70,19 @@ class Decoder(nn.Module):
 
         # decoder
         # decoder
-        self.firedec10 = FireUp(self.backbone_feature_depth, 64, 128, 128,
+        self.firedec10 = FireUp(self.backbone_feature_depth,
+                                64,
+                                128,
+                                128,
                                 stride=self.strides[0])
-        self.firedec11 = FireUp(256, 32, 64, 64,
-                                stride=self.strides[1])
-        self.firedec12 = FireUp(128, 16, 32, 32,
-                                stride=self.strides[2])
-        self.firedec13 = FireUp(64, 16, 32, 32,
-                                stride=self.strides[3])
+        self.firedec11 = FireUp(256, 32, 64, 64, stride=self.strides[1])
+        self.firedec12 = FireUp(128, 16, 32, 32, stride=self.strides[2])
+        self.firedec13 = FireUp(64, 16, 32, 32, stride=self.strides[3])
 
         # layer list to execute with skips
-        self.layers = [self.firedec10, self.firedec11,
-                       self.firedec12, self.firedec13]
+        self.layers = [
+            self.firedec10, self.firedec11, self.firedec12, self.firedec13
+        ]
 
         # for a bit of fun
         self.dropout = nn.Dropout2d(self.drop_prob)
