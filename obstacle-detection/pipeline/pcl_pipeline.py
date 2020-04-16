@@ -91,14 +91,14 @@ def pipeline_optimized_pcl(scan, label, obstacle_lst,
 
     if verbose:
         print('Execution time:')
-        print('\n - ROI filtering: {:.5f} s'.format(roi_time.total_seconds()))
+        print('\n-ROI filtering: {:.5f}s'.format(roi_time.total_seconds()))
         print(
-            '\n - Filtering obstacles: {:.5f} s'.format(obstacle_time.total_seconds()))
-        print('\n - Voxel grid: {:.5f} s'.format(voxel_time.total_seconds()))
+            '\n-Filtering obstacles: {:.5f}s'.format(obstacle_time.total_seconds()))
+        print('\n-Voxel grid: {:.5f}s'.format(voxel_time.total_seconds()))
         print(
-            '\n - Clustering: {:.5f} s'.format(clustering_time.total_seconds()))
+            '\n-Clustering: {:.5f}s'.format(clustering_time.total_seconds()))
         print(
-            '\n - Min-max cluster points: {:.5f} s \n'.format(bbox_time.total_seconds()))
+            '\n-Min-max cluster points: {:.5f} s \n'.format(bbox_time.total_seconds()))
 
     if exec_time:
         return box_min_max_list, cluster_data, {'roi_time': roi_time.total_seconds(),
