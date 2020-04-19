@@ -3,6 +3,10 @@
 name: CI
 env:
   PROJECT_NAME: PointCloudSegmentation
+  BUILD_DIR:    docker-env 
+  VK_ME:        136761433
+  VK_ILYA:      75560006
+  VK_POLINA:    132293451
 on:
   push:
     branches: [ master ]
@@ -19,10 +23,10 @@ jobs:
       env:  
         PRECOMMAND_MESSAGE: Vaba Laba Dab Dab!
   
-    - name: VK Notifications
+    - name: CodeStyle VK Notify
       uses: alphamusic/VK-Notifications@1.0.2
       env: 
-         VK_USERS :  136761433 #, 75560006, 132293451
+         VK_USERS :  $VK_ME #, 75560006, 132293451
          VK_MESSAGE: "Hi! The code style cheker is passed"
          VK_TOKEN: ${{ secrets.VK_TOKEN }}   
     
@@ -38,6 +42,12 @@ jobs:
       
       - name: Docker build
         run: |
-              docker build -t ${{ secrets.USERNAME }}/$PROJECT_NAME/docker-env:ver_$GITHUB_RUN_NUMBER
+              docker build -t ${{ secrets.USERNAME }}/$PROJECT_NAME:ver_$GITHUB_RUN_NUMBER $BUILD_DIR
               docker images 
-     
+         
+      - name: DockerBuild VK Notify
+        uses: alphamusic/VK-Notifications@1.0.2
+        env: 
+          VK_USERS :  $VK_ME #, 75560006, 132293451
+          VK_MESSAGE: "And... docker build step is successfuly passed!"
+          VK_TOKEN: ${{ secrets.VK_TOKEN }}   
