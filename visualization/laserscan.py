@@ -6,14 +6,10 @@ import time
 
 class LaserScan:
     """Class that contains LaserScan with x,y,z,r"""
-    EXTENSIONS_SCAN = ['.bin']
 
-    def __init__(self,
-                 project=False,
-                 H=64,
-                 W=1024,
-                 fov_up=3.0,
-                 fov_down=-25.0):
+    EXTENSIONS_SCAN = [".bin"]
+
+    def __init__(self, project=False, H=64, W=1024, fov_up=3.0, fov_down=-25.0):
         self.project = project
         self.proj_H = H
         self.proj_W = W
@@ -23,42 +19,33 @@ class LaserScan:
 
     def reset(self):
         """ Reset scan members. """
-        self.points = np.zeros((0, 3),
-                               dtype=np.float32)  # [m, 3]: x, y, z
-        self.remissions = np.zeros(
-            (0, 1), dtype=np.float32)  # [m ,1]: remission
+        self.points = np.zeros((0, 3), dtype=np.float32)  # [m, 3]: x, y, z
+        self.remissions = np.zeros((0, 1), dtype=np.float32)  # [m ,1]: remission
 
         # projected range image - [H,W] range (-1 is no data)
-        self.proj_range = np.full((self.proj_H, self.proj_W),
-                                  -1,
-                                  dtype=np.float32)
+        self.proj_range = np.full((self.proj_H, self.proj_W), -1, dtype=np.float32)
 
         # unprojected range (list of depths for each point)
         self.unproj_range = np.zeros((0, 1), dtype=np.float32)
 
         # projected point cloud xyz - [H,W,3] xyz coord (-1 is no data)
-        self.proj_xyz = np.full((self.proj_H, self.proj_W, 3),
-                                -1,
-                                dtype=np.float32)
+        self.proj_xyz = np.full((self.proj_H, self.proj_W, 3), -1, dtype=np.float32)
 
         # projected remission - [H,W] intensity (-1 is no data)
-        self.proj_remission = np.full((self.proj_H, self.proj_W),
-                                      -1,
-                                      dtype=np.float32)
+        self.proj_remission = np.full((self.proj_H, self.proj_W), -1, dtype=np.float32)
 
         # projected index (for each pixel, what I am in the pointcloud)
         # [H,W] index (-1 is no data)
-        self.proj_idx = np.full((self.proj_H, self.proj_W),
-                                -1,
-                                dtype=np.int32)
+        self.proj_idx = np.full((self.proj_H, self.proj_W), -1, dtype=np.int32)
 
         # for each point, where it is in the range image
         self.proj_x = np.zeros((0, 1), dtype=np.int32)  # [m, 1]: x
         self.proj_y = np.zeros((0, 1), dtype=np.int32)  # [m, 1]: y
 
         # mask containing for each pixel, if it contains a point or not
-        self.proj_mask = np.zeros((self.proj_H, self.proj_W),
-                                  dtype=np.int32)  # [H,W] mask
+        self.proj_mask = np.zeros(
+            (self.proj_H, self.proj_W), dtype=np.int32
+        )  # [H,W] mask
 
     def size(self):
         """ Return the size of the point cloud. """
@@ -77,14 +64,12 @@ class LaserScan:
         if not isinstance(filename, str):
             raise TypeError(
                 "Filename should be string type, "
-                "but was {type}".format(type=str(type(filename))))
+                "but was {type}".format(type=str(type(filename)))
+            )
 
         # check extension is a laserscan
-        if not any(
-                filename.endswith(ext)
-                for ext in self.EXTENSIONS_SCAN):
-            raise RuntimeError(
-                "Filename extension is not valid scan file.")
+        if not any(filename.endswith(ext) for ext in self.EXTENSIONS_SCAN):
+            raise RuntimeError("Filename extension is not valid scan file.")
 
         # if all goes well, open pointcloud
         scan = np.fromfile(filename, dtype=np.float32)
@@ -106,8 +91,7 @@ class LaserScan:
             raise TypeError("Scan should be numpy array")
 
         # check remission makes sense
-        if remissions is not None and not isinstance(
-                remissions, np.ndarray):
+        if remissions is not None and not isinstance(remissions, np.ndarray):
             raise TypeError("Remissions should be numpy array")
 
         # put in attribute
@@ -115,8 +99,7 @@ class LaserScan:
         if remissions is not None:
             self.remissions = remissions  # get remission
         else:
-            self.remissions = np.zeros((points.shape[0]),
-                                       dtype=np.float32)
+            self.remissions = np.zeros((points.shape[0]), dtype=np.float32)
 
         # if projection is wanted, then do it and fill in the structure
         if self.project:
@@ -132,8 +115,7 @@ class LaserScan:
         # laser parameters
         fov_up = self.proj_fov_up / 180.0 * np.pi  # field of view up in rad
         fov_down = self.proj_fov_down / 180.0 * np.pi  # field of view down in rad
-        fov = abs(fov_down) + abs(
-            fov_up)  # get field of view total in rad
+        fov = abs(fov_down) + abs(fov_up)  # get field of view total in rad
 
         # get depth of all points
         depth = np.linalg.norm(self.points, 2, axis=1)
@@ -164,8 +146,7 @@ class LaserScan:
         proj_y = np.floor(proj_y)
         proj_y = np.minimum(self.proj_H - 1, proj_y)
         proj_y = np.maximum(0, proj_y).astype(np.int32)  # in [0,H-1]
-        self.proj_y = np.copy(
-            proj_y)  # stope a copy in original order
+        self.proj_y = np.copy(proj_y)  # stope a copy in original order
 
         # copy of depth in original order
         self.unproj_range = np.copy(depth)
@@ -190,19 +171,21 @@ class LaserScan:
 
 class SemLaserScan(LaserScan):
     """Class that contains LaserScan with x,y,z,r,sem_label,sem_color_label,inst_label,inst_color_label"""
-    EXTENSIONS_LABEL = ['.label']
 
-    def __init__(self,
-                 sem_color_dict=None,
-                 sem_labels_dict=None,
-                 project=False,
-                 H=64,
-                 W=1024,
-                 fov_up=3.0,
-                 fov_down=-25.0,
-                 max_classes=300):
-        super(SemLaserScan, self).__init__(project, H, W, fov_up,
-                                           fov_down)
+    EXTENSIONS_LABEL = [".label"]
+
+    def __init__(
+        self,
+        sem_color_dict=None,
+        sem_labels_dict=None,
+        project=False,
+        H=64,
+        W=1024,
+        fov_up=3.0,
+        fov_down=-25.0,
+        max_classes=300,
+    ):
+        super(SemLaserScan, self).__init__(project, H, W, fov_up, fov_down)
         self.reset()
 
         # make semantic colors
@@ -212,18 +195,15 @@ class SemLaserScan(LaserScan):
             for key, data in sem_color_dict.items():
                 if key + 1 > max_sem_key:
                     max_sem_key = key + 1
-            self.sem_color_lut = np.zeros((max_sem_key + 100, 3),
-                                          dtype=np.float32)
+            self.sem_color_lut = np.zeros((max_sem_key + 100, 3), dtype=np.float32)
             for key, value in sem_color_dict.items():
-                self.sem_color_lut[key] = np.array(value,
-                                                   np.float32) / 255.0
+                self.sem_color_lut[key] = np.array(value, np.float32) / 255.0
         else:
             # otherwise make random
             max_sem_key = max_classes
-            self.sem_color_lut = np.random.uniform(low=0.0,
-                                                   high=1.0,
-                                                   size=(max_sem_key,
-                                                         3))
+            self.sem_color_lut = np.random.uniform(
+                low=0.0, high=1.0, size=(max_sem_key, 3)
+            )
             # force zero to a gray-ish color
             self.sem_color_lut[0] = np.full((3), 0.1)
 
@@ -239,9 +219,9 @@ class SemLaserScan(LaserScan):
 
         # make instance colors
         max_inst_id = 100000
-        self.inst_color_lut = np.random.uniform(low=0.0,
-                                                high=1.0,
-                                                size=(max_inst_id, 3))
+        self.inst_color_lut = np.random.uniform(
+            low=0.0, high=1.0, size=(max_inst_id, 3)
+        )
         # force zero to a gray-ish color
         self.inst_color_lut[0] = np.full((3), 0.1)
 
@@ -250,31 +230,28 @@ class SemLaserScan(LaserScan):
         super(SemLaserScan, self).reset()
 
         # semantic labels
-        self.sem_label = np.zeros((0, 1),
-                                  dtype=np.int32)  # [m, 1]: label
-        self.sem_label_color = np.zeros(
-            (0, 3), dtype=np.float32)  # [m ,3]: color
+        self.sem_label = np.zeros((0, 1), dtype=np.int32)  # [m, 1]: label
+        self.sem_label_color = np.zeros((0, 3), dtype=np.float32)  # [m ,3]: color
 
         # instance labels
-        self.inst_label = np.zeros((0, 1),
-                                   dtype=np.int32)  # [m, 1]: label
-        self.inst_label_color = np.zeros(
-            (0, 3), dtype=np.float32)  # [m ,3]: color
+        self.inst_label = np.zeros((0, 1), dtype=np.int32)  # [m, 1]: label
+        self.inst_label_color = np.zeros((0, 3), dtype=np.float32)  # [m ,3]: color
 
         # projection color with semantic labels
-        self.proj_sem_label = np.zeros((self.proj_H, self.proj_W),
-                                       dtype=np.int32)  # [H,W]  label
+        self.proj_sem_label = np.zeros(
+            (self.proj_H, self.proj_W), dtype=np.int32
+        )  # [H,W]  label
         self.proj_sem_color = np.zeros(
-            (self.proj_H, self.proj_W, 3),
-            dtype=np.float)  # [H,W,3] color
+            (self.proj_H, self.proj_W, 3), dtype=np.float
+        )  # [H,W,3] color
 
         # projection color with instance labels
         self.proj_inst_label = np.zeros(
-            (self.proj_H, self.proj_W),
-            dtype=np.int32)  # [H,W]  label
+            (self.proj_H, self.proj_W), dtype=np.int32
+        )  # [H,W]  label
         self.proj_inst_color = np.zeros(
-            (self.proj_H, self.proj_W, 3),
-            dtype=np.float)  # [H,W,3] color
+            (self.proj_H, self.proj_W, 3), dtype=np.float
+        )  # [H,W,3] color
 
     def open_label(self, filename):
         """ Open raw scan and fill in attributes
@@ -283,14 +260,12 @@ class SemLaserScan(LaserScan):
         if not isinstance(filename, str):
             raise TypeError(
                 "Filename should be string type, "
-                "but was {type}".format(type=str(type(filename))))
+                "but was {type}".format(type=str(type(filename)))
+            )
 
         # check extension is a laserscan
-        if not any(
-                filename.endswith(ext)
-                for ext in self.EXTENSIONS_LABEL):
-            raise RuntimeError(
-                "Filename extension is not valid label file.")
+        if not any(filename.endswith(ext) for ext in self.EXTENSIONS_LABEL):
+            raise RuntimeError("Filename extension is not valid label file.")
 
         # if all goes well, open label
         label = np.fromfile(filename, dtype=np.int32)
@@ -313,12 +288,10 @@ class SemLaserScan(LaserScan):
         else:
             print("Points shape: ", self.points.shape)
             print("Label shape: ", label.shape)
-            raise ValueError(
-                "Scan and Label don't contain same number of points")
+            raise ValueError("Scan and Label don't contain same number of points")
 
         # sanity check
-        assert ((self.sem_label +
-                 (self.inst_label << 16) == label).all())
+        assert (self.sem_label + (self.inst_label << 16) == label).all()
 
         if self.project:
             self.do_label_projection()
@@ -335,10 +308,10 @@ class SemLaserScan(LaserScan):
         vec2_x = 5
         vec2_y = 0
         cos_angle = (vec1_x * vec2_x + vec1_y * vec2_y) / (
-            (np.sqrt(vec1_x**2 + vec1_y**2)) *
-            (np.sqrt(vec2_x**2 + vec2_y**2)))
+            (np.sqrt(vec1_x ** 2 + vec1_y ** 2)) * (np.sqrt(vec2_x ** 2 + vec2_y ** 2))
+        )
 
-        if ((cos_angle >= -1) & (cos_angle <= 1)):
+        if (cos_angle >= -1) & (cos_angle <= 1):
             angle = np.degrees(np.arccos(cos_angle))
         else:
             angle = 0
@@ -355,24 +328,25 @@ class SemLaserScan(LaserScan):
         bboxes = []
         if not use_bbox_measurements:
             for str in fl:
-                coord = str.split(' ')
+                coord = str.split(" ")
                 cluster = []
                 for i in range(0, len(coord), 3):
                     cluster.append(
                         np.array(
-                            (float(coord[i]), float(coord[i + 1]),
-                             float(coord[i + 2]))))
+                            (float(coord[i]), float(coord[i + 1]), float(coord[i + 2]))
+                        )
+                    )
                 bboxes.append(self.get_bbox_info(cluster))
         else:
             for str in fl:
-                coord = str.split(' ')
+                coord = str.split(" ")
                 cluster = []
                 cluster.append(float(coord[0]))
                 cluster.append(float(coord[1]))
                 cluster.append(float(coord[2]))
                 cluster.append(
-                    np.array((float(coord[3]), float(coord[4]),
-                              float(coord[5]))))
+                    np.array((float(coord[3]), float(coord[4]), float(coord[5])))
+                )
                 cluster.append(float(coord[6]))
                 bboxes.append(cluster)
         self.bboxes = bboxes
@@ -383,15 +357,13 @@ class SemLaserScan(LaserScan):
         self.bbox_labels = []
         self.bbox_label_color = []
         if len(str) != 0:
-            labels = str.split(' ')
+            labels = str.split(" ")
             bbox_labels = []
             for i in range(len(labels)):
                 bbox_labels.append(int(float(labels[i])))
-                self.bbox_labels.append(
-                    self.sem_labels_lut[bbox_labels[i]])
+                self.bbox_labels.append(self.sem_labels_lut[bbox_labels[i]])
             self.bbox_label_color = self.sem_color_lut[bbox_labels]
-            self.bbox_label_color = self.bbox_label_color.reshape(
-                (-1, 3))
+            self.bbox_label_color = self.bbox_label_color.reshape((-1, 3))
 
     def colorize(self):
         """ Colorize pointcloud with the color of each semantic label
@@ -407,13 +379,14 @@ class SemLaserScan(LaserScan):
         mask = self.proj_idx >= 0
 
         # semantics
-        self.proj_sem_label[mask] = self.sem_label[
-            self.proj_idx[mask]]
-        self.proj_sem_color[mask] = self.sem_color_lut[self.sem_label[
-            self.proj_idx[mask]]]
+        self.proj_sem_label[mask] = self.sem_label[self.proj_idx[mask]]
+        self.proj_sem_color[mask] = self.sem_color_lut[
+            self.sem_label[self.proj_idx[mask]]
+        ]
 
         # instances
-        self.proj_inst_label[mask] = self.inst_label[
-            self.proj_idx[mask]]
+        self.proj_inst_label[mask] = self.inst_label[self.proj_idx[mask]]
         self.proj_inst_color[mask] = self.inst_color_lut[
-            self.inst_label[self.proj_idx[mask]]]
+            self.inst_label[self.proj_idx[mask]]
+        ]
+

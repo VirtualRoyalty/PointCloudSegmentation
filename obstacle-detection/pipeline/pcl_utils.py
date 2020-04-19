@@ -44,8 +44,7 @@ def roi_filter(cloud, x_roi, y_roi, z_roi):
     xc_min, xc_max = x_roi
     yc_min, yc_max = y_roi
     zc_min, zc_max = z_roi
-    clipper.set_MinMax(xc_min, yc_min, zc_min, 0, xc_max, yc_max,
-                       zc_max, 0)
+    clipper.set_MinMax(xc_min, yc_min, zc_min, 0, xc_max, yc_max, zc_max, 0)
     cloud_roi_filtered = clipper.filter()
     return cloud_roi_filtered
 
@@ -57,11 +56,12 @@ def plane_segmentation(cloud, dist_thold, max_iter):
         dist_thold: distance threshold
         max_iter: maximal number of iteration
     Output:
-        indices: list of indices of the PCL points that belongs to the plane
-        coefficient: the coefficients of the plane-fitting (e.g., [a, b, c, d] for ax + by +cz + d =0)
+        indices: list of indices of the PCL points 
+                 that belongs to the plane
+        coefficient: the coefficients of the plane-fitting 
+                     (e.g., [a, b, c, d] for ax + by +cz + d =0)
     """
-    seg = cloud.make_segmenter_normals(
-        ksearch=50)  # For simplicity,hard coded
+    seg = cloud.make_segmenter_normals(ksearch=50)  # For simplicity,hard coded
     seg.set_optimize_coefficients(True)
     seg.set_model_type(pcl.SACMODEL_NORMAL_PLANE)
     seg.set_method_type(pcl.SAC_RANSAC)
@@ -79,7 +79,8 @@ def clustering(cloud, tol, min_size, max_size):
         min_size: minimal number of points to form a cluster
         max_size: maximal number of points that a cluster allows
     Output:
-        cluster_indices: a list of list. Each element list contains the indices of the points that belongs to
+        cluster_indices: a list of list. Each element list contains 
+                         the indices of the points that belongs to
                          the same cluster
     """
     tree = cloud.make_kdtree()
@@ -92,17 +93,18 @@ def clustering(cloud, tol, min_size, max_size):
     return cluster_indices
 
 
-def get_cluster_box_list(cluster_indices,
-                         cloud_obsts,
-                         radius_search=0.8,
-                         min_neighbors_in_radius=2):
+def get_cluster_box_list(
+    cluster_indices, cloud_obsts, radius_search=0.8, min_neighbors_in_radius=2
+):
     """
     Input parameters:
-        cluster_indices: a list of list. Each element list contains the indices of the points that belongs to
+        cluster_indices: a list of list. Each element list contains 
+                         the indices of the points that belongs to
                          the same cluster
         colud_obsts: PCL for the obstacles
     Output:
-        cloud_cluster_list: a list for the PCL clusters: each element is a point cloud of a cluster
+        cloud_cluster_list: a list for the PCL clusters: each element 
+                            is a point cloud of a cluster
         box_coord_list: a list of corrdinates for bounding boxes
     """
     cloud_cluster_list = []
@@ -179,8 +181,7 @@ def box_center(box):
     y_min, y_max = min(box[1]), max(box[1])
     z_min, z_max = min(box[2]), max(box[2])
 
-    return ((x_min + x_max) / 2.0, (y_min + y_max) / 2.0,
-            (z_min + z_max) / 2.0)
+    return ((x_min + x_max) / 2.0, (y_min + y_max) / 2.0, (z_min + z_max) / 2.0)
 
 
 def get_min_max_box(box):
