@@ -42,7 +42,7 @@ jobs:
       
       - name: Docker build
         run: |
-              docker build -t ${{ secrets.USERNAME }}/$PROJECT_NAME:ver_$GITHUB_RUN_NUMBER $BUILD_DIR
+              docker build -t $PROJECT_NAME:ver_$GITHUB_RUN_NUMBER $BUILD_DIR
               docker images 
          
       - name: DockerBuild VK Notify
