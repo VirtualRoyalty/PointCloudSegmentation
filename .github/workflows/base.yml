@@ -14,6 +14,7 @@ on:
     branches: [ master ]
 
 jobs:
+
   codeStyles:
     runs-on: ubuntu-latest
     steps:
@@ -27,8 +28,7 @@ jobs:
       uses: alphamusic/VK-Notifications@1.0.2
       env: 
          VK_USERS :  ${{ secrets.VK_ME }} 
-         VK_MESSAGE: Hi!
-                     The code style cheker is passed for ${GITHUB_REF:11}  ${{ github.event_name }}
+         VK_MESSAGE: Hi! The code style cheker is passed for ${GITHUB_REF:11}  ${{ github.event_name }}
          VK_TOKEN: ${{ secrets.VK_TOKEN }}   
     
   build:
