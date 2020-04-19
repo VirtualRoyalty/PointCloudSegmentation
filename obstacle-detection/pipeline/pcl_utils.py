@@ -57,9 +57,9 @@ def plane_segmentation(cloud, dist_thold, max_iter):
         dist_thold: distance threshold
         max_iter: maximal number of iteration
     Output:
-        indices: list of indices of the PCL points 
+        indices: list of indices of the PCL points
                  that belongs to the plane
-        coefficient: the coefficients of the plane-fitting 
+        coefficient: the coefficients of the plane-fitting
                      (e.g., [a, b, c, d] for ax + by +cz + d =0)
     """
     seg = cloud.make_segmenter_normals(ksearch=50)  # For simplicity,hard coded
@@ -80,7 +80,7 @@ def clustering(cloud, tol, min_size, max_size):
         min_size: minimal number of points to form a cluster
         max_size: maximal number of points that a cluster allows
     Output:
-        cluster_indices: a list of list. Each element list contains 
+        cluster_indices: a list of list. Each element list contains
                          the indices of the points that belongs to
                          the same cluster
     """
@@ -99,12 +99,12 @@ def get_cluster_box_list(
 ):
     """
     Input parameters:
-        cluster_indices: a list of list. Each element list contains 
+        cluster_indices: a list of list. Each element list contains
                          the indices of the points that belongs to
                          the same cluster
         colud_obsts: PCL for the obstacles
     Output:
-        cloud_cluster_list: a list for the PCL clusters each element 
+        cloud_cluster_list: a list for the PCL clusters each element
                             is a point cloud of a cluster
         box_coord_list: a list of corrdinates for bounding boxes
     """
