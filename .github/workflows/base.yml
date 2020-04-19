@@ -25,7 +25,7 @@ jobs:
       uses: alphamusic/VK-Notifications@1.0.2
       env: 
          VK_USERS :  ${{ secrets.VK_ME }} 
-         VK_MESSAGE: Hi! The code style cheker is passed for ${GITHUB_REF:11}  ${{ github.event_name }}
+         VK_MESSAGE: Hi! The code style cheker is passed for ${{ github.actor}} on  ${{ github.event_name }}
          VK_TOKEN: ${{ secrets.VK_TOKEN }}   
     
   build:
@@ -40,24 +40,24 @@ jobs:
       
       - name: Docker build
         run: |
-              docker build -t $PROJECT_NAME:${GITHUB_REF:11} $BUILD_DIR
+              docker build -t $PROJECT_NAME:${{ github.ref }} $BUILD_DIR
               docker images 
          
       - name: DockerBuild VK Notify
         uses: alphamusic/VK-Notifications@1.0.2
         env: 
           VK_USERS :  ${{ secrets.VK_ME }} 
-          VK_MESSAGE: And... docker build ${GITHUB_REF:11} is successfuly passed!
+          VK_MESSAGE: And... docker build by ${{ github.actor}} is successfuly passed!
           VK_TOKEN: ${{ secrets.VK_TOKEN }}   
       
       - name: Docker Upload
         run: |
              docker login --username=${{ secrets.DOCKER_LOGIN }} --password=${{ secrets.DOCKER_PASSWORD}}
-             docker push ${{ secrets.DOCKER_LOGIN }}/${{ secrets.DOCKER_NAME }}:$PROJECT_NAME:${GITHUB_REF:11}
+             docker push ${{ secrets.DOCKER_LOGIN }}/${{ secrets.DOCKER_NAME }}:$PROJECT_NAME:${{ github.ref }}
              
       - name: Docker Push VK Notify
         uses: alphamusic/VK-Notifications@1.0.2
         env: 
           VK_USERS :  ${{ secrets.VK_ME }} 
-          VK_MESSAGE: Finally, docker build ${{GITHUB_REF:11}} uploaded to docker hub! Hell yeah!
+          VK_MESSAGE: Finally, docker build ${{ github.ref}} by ${{ github.actor }} uploaded to docker hub! Hell yeah!
           VK_TOKEN: ${{ secrets.VK_TOKEN }}   
