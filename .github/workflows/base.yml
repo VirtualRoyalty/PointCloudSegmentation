@@ -2,7 +2,7 @@
 
 name: CI
 env:
-  PROJECT_NAME: PointCloudSegmentation
+  PROJECT_NAME: point_cloud_segmentation
   BUILD_DIR:    docker-env 
   VK_ME:        136761433
   VK_ILYA:      75560006
