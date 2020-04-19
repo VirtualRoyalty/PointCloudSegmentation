@@ -13,23 +13,24 @@ from scipy.ndimage.interpolation import rotate
 def roi_filter_rounded(pcloud, verbose=True, **params):
     """ Region of Interest filter """
 
-    a = (-params['max_x'] - params['max_x']) / 2
-    b = (params['min_y'] - params['max_y']) / 2
+    a = (-params["max_x"] - params["max_x"]) / 2
+    b = (params["min_y"] - params["max_y"]) / 2
 
     if verbose:
-        print('Input pcloud size: {}'.format(len(pcloud)))
-    pcloud['equation'] = (pcloud['x'] ** 2) / (a ** 2) + \
-        (pcloud['y'] ** 2) / (b ** 2)
+        print("Input pcloud size: {}".format(len(pcloud)))
+    pcloud["equation"] = (pcloud["x"] ** 2) / (a ** 2) + (pcloud["y"] ** 2) / (b ** 2)
 
-    pcloud['camera'] = ((pcloud['z'] > params['min_z']) &
-                        (pcloud['z'] < params['max_z']) &
-                        (pcloud['x'] > params['min_x']) &
-                        (pcloud['equation'] <= 1.0))
+    pcloud["camera"] = (
+        (pcloud["z"] > params["min_z"])
+        & (pcloud["z"] < params["max_z"])
+        & (pcloud["x"] > params["min_x"])
+        & (pcloud["equation"] <= 1.0)
+    )
 
-    pcloud = pcloud[pcloud['camera']]
+    pcloud = pcloud[pcloud["camera"]]
 
     if verbose:
-        print('Output ROI pcloud size: {}'.format(len(pcloud)))
+        print("Output ROI pcloud size: {}".format(len(pcloud)))
     return pcloud
 
 
@@ -39,23 +40,22 @@ def roi_filter(pcloud, verbose=True, **params):
     that relative to LIDAR scanner (point (0, 0, 0) is a center)
     """
     if verbose:
-        print('Input pcloud size: {}'.format(len(pcloud)))
-    pcloud['camera'] = ((pcloud['x'] > params['min_x']) &
-                        (pcloud['x'] < params['max_x']) &
-                        (pcloud['y'] > params['min_y']) &
-                        (pcloud['y'] < params['max_y']) &
-                        (pcloud['z'] > params['min_z']) &
-                        (pcloud['z'] < params['max_z']))
-    pcloud = pcloud[pcloud['camera']]
+        print("Input pcloud size: {}".format(len(pcloud)))
+    pcloud["camera"] = (
+        (pcloud["x"] > params["min_x"])
+        & (pcloud["x"] < params["max_x"])
+        & (pcloud["y"] > params["min_y"])
+        & (pcloud["y"] < params["max_y"])
+        & (pcloud["z"] > params["min_z"])
+        & (pcloud["z"] < params["max_z"])
+    )
+    pcloud = pcloud[pcloud["camera"]]
     if verbose:
-        print('Output ROI pcloud size: {}'.format(len(pcloud)))
+        print("Output ROI pcloud size: {}".format(len(pcloud)))
     return pcloud
 
 
-def obstacle_filter(pcloud,
-                    obstacle_lst,
-                    proc_labels=True,
-                    verbose=True):
+def obstacle_filter(pcloud, obstacle_lst, proc_labels=True, verbose=True):
     """
     Obstacle filtering function
     pcloud: pandas.DataFrame,
@@ -69,16 +69,18 @@ def obstacle_filter(pcloud,
     origin_point_size = len(pcloud)
 
     if proc_labels:
-        pcloud.seg_id = pcloud.seg_id.astype('uint32')
+        pcloud.seg_id = pcloud.seg_id.astype("uint32")
         pcloud.seg_id = pcloud.seg_id.apply(lambda x: x & 0xFFFF)
-        pcloud = pcloud[pcloud['seg_id'].isin(
-            list(obstacle_lst.keys()))]
+        pcloud = pcloud[pcloud["seg_id"].isin(list(obstacle_lst.keys()))]
     else:
-        pcloud = pcloud[pcloud['seg_id'].isin(obstacle_lst)]
+        pcloud = pcloud[pcloud["seg_id"].isin(obstacle_lst)]
     if verbose:
-        print('Filter required segments')
-        print('Point size before: {} and after filtering: {}'.format(
-            origin_point_size, len(pcloud)))
+        print("Filter required segments")
+        print(
+            "Point size before: {} and after filtering: {}".format(
+                origin_point_size, len(pcloud)
+            )
+        )
 
     return pcloud
 
@@ -89,31 +91,28 @@ def outlier_filter(tcluster, verbose=True):
     # tcluster['norm'] = np.sqrt(np.square(tcluster).sum(axis=1))
     start_time = datetime.now()
     try:
-        _mean, _std = tcluster['norm'].mean(), tcluster['norm'].std()
+        _mean, _std = tcluster["norm"].mean(), tcluster["norm"].std()
         lower, higher = _mean - 3 * _std, _mean + 3 * _std
     except BaseException:
-        tcluster['norm'] = np.sqrt(
-            np.square(tcluster[['x', 'y', 'z']]).sum(axis=1))
-        _mean, _std = tcluster['norm'].mean(), tcluster['norm'].std()
+        tcluster["norm"] = np.sqrt(np.square(tcluster[["x", "y", "z"]]).sum(axis=1))
+        _mean, _std = tcluster["norm"].mean(), tcluster["norm"].std()
         lower, higher = _mean - 3 * _std, _mean + 3 * _std
     end_time = (datetime.now() - start_time).total_seconds()
     if verbose:
-        print('Computing lower-higher bounds {}'.format(end_time))
+        print("Computing lower-higher bounds {}".format(end_time))
 
     start_time = datetime.now()
-    tcluster = tcluster[(tcluster['norm'] > lower)
-                        & (tcluster['norm'] < higher)]
+    tcluster = tcluster[(tcluster["norm"] > lower) & (tcluster["norm"] < higher)]
     end_time = (datetime.now() - start_time).total_seconds()
     if verbose:
-        print('Applying  bounds {}'.format(end_time))
+        print("Applying  bounds {}".format(end_time))
     return tcluster
 
 
 def get_bounding_boxes(clusters):
     box_coord_list = []
     for i in range(len(clusters)):
-        x_min, x_max, y_min, y_max, z_min, z_max = list(
-            clusters.iloc[i])
+        x_min, x_max, y_min, y_max, z_min, z_max = list(clusters.iloc[i])
         box = np.zeros([8, 3])
         box[0, :] = [x_min, y_min, z_min]
         box[1, :] = [x_max, y_min, z_min]
@@ -135,17 +134,16 @@ def get_OBB(cluster):
     assert isinstance(cluster, pd.DataFrame)
 
     # get min max values for Z axis
-    z_min, z_max = cluster['z'].min(), cluster['z'].max()
+    z_min, z_max = cluster["z"].min(), cluster["z"].max()
 
     # get minimum bounding box on XoY surfuce
-    xy_minimum_bb = minimum_bounding_box(cluster[['x', 'y']].values)
+    xy_minimum_bb = minimum_bounding_box(cluster[["x", "y"]].values)
 
     # make array [z_min, z_min , z_min , z_min , z_max,  z_max,  z_max,  z_max]
     z_array = np.array([z_min] * 4 + [z_max] * 4)
 
     # double xy bbox z_array
-    xy_minimum_bb = np.concatenate((xy_minimum_bb, xy_minimum_bb),
-                                   axis=0)
+    xy_minimum_bb = np.concatenate((xy_minimum_bb, xy_minimum_bb), axis=0)
 
     # concatenate xy with z values and get array of 8x3 shape
     obb = np.hstack((xy_minimum_bb, z_array.reshape(8, 1)))
@@ -156,7 +154,7 @@ def get_OBB(cluster):
 def minimum_bounding_box(points):
     """compute minimum bounding box in XoY"""
 
-    pi2 = np.pi / 2.
+    pi2 = np.pi / 2.0
 
     # get the convex hull for the points
     hull_points = points[ConvexHull(points).vertices]
@@ -172,12 +170,9 @@ def minimum_bounding_box(points):
     angles = np.unique(angles)
 
     # find rotation matrices
-    rotations = np.vstack([
-        np.cos(angles),
-        np.cos(angles - pi2),
-        np.cos(angles + pi2),
-        np.cos(angles)
-    ]).T
+    rotations = np.vstack(
+        [np.cos(angles), np.cos(angles - pi2), np.cos(angles + pi2), np.cos(angles)]
+    ).T
     rotations = rotations.reshape((-1, 2, 2))
 
     # apply rotations to the hull
