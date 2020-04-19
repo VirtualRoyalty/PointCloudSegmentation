@@ -104,7 +104,7 @@ def get_cluster_box_list(
                          the same cluster
         colud_obsts: PCL for the obstacles
     Output:
-        cloud_cluster_list: a list for the PCL clusters: each element 
+        cloud_cluster_list: a list for the PCL clusters each element 
                             is a point cloud of a cluster
         box_coord_list: a list of corrdinates for bounding boxes
     """

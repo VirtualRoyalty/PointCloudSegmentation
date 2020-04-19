@@ -389,4 +389,3 @@ class SemLaserScan(LaserScan):
         self.proj_inst_color[mask] = self.inst_color_lut[
             self.inst_label[self.proj_idx[mask]]
         ]
-
