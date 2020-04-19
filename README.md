@@ -1,5 +1,7 @@
 # PointCloudSegmentation
 
+---
+
 ![CI](https://github.com/VirtualRoyalty/PointCloudSegmentation/workflows/CI/badge.svg)
 
 ---
