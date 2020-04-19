@@ -40,7 +40,7 @@ jobs:
       
       - name: Docker build
         run: |
-              docker build -t $PROJECT_NAME:${{ github.ref }} $BUILD_DIR
+              docker build -t $PROJECT_NAME:${{ github.sha }} $BUILD_DIR
               docker images 
          
       - name: DockerBuild VK Notify
