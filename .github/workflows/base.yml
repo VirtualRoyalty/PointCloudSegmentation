@@ -40,7 +40,7 @@ jobs:
       
       - name: Docker build
         run: |
-              docker build -t point_cloud_segmentation:ver_$GITHUB_RUN_NUMBER $BUILD_DIR
+              docker build -t ${{ secrets.DOCKER_LOGIN }}/${{ secrets.DOCKER_NAME }}:ver_$GITHUB_RUN_NUMBER $BUILD_DIR
               docker images 
          
       - name: DockerBuild VK Notify
@@ -53,7 +53,7 @@ jobs:
       - name: Docker Upload
         run: |
              docker login --username=${{ secrets.DOCKER_LOGIN }} --password=${{ secrets.DOCKER_PASSWORD}}
-             docker push ${{ secrets.DOCKER_LOGIN }}/${{ secrets.DOCKER_NAME }}:point_cloud_segmentation:ver_$GITHUB_RUN_NUMBER
+             docker push ${{ secrets.DOCKER_LOGIN }}/${{ secrets.DOCKER_NAME }}:ver_$GITHUB_RUN_NUMBER
              
       - name: Docker Push VK Notify
         uses: alphamusic/VK-Notifications@1.0.2
