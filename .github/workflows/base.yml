@@ -14,7 +14,7 @@ on:
     branches: [ master ]
 
 jobs:
-  codeStyle:
+  codeStyles:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
@@ -33,7 +33,7 @@ jobs:
     
   build:
     runs-on: ubuntu-latest
-    needs: codeStyle
+    needs: codeStyles
     
     steps:
       - uses: actions/checkout@v2
