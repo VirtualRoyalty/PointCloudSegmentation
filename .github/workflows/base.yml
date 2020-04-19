@@ -1,12 +1,11 @@
 # This is a basic workflow to help you get started with Actions
 
 name: CI
+
 env:
   PROJECT_NAME: point_cloud_segmentation
-  BUILD_DIR:    docker-env 
-  VK_ME:        136761433
-  VK_ILYA:      75560006
-  VK_POLINA:    132293451
+  BUILD_DIR:    docker-env
+
 on:
   push:
     branches: [ master ]
@@ -26,7 +25,7 @@ jobs:
     - name: CodeStyle VK Notify
       uses: alphamusic/VK-Notifications@1.0.2
       env: 
-         VK_USERS :  $VK_ME #, 75560006, 132293451
+         VK_USERS :  ${{ secrets.VK_ME }} 
          VK_MESSAGE: "Hi! The code style cheker is passed"
          VK_TOKEN: ${{ secrets.VK_TOKEN }}   
     
@@ -48,6 +47,11 @@ jobs:
       - name: DockerBuild VK Notify
         uses: alphamusic/VK-Notifications@1.0.2
         env: 
-          VK_USERS :  $VK_ME #, 75560006, 132293451
+          VK_USERS :  ${{ secrets.VK_ME }} 
           VK_MESSAGE: "And... docker build step is successfuly passed!"
           VK_TOKEN: ${{ secrets.VK_TOKEN }}   
+      
+      - name: Docker Upload
+        run: |
+             docker login --username=${{ secrets.DOCKER_LOGIN }} --password=${{ secrets.DOCKER_PASSWORD}}
+             docker push $PROJECT_NAME:ver_$GITHUB_RUN_NUMBER
