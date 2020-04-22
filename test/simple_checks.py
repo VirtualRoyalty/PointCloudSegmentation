@@ -17,7 +17,7 @@ with open('./test/config.yaml') as file:
 obstacle_lst = config['obstacles']
 
 
-def get_pcloud(scan, label, proc_label=True):
+def get_pcloud(scan, label, proc_labels=True):
     scan = np.fromfile(scan, dtype=np.float32)
     scan = scan.reshape((-1, 4))
     scan = scan[:,  :3]
