@@ -24,7 +24,7 @@ jobs:
     - name: CodeStyle VK Notify
       uses: alphamusic/VK-Notifications@1.0.2
       env: 
-         VK_USERS :  ${{ secrets.VK_ME }} 
+         VK_USERS :  ${{ secrets.VK_ME }},  ${{ secrets.VK_POLINA }},  ${{ secrets.VK_ILYA }}
          VK_MESSAGE: Hi! The code style cheker is passed for ${{ github.actor}} on  ${{ github.event_name }}
          VK_TOKEN: ${{ secrets.VK_TOKEN }}   
     
@@ -46,7 +46,7 @@ jobs:
       - name: DockerBuild VK Notify
         uses: alphamusic/VK-Notifications@1.0.2
         env: 
-          VK_USERS :  ${{ secrets.VK_ME }} 
+          VK_USERS :   ${{ secrets.VK_ME }},  ${{ secrets.VK_POLINA }},  ${{ secrets.VK_ILYA }}
           VK_MESSAGE: And... docker build by ${{ github.actor}} is successfuly passed!
           VK_TOKEN: ${{ secrets.VK_TOKEN }}   
       
@@ -58,6 +58,6 @@ jobs:
       - name: Docker Push VK Notify
         uses: alphamusic/VK-Notifications@1.0.2
         env: 
-          VK_USERS :  ${{ secrets.VK_ME }} 
+          VK_USERS :   ${{ secrets.VK_ME }},  ${{ secrets.VK_POLINA }},  ${{ secrets.VK_ILYA }}
           VK_MESSAGE: Finally, docker build ${{ github.ref}} by ${{ github.actor }} uploaded to docker hub! Hell yeah!
           VK_TOKEN: ${{ secrets.VK_TOKEN }}   
