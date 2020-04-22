@@ -30,10 +30,9 @@ jobs:
         pytest -q test/simple_checks.py -v
    
     - name: Docker Push VK Notify
-      if: steps.push.outcome == 'Success'
       uses: alphamusic/VK-Notifications@1.0.2
       env: 
           VK_USERS :  ${{ secrets.VK_ME }} 
-          VK_MESSAGE: Congratulate ${{ github.actor }},  ${{ github.event }} is passed simple checks!
+          VK_MESSAGE: Simple checks for ${{ github.actor }} on ${{ github.event }} is passed with status ${{ steps.push.outcome }}
           VK_TOKEN: ${{ secrets.VK_TOKEN }}   
 
