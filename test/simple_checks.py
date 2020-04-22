@@ -9,10 +9,8 @@ import pandas as pd
 sys.path.append('./obstacle-detection/')
 from pipeline import common
 
-
 scan_lst = sorted(glob.glob("./test/data/*.bin"))
 label_lst = sorted(glob.glob("./test/data/*.label"))
-
 
 with open('../obstacle-detection/config.yaml') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
@@ -33,50 +31,41 @@ def get_pcloud(scan, label, proc_label=True):
 
 
 class TestClass:
-
     def test_obstacle_filter_1(self):
         pcloud = get_pcloud(scan_lst[0], label_lst[0])
-        cloud = common.obstacle_filter(pcloud,
-                                        obstacle_lst,
-                                        proc_label = False)
+        cloud = common.obstacle_filter(pcloud, obstacle_lst, proc_label=False)
         seg_lst = list(cloud['seg_id'].unique())
         for seg in seq_lst:
             assert seg in list(obstacle_lst.keys())
 
     def test_obstacle_filter_2(self):
         pcloud = get_pcloud(scan_lst[1], label_lst[1])
-        cloud = common.obstacle_filter(pcloud,
-                                        obstacle_lst,
-                                        proc_label=False)
+        cloud = common.obstacle_filter(pcloud, obstacle_lst, proc_label=False)
         seg_lst = list(cloud['seg_id'].unique())
         for seg in seq_lst:
             assert seg in list(obstacle_lst.keys())
 
     def test_obstacle_filter_3(self):
         pcloud = get_pcloud(scan_lst[2], label_lst[2])
-        cloud = common.obstacle_filter(pcloud,
-                                        obstacle_lst,
-                                        proc_label=False)
+        cloud = common.obstacle_filter(pcloud, obstacle_lst, proc_label=False)
         seg_lst = list(cloud['seg_id'].unique())
         for seg in seq_lst:
             assert seg in list(obstacle_lst.keys())
 
     def test_roi_filter_1(self):
-        params = {'roi_x_min': -10, 'roi_x_max': 10,
-                  'roi_y_min': -14, 'roi_y_max': 14,
-                  'roi_z_min': -2, 'roi_z_max': 1}
+        params = {'roi_x_min': -10, 'roi_x_max': 10, 'roi_y_min': -14, 'roi_y_max': 14, 'roi_z_min': -2, 'roi_z_max': 1}
         pcloud = get_pcloud(scan_lst[0], label_lst[0])
         cloud = common.roi_filter(pcloud,
-                                    min_x=params["roi_x_min"],
-                                    max_x=params["roi_x_max"],
-                                    min_y=params["roi_y_min"],
-                                    max_y=params["roi_y_max"],
-                                    min_z=params["roi_z_min"],
-                                    max_z=params["roi_z_max"],
-                                    verbose=False)
-       assert cloud['x'].min() <= params['roi_x_min']
-       assert cloud['y'].min() <= params['roi_y_min']
-       assert cloud['z'].min() <= params['roi_z_min']
-       assert cloud['x'].max() <= params['roi_x_max']
-       assert cloud['y'].max() <= params['roi_y_max']
-       assert cloud['z'].max() <= params['roi_z_max']
+                                  min_x=params["roi_x_min"],
+                                  max_x=params["roi_x_max"],
+                                  min_y=params["roi_y_min"],
+                                  max_y=params["roi_y_max"],
+                                  min_z=params["roi_z_min"],
+                                  max_z=params["roi_z_max"],
+                                  verbose=False)
+        assert cloud['x'].min() <= params['roi_x_min']
+        assert cloud['y'].min() <= params['roi_y_min']
+        assert cloud['z'].min() <= params['roi_z_min']
+        assert cloud['x'].max() <= params['roi_x_max']
+        assert cloud['y'].max() <= params['roi_y_max']
+        assert cloud['z'].max() <= params['roi_z_max']
