@@ -64,9 +64,9 @@ class TestClass:
                                   min_z=params["roi_z_min"],
                                   max_z=params["roi_z_max"],
                                   verbose=False)
-        assert cloud['x'].min() <= params['roi_x_min']
-        assert cloud['y'].min() <= params['roi_y_min']
-        assert cloud['z'].min() <= params['roi_z_min']
+        assert cloud['x'].min() >= params['roi_x_min']
+        assert cloud['y'].min() >= params['roi_y_min']
+        assert cloud['z'].min() >= params['roi_z_min']
         assert cloud['x'].max() <= params['roi_x_max']
         assert cloud['y'].max() <= params['roi_y_max']
         assert cloud['z'].max() <= params['roi_z_max']
