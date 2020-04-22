@@ -12,7 +12,7 @@ from pipeline import common
 scan_lst = sorted(glob.glob("./test/data/*.bin"))
 label_lst = sorted(glob.glob("./test/data/*.label"))
 
-with open('../obstacle-detection/config.yaml') as file:
+with open('config.yaml') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
 obstacle_lst = config['obstacles']
 
