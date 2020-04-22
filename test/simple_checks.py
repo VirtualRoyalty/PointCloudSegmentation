@@ -36,21 +36,21 @@ class TestClass:
         pcloud = get_pcloud(scan_lst[0], label_lst[0])
         cloud = common.obstacle_filter(pcloud, obstacle_lst, proc_labels=False)
         seg_lst = list(cloud['seg_id'].unique())
-        for seg in seq_lst:
+        for seg in seg_lst:
             assert seg in list(obstacle_lst.keys())
 
     def test_obstacle_filter_2(self):
         pcloud = get_pcloud(scan_lst[1], label_lst[1])
         cloud = common.obstacle_filter(pcloud, obstacle_lst, proc_labels=False)
         seg_lst = list(cloud['seg_id'].unique())
-        for seg in seq_lst:
+        for seg in seg_lst:
             assert seg in list(obstacle_lst.keys())
 
     def test_obstacle_filter_3(self):
         pcloud = get_pcloud(scan_lst[2], label_lst[2])
         cloud = common.obstacle_filter(pcloud, obstacle_lst, proc_labels=False)
         seg_lst = list(cloud['seg_id'].unique())
-        for seg in seq_lst:
+        for seg in seg_lst:
             assert seg in list(obstacle_lst.keys())
 
     def test_roi_filter_1(self):
