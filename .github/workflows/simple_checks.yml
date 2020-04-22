@@ -32,7 +32,9 @@ jobs:
     - name: Docker Push VK Notify
       uses: alphamusic/VK-Notifications@1.0.2
       env: 
-          VK_USERS :  ${{ secrets.VK_ME }} 
-          VK_MESSAGE: Simple checks for ${{ github.actor }} on ${{ github.event_name }} is passed!}}
+          VK_USERS :  ${{ secrets.VK_ME }} , ${{ secrets.VK_POLINA }} , ${{ secrets.VK_ILYA }} 
+          VK_MESSAGE: Wow, simple checks for ${{ github.actor }} on ${{ github.event_name }} is passed!
           VK_TOKEN: ${{ secrets.VK_TOKEN }}   
+
+
 
