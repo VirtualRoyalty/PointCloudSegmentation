@@ -20,7 +20,7 @@ obstacle_lst = config['obstacles']
 def get_pcloud(scan, label, proc_labels=True):
     scan = np.fromfile(scan, dtype=np.float32)
     scan = scan.reshape((-1, 4))
-    scan = scan[:,  :3]
+    scan = scan[:, :3]
     label = np.fromfile(label, dtype=np.uint32)
     label = label.reshape((-1))
     values = np.concatenate((scan, label.reshape(len(label), 1)), axis=1)
