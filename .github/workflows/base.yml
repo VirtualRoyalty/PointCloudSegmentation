@@ -1,15 +1,18 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
+env:
+  PROJECT_NAME: point_cloud_segmentation
+  BUILD_DIR:    docker-env
+
 on:
-  push:
-    branches: [ master ]
+  push: 
+    branches: master
   pull_request:
-    branches: [ master ]
+    branches: master
 
 jobs:
-  codeStyle:
+ 
+  codeStyles:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
@@ -18,29 +21,44 @@ jobs:
       env:  
         PRECOMMAND_MESSAGE: Vaba Laba Dab Dab!
   
-      
-    - name: VK Notifications
+    - name: CodeStyle VK Notify
       uses: alphamusic/VK-Notifications@1.0.2
       env: 
-         VK_USERS :  136761433, 75560006, 132293451
-         VK_MESSAGE: "Hi! The code style cheker is passed"
+         VK_USERS :  ${{ secrets.VK_ME }},  ${{ secrets.VK_POLINA }},  ${{ secrets.VK_ILYA }}
+         VK_MESSAGE: Hi! The code style cheker is passed for ${{ github.actor}} on  ${{ github.event_name }}
          VK_TOKEN: ${{ secrets.VK_TOKEN }}   
     
   build:
     runs-on: ubuntu-latest
-    needs: codeStyle
-     
+    needs: codeStyles
+    
     steps:
-    - uses: actions/checkout@v2
-    - name: Run a one-line script
-      run: |
-          echo Hello, world!
-          lscpu
-          env
-
-    # Runs a set of commands using the runners shell
-    - name: Run a multi-line script
-      run: |
-        echo Add other actions to build,
-        echo test, and deploy your project.
-
+      - uses: actions/checkout@v2
+        
+      - name: Docker version
+        run: docker -v
+      
+      - name: Docker build
+        run: |
+              docker system prune -a
+              docker build -t ${{ secrets.DOCKER_LOGIN }}/${{ secrets.DOCKER_NAME }}:ver_$GITHUB_RUN_NUMBER $BUILD_DIR
+              docker images 
+        continue-on-error: true
+      - name: DockerBuild VK Notify
+        uses: alphamusic/VK-Notifications@1.0.2
+        env: 
+          VK_USERS :   ${{ secrets.VK_ME }},  ${{ secrets.VK_POLINA }},  ${{ secrets.VK_ILYA }}
+          VK_MESSAGE: And... docker build by ${{ github.actor}} is successfuly passed!
+          VK_TOKEN: ${{ secrets.VK_TOKEN }}   
+      
+      - name: Docker Upload
+        run: |
+             docker login --username=${{ secrets.DOCKER_LOGIN }} --password=${{ secrets.DOCKER_PASSWORD}}
+             docker push ${{ secrets.DOCKER_LOGIN }}/${{ secrets.DOCKER_NAME }}:ver_$GITHUB_RUN_NUMBER
+        continue-on-error: true
+      - name: Docker Push VK Notify
+        uses: alphamusic/VK-Notifications@1.0.2
+        env: 
+          VK_USERS :   ${{ secrets.VK_ME }},  ${{ secrets.VK_POLINA }},  ${{ secrets.VK_ILYA }}
+          VK_MESSAGE: Finally, docker build ${{ github.ref}} by ${{ github.actor }} uploaded to docker hub! Hell yeah!
+          VK_TOKEN: ${{ secrets.VK_TOKEN }}   

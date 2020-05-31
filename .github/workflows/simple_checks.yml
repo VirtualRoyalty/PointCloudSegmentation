@@ -1,0 +1,38 @@
+name: simple_checks
+
+env: 
+  PROJECT_NAME:    PointCloudSegmentation
+on:
+  push:
+    branches: [ dev, master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test: 
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r test/requirements.txt
+        pip freeze
+    - name: Simple Checks
+      run: |
+        pwd
+        pip install pytest
+        pytest -q test/simple_checks.py -v
+   
+    - name: Docker Push VK Notify
+      uses: alphamusic/VK-Notifications@1.0.2
+      env: 
+          VK_USERS :  ${{ secrets.VK_ME }} 
+          VK_MESSAGE: Simple checks for ${{ github.actor }} on ${{ github.event_name }} is passed!}}
+          VK_TOKEN: ${{ secrets.VK_TOKEN }}   
+

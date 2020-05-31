@@ -1,4 +1,9 @@
 # PointCloudSegmentation
+
+---
+
+![CI](https://github.com/VirtualRoyalty/PointCloudSegmentation/workflows/CI/badge.svg) ![simple_checks](https://github.com/VirtualRoyalty/PointCloudSegmentation/workflows/simple_checks/badge.svg)
+
 ---
 <img src="https://github.com/VirtualRoyalty/PointCloudSegmentation/blob/master/obstacle-detection/examples/img/MainGifwithLabels.gif" width="1000">
 
