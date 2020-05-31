@@ -34,7 +34,7 @@ class Inference():
         # get the data
         parserModule = imp.load_source(
             "parserModule",
-            '/home/jovyan/work/obstacle-detection/model/tasks/semantic/dataset/'
+            '/home/jovyan/work/model/tasks/semantic/dataset/'
             + self.DATA["name"] + '/parser.py')
         self.parser = parserModule.Parser(
             root=self.datadir,

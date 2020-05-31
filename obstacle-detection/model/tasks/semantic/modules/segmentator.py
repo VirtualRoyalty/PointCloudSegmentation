@@ -26,7 +26,7 @@ class Segmentator(nn.Module):
         # get the model
         bboneModule = imp.load_source(
             "bboneModule",
-            '/home/jovyan/work/obstacle-detection/model/backbones/' +
+            '/home/jovyan/work/model/backbones/' +
             self.ARCH["backbone"]["name"] + '.py')
         self.backbone = bboneModule.Backbone(
             params=self.ARCH["backbone"])
@@ -44,7 +44,7 @@ class Segmentator(nn.Module):
 
         decoderModule = imp.load_source(
             "decoderModule",
-            '/home/jovyan/work/obstacle-detection/model/tasks/semantic/decoders/'
+            '/home/jovyan/work/model/tasks/semantic/decoders/'
             + self.ARCH["decoder"]["name"] + '.py')
         self.decoder = decoderModule.Decoder(
             params=self.ARCH["decoder"],

@@ -25,7 +25,7 @@ def get_user(model):
         print("Opening arch config file from %s" % model)
         ARCH = yaml.safe_load(
             open(
-                "/home/jovyan/work/obstacle-detection/model/" +
+                "/home/jovyan/work/model/" +
                 model + "/arch_cfg.yaml", 'r'))
     except Exception as e:
         print(e)
@@ -37,13 +37,13 @@ def get_user(model):
         print("Opening data config file from %s" % model)
         DATA = yaml.safe_load(
             open(
-                "/home/jovyan/work/obstacle-detection/model/" +
+                "/home/jovyan/work/model/" +
                 model + "/data_cfg.yaml", 'r'))
     except Exception as e:
         print(e)
         print("Error opening data yaml file.")
         quit()
-    model_dir = "/home/jovyan/work/obstacle-detection/model/" + model
+    model_dir = "/home/jovyan/work/model/" + model
     # does model folder exist?
     if os.path.isdir(model_dir):
         print("model folder exists! Using model from %s" % (model))
