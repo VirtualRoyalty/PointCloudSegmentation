@@ -1,6 +1,6 @@
 """
 Our implementation of obstacle detection pipeline steps
-@authors:
+@authors: Vadik Alperovich, Artem Aroslankin, Ilya Sedunov, Polina Smolnikova
 """
 import numpy as np
 import pandas as pd

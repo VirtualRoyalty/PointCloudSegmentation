@@ -4,7 +4,6 @@ import importlib as imp
 
 from datetime import datetime
 from sklearn.cluster import DBSCAN
-from pyobb.obb import OBB
 from pipeline import common
 
 common = imp.reload(common)

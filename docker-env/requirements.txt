@@ -1,0 +1,9 @@
+#torch
+#torchvision
+pyntcloud
+sklearn
+pandas
+pythreejs
+ipywidgets
+pyyaml
+matplotlib
