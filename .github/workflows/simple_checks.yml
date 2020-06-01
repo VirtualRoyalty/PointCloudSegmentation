@@ -3,8 +3,6 @@ name: simple_checks
 env: 
   PROJECT_NAME:    PointCloudSegmentation
 on:
-  push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
 
