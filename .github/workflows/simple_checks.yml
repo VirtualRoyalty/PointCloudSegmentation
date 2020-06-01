@@ -1,7 +1,7 @@
 name: simple_checks
 
 env: 
-  PROJECT_NAME:    PointCloudSegmentation
+  PROJECT_NAME: PointCloudSegmentation
 on:
   pull_request:
     branches: [ master ]
@@ -31,6 +31,6 @@ jobs:
       uses: alphamusic/VK-Notifications@1.0.2
       env: 
           VK_USERS :  ${{ secrets.VK_ME }} 
-          VK_MESSAGE: Simple checks for ${{ github.actor }} on ${{ github.event_name }} is passed!}}
+          VK_MESSAGE:  \#github_notify %0A ${{ github.actor}} on  ${{ github.event_name }} %0A Testing status✅ 
           VK_TOKEN: ${{ secrets.VK_TOKEN }}   
 
