@@ -8,8 +8,8 @@ COPY requirements.txt requirements.txt
 
 RUN pip install -r requirements.txt
 
-RUN pip install torch
+RUN pip install --no-cache-dir torch
 
-RUN pip install torchvision
+RUN pip install --no-cache-dir torchvision
 
 USER jovyan
