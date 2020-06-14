@@ -22,7 +22,7 @@ jobs:
     - name: CodeStyle VK Notify
       uses: alphamusic/VK-Notifications@1.0.2
       env: 
-         VK_USERS :  ${{ secrets.VK_ME }} #,  ${{ secrets.VK_POLINA }},  ${{ secrets.VK_ILYA }}
+         VK_USERS :  ${{ secrets.VK_ME }},  ${{ secrets.VK_POLINA }},  ${{ secrets.VK_ILYA }}
          VK_MESSAGE: \#github_notify %0A ${{ github.actor}} on  ${{ github.event_name }} %0A CodeStyle status✅ 
          VK_TOKEN: ${{ secrets.VK_TOKEN }}   
     
@@ -45,7 +45,7 @@ jobs:
       - name: DockerBuild VK Notify
         uses: alphamusic/VK-Notifications@1.0.2
         env: 
-          VK_USERS :   ${{ secrets.VK_ME }} #,  ${{ secrets.VK_POLINA }},  ${{ secrets.VK_ILYA }}
+          VK_USERS :   ${{ secrets.VK_ME }},  ${{ secrets.VK_POLINA }},  ${{ secrets.VK_ILYA }}
           VK_MESSAGE: \#github_notify %0A ${{ github.actor}} on  ${{ github.event_name }} %0A Building status✅ 
           VK_TOKEN: ${{ secrets.VK_TOKEN }}   
       
@@ -57,6 +57,6 @@ jobs:
       - name: Docker Push VK Notify
         uses: alphamusic/VK-Notifications@1.0.2
         env: 
-          VK_USERS :   ${{ secrets.VK_ME }} #,  ${{ secrets.VK_POLINA }},  ${{ secrets.VK_ILYA }}
+          VK_USERS :   ${{ secrets.VK_ME }} ,  ${{ secrets.VK_POLINA }},  ${{ secrets.VK_ILYA }}
           VK_MESSAGE:  \#github_notify %0A ${{ github.actor}} on  ${{ github.event_name }} %0A Uploading status✅ 
           VK_TOKEN: ${{ secrets.VK_TOKEN }}   
