@@ -30,7 +30,7 @@ jobs:
     - name: Docker Push VK Notify
       uses: alphamusic/VK-Notifications@1.0.2
       env: 
-          VK_USERS :  ${{ secrets.VK_ME }} 
+          VK_USERS :  ${{ secrets.VK_ME }},   ${{ secrets.VK_POLINA }},  ${{ secrets.VK_ILYA }}
           VK_MESSAGE:  \#github_notify %0A ${{ github.actor}} on  ${{ github.event_name }} %0A Testing status✅ 
           VK_TOKEN: ${{ secrets.VK_TOKEN }}   
 
